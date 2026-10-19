@@ -2,7 +2,6 @@ import {CardGuide} from '../components/CardGuide';
 import React,{useState} from 'react';
 import {TUTORIAL_STEPS,TUTORIAL_RESULTS,TUTORIAL_PLAYER,createTutorialExample,playTutorialExample,type TutorialStepNumber} from '../game/tutorial/tutorialEngine';
 import {CardView} from '../components/CardView';
-import {soundManager} from '../services/audio/soundEffects';
 
 interface TutorialScreenProps{onCompleteTutorial:()=>void;onSkipTutorial:()=>void;onStartPractice:()=>void;}
 export const TutorialScreen:React.FC<TutorialScreenProps>=({onCompleteTutorial,onSkipTutorial,onStartPractice})=>{
@@ -19,7 +18,6 @@ export const TutorialScreen:React.FC<TutorialScreenProps>=({onCompleteTutorial,o
   if(stepNum!==4&&stepNum!==5&&!selected){setError('اضغط على البطاقة أولًا ');return;}
   if(stepNum===3&&claim!=='alkabeer'){setError('في هذا المثال نجرب الخداع. اختر «أقول: الكبير».');return;}
   setState(playTutorialExample(stepNum,state));setDone(true);setError('');
-  if(stepNum===6)soundManager.playWinFanfare();else if(stepNum===4||stepNum===5)soundManager.playSadoohAlert();else soundManager.playCardPlace();
  };
  const exampleCard=stepNum===3?'malqoof':'sanad';
  return <div className="tutorial-screen" style={{backgroundImage:"url('./assets/game-table.svg')"}}>

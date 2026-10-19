@@ -6,15 +6,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/build-pwa.mjs",
     "preview": "vite preview",
     "test": "tsx scripts/test-engine.ts",
     "test:security": "tsx --test tests/security.test.ts",
     "test:rooms": "tsx --test tests/room.test.ts",
     "test:tutorial": "tsx --test tests/tutorial.test.ts",
+    "test:pwa": "node --test tests/pwa.test.mjs",
     "test:live": "tsx scripts/test-live.ts",
     "build:edge": "node scripts/build-edge.mjs",
-    "check": "npm test && npm run test:security && npm run test:rooms && npm run test:tutorial && npm run build && npm run build:edge"
+    "check": "npm test && npm run test:security && npm run test:rooms && npm run test:tutorial && npm run build && npm run test:pwa && npm run build:edge"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

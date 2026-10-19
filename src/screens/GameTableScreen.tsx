@@ -23,7 +23,6 @@ import { PlayerSeat } from '../components/PlayerSeat';
 import { ChatDrawer } from '../components/ChatDrawer';
 import { ActionLogModal } from '../components/ActionLogModal';
 import { PracticeCoach } from '../components/PracticeCoach';
-import { soundManager } from '../services/audio/soundEffects';
 
 import type { SupabaseRoomService } from '../services/multiplayer/roomClient';
 
@@ -126,7 +125,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   useEffect(() => {
     if (view.phase === 'GAME_OVER' && view.winnerPlayerId && !matchRecordedRef.current) {
       matchRecordedRef.current = true;
-      soundManager.playWinFanfare();
+
       onRecordMatchEnd(view.winnerPlayerId === HUMAN_ID);
     }
   }, [view.phase, view.winnerPlayerId, onRecordMatchEnd]);
@@ -145,7 +144,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             return { ...prev, turnTimerSeconds: prev.turnTimerSeconds - 1 };
           }
           // انتهى وقت الـ 15 ثانية -> تنفيذ حركة قانونية تلقائية
-          soundManager.playCardPlace();
+
           return executeAutoTimeoutMove(prev);
         }
 
@@ -186,7 +185,6 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
           botPlayer.botDifficulty ?? botDifficulty
         );
 
-        soundManager.playCardPlace();
         const res = submitPlayerMove(prev, move);
 
         // عبارة سعودية خفيفة من البوت فوق مقعده
@@ -234,7 +232,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             bot.botDifficulty ?? botDifficulty
           );
           if (wantsChallenge) {
-            soundManager.playSadoohAlert();
+
             const phrase =
               BOT_MOVE_CHAT_PHRASES.challenge[
                 Math.floor(Math.random() * BOT_MOVE_CHAT_PHRASES.challenge.length)
@@ -285,7 +283,6 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
       return;
     }
 
-    soundManager.playCardPlace();
     setUiError(null);
     setGameState(res.nextState);
   };
@@ -300,7 +297,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     ) {
       return;
     }
-    soundManager.playSadoohAlert();
+
     showBubbleForPlayer(HUMAN_ID, 'صادوه! اكشف البطاقة! ');
     setGameState((prev) => resolveChallengeWindow(prev, HUMAN_ID));
   };

@@ -1,3 +1,4 @@
+import {InstallButton} from '../components/InstallButton';
 import React, { useState } from 'react';
 import { BotDifficulty } from '../types/game';
 import { UserSettings } from '../services/storage/localSettings';
@@ -101,6 +102,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
               >
                 أول مرة؟ نجربها سوا
               </button>
+              <InstallButton/>
             </div>
           ) : (
             <div className="singleplayer-setup-panel">

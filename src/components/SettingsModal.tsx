@@ -85,20 +85,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </label>
 
-          <div className="toggle-row">
-            <span> المؤثرات الصوتية</span>
-            <button
-              type="button"
-              className={`toggle-btn ${settings.soundEnabled ? 'is-on' : ''}`}
-              onClick={() =>
-                onUpdateSettings({ soundEnabled: !settings.soundEnabled })
-              }
-            >
-              {settings.soundEnabled ? 'مفعّل' : 'مغلَق'}
-            </button>
-          </div>
-
-          <div className="toggle-row">
+<div className="toggle-row">
             <span> تقليل الحركة والتحريكات (Reduce Motion)</span>
             <button
               type="button"

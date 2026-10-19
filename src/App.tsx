@@ -5,7 +5,6 @@ import {
   saveUserSettings,
   UserSettings,
 } from './services/storage/localSettings';
-import { soundManager } from './services/audio/soundEffects';
 import { MainMenuScreen } from './screens/MainMenuScreen';
 import { TutorialScreen } from './screens/TutorialScreen';
 import { MultiplayerLobbyScreen } from './screens/MultiplayerLobbyScreen';
@@ -20,10 +19,16 @@ export default function App() {
 
   // عند أول تشغيل، اعرض الجولة التعليمية التفاعلية مع «أبو فهد» تلقائيًا (مع إمكانية تخطيها فورًا)
   const [screen, setScreen] = useState<ActiveScreen>(() => {
-    if (new URLSearchParams(window.location.search).get('learn') === '1') return 'tutorial';
     const initial = loadUserSettings();
     return initial.tutorialCompleted ? 'menu' : 'tutorial';
   });
+
+  useEffect(() => {
+    if (!loadUserSettings().tutorialCompleted) {
+      const saved=saveUserSettings({tutorialCompleted:true});
+      setSettings(saved);
+    }
+  }, []);
 
   const [matchConfig, setMatchConfig] = useState<{
     botCount: number;
@@ -39,11 +44,7 @@ export default function App() {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  useEffect(() => {
-    soundManager.setEnabled(settings.soundEnabled);
-  }, [settings.soundEnabled]);
-
-  const handleUpdateSettings = (partial: Partial<UserSettings>) => {
+const handleUpdateSettings = (partial: Partial<UserSettings>) => {
     const updated = saveUserSettings(partial);
     setSettings(updated);
   };

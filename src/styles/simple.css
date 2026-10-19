@@ -230,3 +230,25 @@ input,select,.form-field input[type=text],.inline-input-row input {border:1.5px 
  .table-topbar__meta .turn-badge {display:none;}
  .table-more {align-self:flex-start;}
 }
+.install-app {width:100%;}
+.install-app-button {font-size:15px;min-height:46px;justify-content:center;gap:12px;}
+.install-app-button img {width:60px;height:26px;object-fit:contain;}
+.install-app-help {font-size:14px;line-height:1.8;color:#61675b;padding:10px 0;}
+@media(max-width:600px) {
+ .game-table-overlay {gap:10px;}
+ .table-center-stage:has(.center-status-box) {display:none;}
+ .human-player-dock {padding:10px 8px;gap:7px;}
+ .human-dock-layout {gap:8px;}
+ .human-hand-scroll {padding-top:15px;padding-bottom:6px;gap:8px;}
+ .human-hand-scroll .sadooh-card {width:98px;height:132px;}
+ .human-hand-scroll .sadooh-card__title {font-size:14px;}
+ .move-controls-panel {gap:8px;padding:10px;}
+ .simple-move-choice {gap:7px;}
+ .selected-ability {font-size:13px;}
+ .opponents-ring {gap:7px;}
+ .player-seat {padding:6px;}
+ .player-seat__avatar {width:28px;height:28px;}
+ .player-seat__info {gap:3px;}
+ .main-menu-actions {gap:10px;}
+ .main-menu-card {gap:18px;}
+}
