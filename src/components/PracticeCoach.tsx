@@ -17,5 +17,5 @@ export const PracticeCoach:React.FC<{view:ClientProjectedGameState;selectedCardI
   message=!result?.challenged?'محد تحدّى اللاعب، فنطبق حركة الشخصية اللي قالها.':result.wasTruthful?'طلع صادق! اللي ضغط «صادوه!» يسحب بطاقة.':'طلع يخدعهم! صاحب البطاقة يسحب بطاقة، وحركته ما تشتغل.';
   example='اقرأ النتيجة، ثم اضغط «قرأت النتيجة — الدور التالي».';
  }else message=view.winnerPlayerId===me?'كفو! خلصت بطاقاتك وفزت. تقدر الآن تجرب مباراة عادية.':'انتهى التدريب. تقدر تعيد التجربة، أو ترجع للقائمة.';
- return <aside className="practice-coach" aria-label="شرح أثناء اللعب"><strong>💡 الحين وش أسوي؟</strong><p>{message}</p>{example&&<p className="practice-coach-example">{example}</p>}<small>تدريب مع الشرح • ما يحسب ضمن نتائجك</small></aside>;
+ return <aside className="practice-coach" aria-label="شرح أثناء اللعب"><strong> الحين وش أسوي؟</strong><p>{message}</p>{example&&<p className="practice-coach-example">{example}</p>}<small>تدريب مع الشرح • ما يحسب ضمن نتائجك</small></aside>;
 };

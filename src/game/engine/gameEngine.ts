@@ -33,13 +33,13 @@ export interface CreateMatchOptions {
 }
 
 const SAUDI_BOT_PROFILES: Array<{ name: string; avatar: string }> = [
-  { name: 'أبو فهد', avatar: './assets/abu-fahad.png' },
-  { name: 'أبو سارة', avatar: './assets/alkabeer.png' },
-  { name: 'عزّام', avatar: './assets/malqoof.png' },
-  { name: 'تركي', avatar: './assets/nashal.png' },
-  { name: 'سلمان', avatar: './assets/sanad.png' },
-  { name: 'نايف', avatar: './assets/mosarref.png' },
-  { name: 'وليد', avatar: './assets/mokhabbes.png' },
+  { name: 'أبو فهد', avatar: './assets/abu-fahad.svg' },
+  { name: 'أبو سارة', avatar: './assets/alkabeer.svg' },
+  { name: 'عزّام', avatar: './assets/malqoof.svg' },
+  { name: 'تركي', avatar: './assets/nashal.svg' },
+  { name: 'سلمان', avatar: './assets/sanad.svg' },
+  { name: 'نايف', avatar: './assets/mosarref.svg' },
+  { name: 'وليد', avatar: './assets/mokhabbes.svg' },
 ];
 
 const FUNNY_CAUGHT_QUOTES = [
@@ -106,7 +106,7 @@ export function createMatch(options: CreateMatchOptions): GameState {
       id: 'player_human',
       name: options.humanPlayerName.trim() || 'أنت',
       isBot: false,
-      avatarAsset: './assets/sanad.png',
+      avatarAsset: './assets/sanad.svg',
       hand: humanHand,
       hasSanadShield: false,
       isConnected: true,

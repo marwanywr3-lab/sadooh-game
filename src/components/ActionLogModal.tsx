@@ -23,7 +23,7 @@ export const ActionLogModal: React.FC<ActionLogModalProps> = ({
         aria-label="سجل أحداث المباراة"
       >
         <div className="modal-card__header">
-          <h2>📜 سجل أحداث المباراة</h2>
+          <h2> سجل أحداث المباراة</h2>
           <button type="button" className="btn-icon-close" onClick={onClose}>
             ✕
           </button>

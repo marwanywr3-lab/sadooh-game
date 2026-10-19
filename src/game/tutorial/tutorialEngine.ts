@@ -15,7 +15,7 @@ export const TUTORIAL_PLAYER='tutorial_you';
 const ABU='tutorial_abu', AZZAM='tutorial_azzam';
 function card(id:string,characterId:CardInstance['characterId']):CardInstance{return{id,characterId};}
 function player(id:string,name:string,hand:CardInstance[],isBot=false):PlayerState{
- return {id,name,hand,isBot,botDifficulty:'easy',avatarAsset:isBot?'./assets/abu-fahad.png':'./assets/sanad.png',isConnected:true,hasSanadShield:false};
+ return {id,name,hand,isBot,botDifficulty:'easy',avatarAsset:isBot?'./assets/abu-fahad.svg':'./assets/sanad.svg',isConnected:true,hasSanadShield:false};
 }
 // Each clearly labelled example is independent and uses the real game rules.
 export function createTutorialExample(step:TutorialStepNumber):GameState{

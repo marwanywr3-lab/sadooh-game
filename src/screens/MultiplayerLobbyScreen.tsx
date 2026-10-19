@@ -95,25 +95,25 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
   }));
 
   const connectionBadgeLabel: Record<ConnectionStatus, string> = {
-    awaiting_backend: '⏳ انتظر الاتصال بالخادم',
-    connecting: '🔄 جاري الاتصال بالخادم...',
-    connected: '🟢 متصل بالغرفة',
-    reconnecting: '🟠 انقطع الاتصال — جاري محاولة العودة للمباراة...',
-    disconnected: '🔴 غير متصل بالخادم',
+    awaiting_backend: ' انتظر الاتصال بالخادم',
+    connecting: ' جاري الاتصال بالخادم...',
+    connected: ' متصل بالغرفة',
+    reconnecting: ' انقطع الاتصال — جاري محاولة العودة للمباراة...',
+    disconnected: ' غير متصل بالخادم',
   };
 
   if(matchView) return <><GameTableScreen remote={{service,view:matchView}} humanPlayerName={playerName} botCount={2} botDifficulty="medium" onExitToMenu={leave} onRecordMatchEnd={()=>{}} />{roomState.connectionStatus!=='connected' && <div role="alert" style={{position:'fixed',top:10,right:10,zIndex:1000,background:'#622',padding:16}}>انقطع الاتصال — نحاول استعادة الجلسة.</div>}{statusBanner && statusBanner!=='متصل بالغرفة.' && <div role="status" style={{position:'fixed',bottom:10,right:10,zIndex:1000,background:'#342711',padding:12}}>{statusBanner}</div>}</>;
   return (
     <div
       className="multiplayer-lobby-screen"
-      style={{ backgroundImage: `url('./assets/menu-background.png')` }}
+      style={{ backgroundImage: `url('./assets/menu-background.svg')` }}
     >
       <div className="multiplayer-lobby-overlay">
         <header className="lobby-header">
           <div className="lobby-header__right">
-            <img src="./assets/logo.png" alt="صادوه!" className="lobby-logo" />
+            <img src="./assets/logo.svg" alt="صادوه!" className="lobby-logo" />
             <div>
-              <h2>🌐 الغرف الجماعية عبر الإنترنت</h2>
+              <h2> الغرف الجماعية عبر الإنترنت</h2>
               <span className={`conn-status-pill conn-status--${roomState.connectionStatus}`}>
                 {connectionBadgeLabel[roomState.connectionStatus]}
               </span>
@@ -126,10 +126,10 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
               className="btn-secondary"
               onClick={() => setIsChatOpen(true)}
             >
-              💬 الشات ({roomState.chatHistory.length})
+               الشات ({roomState.chatHistory.length})
             </button>
             <button type="button" className="btn-ghost" onClick={leave}>
-              🏠 القائمة الرئيسية
+               القائمة الرئيسية
             </button>
           </div>
         </header>
@@ -137,7 +137,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
         {/* تنبيه واضح وصادق بأن الخادم بانتظار التفعيل */}
         {statusBanner && (
           <div className="backend-honest-banner" role="status">
-            <span>ℹ️ {statusBanner}</span>
+            <span> {statusBanner}</span>
           </div>
         )}
 
@@ -146,7 +146,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
           roomState.connectionStatus === 'reconnecting') && (
           <div className="reconnect-card" role="alert">
             <div className="reconnect-card__content">
-              <h3>🔌 انقطع الاتصال بالغرفة!</h3>
+              <h3> انقطع الاتصال بالغرفة!</h3>
               <p>
                 لا تشيل هم! مقعدك وبطاقاتك السرية محفوظة في الغرفة ({roomState.roomCode}). يمكنك
                 استعادة الجلسة فور استقرار الاتصال.
@@ -167,7 +167,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                🔄 العودة إلى المباراة الآن
+                 العودة إلى المباراة الآن
               </button>
               <button
                 type="button"
@@ -183,7 +183,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
         <div className="lobby-grid">
           {/* العمود الأيمن: إعدادات اللاعب، إنشاء غرفة، أو الانضمام برمز/رابط */}
           <section className="lobby-panel">
-            <h3>👤 هويتك وإدارة الدخول (بدون تسجيل حساب)</h3>
+            <h3> هويتك وإدارة الدخول (بدون تسجيل حساب)</h3>
 
             <div className="form-field">
               <span>اسم اللاعب في الغرفة:</span>
@@ -206,7 +206,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
             </div>
 
             <div className="lobby-subbox">
-              <h4>➕ إنشاء غرفة جديدة</h4>
+              <h4> إنشاء غرفة جديدة</h4>
               <div className="form-field">
                 <span>عدد اللاعبين المستهدف ({roomState.maxPlayers} لاعبين):</span>
                 <div className="player-count-chips">
@@ -243,12 +243,12 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                🏠 إنشاء غرفة جديدة
+                 إنشاء غرفة جديدة
               </button>
             </div>
 
             <div className="lobby-subbox">
-              <h4>🔑 الانضمام برمز غرفة</h4>
+              <h4> الانضمام برمز غرفة</h4>
               <div className="inline-input-row">
                 <input
                   type="text"
@@ -276,7 +276,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
             </div>
 
             <div className="lobby-subbox">
-              <h4>🔗 الانضمام برابط دعوة</h4>
+              <h4> الانضمام برابط دعوة</h4>
               <div className="inline-input-row">
                 <input
                   type="text"
@@ -318,14 +318,14 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                 className="btn-secondary btn-sm"
                 onClick={handleCopyInvite}
               >
-                📋 نسخ رابط الدعوة
+                 نسخ رابط الدعوة
               </button>
             </div>
 
             {copiedNotice && <div className="copied-toast">{copiedNotice}</div>}
 
             <h3>
-              👥 أعضاء الغرفة ({roomState.members.length} / {roomState.maxPlayers}) — غرف
+               أعضاء الغرفة ({roomState.members.length} / {roomState.maxPlayers}) — غرف
               مختلطة (بشر + آليين)
             </h3>
 
@@ -338,22 +338,22 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                     </div>
                   )}
                   <img
-                    src={member.avatarAsset}
+                    src={member.avatarAsset.replace(/\.png$/, '.svg')}
                     alt={member.name}
                     className="room-member-avatar"
                   />
                   <div className="room-member-info">
                     <div className="room-member-title">
                       <strong>{member.name}</strong>
-                      {member.isHost && <span className="host-badge">👑 المضيف</span>}
+                      {member.isHost && <span className="host-badge"> المضيف</span>}
                       {member.isBot && (
                         <span className="bot-badge">
-                          🤖 آلي ({member.botDifficulty === 'easy' ? 'سهل' : member.botDifficulty === 'hard' ? 'صعب' : 'متوسط'})
+                           آلي ({member.botDifficulty === 'easy' ? 'سهل' : member.botDifficulty === 'hard' ? 'صعب' : 'متوسط'})
                         </span>
                       )}
                     </div>
                     <span className="room-member-status">
-                      {member.isConnected ? '🟢 متصل وجاهز' : '🔴 منقطع'}
+                      {member.isConnected ? ' متصل وجاهز' : ' منقطع'}
                     </span>
                   </div>
                   {member.isBot && (
@@ -378,7 +378,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                 length: Math.max(0, roomState.maxPlayers - roomState.members.length),
               }).map((_, idx) => (
                 <div key={`empty_${idx}`} className="room-member-card is-empty-seat">
-                  <div className="empty-seat-circle">⏳</div>
+                  <div className="empty-seat-circle"></div>
                   <div className="room-member-info">
                     <strong>مقعد بانتظار لاعب...</strong>
                     <span>شارك رمز الغرفة أو أضف خصمًا آليًا</span>
@@ -408,7 +408,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                🤖 + إضافة خصم آلي
+                 + إضافة خصم آلي
               </button>
             </div>
 
@@ -424,7 +424,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                🚀 بدء المباراة الجماعية للمضيف
+                 بدء المباراة الجماعية للمضيف
               </button>
 
               <button
@@ -438,7 +438,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   )
                 }
               >
-                🎮 العب الآن بنفس الإعدادات محليًا ضد الكمبيوتر
+                 العب الآن بنفس الإعدادات محليًا ضد الكمبيوتر
               </button>
             </div>
           </section>

@@ -26,7 +26,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         aria-label="إعدادات اللعبة"
       >
         <div className="modal-card__header">
-          <h2>⚙️ الإعدادات</h2>
+          <h2> الإعدادات</h2>
           <button type="button" className="btn-icon-close" onClick={onClose}>
             ✕
           </button>
@@ -86,7 +86,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </label>
 
           <div className="toggle-row">
-            <span>🔊 المؤثرات الصوتية</span>
+            <span> المؤثرات الصوتية</span>
             <button
               type="button"
               className={`toggle-btn ${settings.soundEnabled ? 'is-on' : ''}`}
@@ -99,7 +99,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div className="toggle-row">
-            <span>🐢 تقليل الحركة والتحريكات (Reduce Motion)</span>
+            <span> تقليل الحركة والتحريكات (Reduce Motion)</span>
             <button
               type="button"
               className={`toggle-btn ${settings.reduceMotion ? 'is-on' : ''}`}

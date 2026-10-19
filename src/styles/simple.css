@@ -1,0 +1,136 @@
+/* A quiet, geometric identity for a Saudi card table. */
+:root {
+ --bg-cream:#faf8f0; --bg-beige:#ecebdd; --wood-dark:#252722; --wood-main:#252722;
+ --wood-light:#777b6c; --orange-warm:#e5c45d; --orange-bright:#f1d374;
+ --brick-red:#a13e32; --brick-dark:#82352c; --olive-green:#58724d; --olive-dark:#40583a;
+ --turquoise-accent:#577260; --text-dark:#252722; --text-muted:#61675b;
+ --shadow-warm:4px 4px 0 #252722;
+}
+html,body,#root,.sadooh-app-root {background:#f6f3e9;color:#252722;}
+button {text-shadow:none;}
+button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible,summary:focus-visible {outline:3px solid #58724d;outline-offset:4px;}
+.btn-primary,.btn-secondary,.btn-menu,.btn-ghost,.btn-sadooh-mega,.count-chip,.seg-btn,.target-chip,.claim-chip,.btn-mini,.quick-reaction-chip,.toggle-btn,.claim-option-btn {
+ border:1.5px solid #252722;border-radius:7px;box-shadow:2px 3px 0 #252722;filter:none;color:#252722;
+}
+.btn-primary,.btn-menu--primary {background:#f1d374;color:#252722;}
+.btn-secondary,.btn-menu--warm,.btn-ghost {background:#faf8f0;color:#252722;}
+.btn-menu--secondary,.btn-menu--accent {background:#c6d7b4;color:#252722;}
+.btn-primary:hover,.btn-secondary:hover,.btn-menu:hover {filter:none;transform:translate(-1px,-1px);box-shadow:4px 5px 0 #252722;}
+.btn-primary:active,.btn-secondary:active,.btn-menu:active {transform:translate(1px,2px);box-shadow:none;}
+.btn-sadooh-mega {background:#f2b3a2;color:#252722;box-shadow:3px 4px 0 #252722;}
+.main-menu-screen,.multiplayer-lobby-screen,.tutorial-screen,.game-table-screen {background:#f6f3e9!important;}
+.main-menu-screen {padding:50px 24px;}
+.main-menu-overlay {max-width:1040px;}
+.main-menu-card {display:grid;grid-template-columns:1.1fr 1fr;gap:28px 56px;border:0;background:transparent;box-shadow:none;padding:16px;border-radius:0;}
+.menu-edition {grid-column:1/-1;font-size:13px;font-weight:800;letter-spacing:1px;border-bottom:1.5px solid #252722;padding-bottom:16px;}
+.main-menu-logo-wrap {grid-column:1;align-items:flex-start;text-align:right;gap:14px;justify-content:center;}
+.main-menu-logo {width:310px;max-width:100%;filter:none;margin-right:-12px;}
+.main-menu-title-fallback {display:none;}
+.main-menu-tagline {font-size:clamp(22px,3vw,32px);color:#252722;max-width:340px;line-height:1.8;font-weight:800;}
+.abu-fahad-welcome {grid-column:1;background:transparent;border:0;padding:0;border-radius:0;align-items:center;gap:14px;}
+.abu-fahad-welcome__img {border:0;border-radius:0;background:transparent;width:56px;height:56px;}
+.abu-fahad-welcome__bubble {font-size:15px;color:#61675b;line-height:1.9;}
+.abu-fahad-welcome__bubble strong {color:#252722;}
+.main-menu-actions,.singleplayer-setup-panel {grid-column:2;grid-row:2/4;align-self:center;}
+.main-menu-actions {gap:16px;}
+.menu-section-label {font-size:13px;color:#61675b;margin-bottom:2px;}
+.btn-menu {padding:17px 22px;font-size:18px;min-height:58px;justify-content:space-between;}
+.main-menu-actions>.btn-menu--primary {order:-1;font-size:21px;min-height:76px;}
+.main-menu-actions>.menu-section-label {order:-2;}
+.main-menu-subgrid {gap:14px;}
+.main-menu-subgrid .btn-menu {font-size:15px;justify-content:center;}
+.singleplayer-setup-panel {padding:22px;background:#faf8f0;}
+.game-table-overlay,.multiplayer-lobby-overlay,.tutorial-backdrop {background:transparent;}
+.game-table-overlay {max-width:1360px;margin:auto;gap:20px;padding:20px;}
+.multiplayer-lobby-overlay {max-width:1280px;margin:auto;padding:24px;}
+.tutorial-backdrop {max-width:1040px;padding:24px;gap:20px;}
+.table-topbar,.lobby-header,.tutorial-header {background:#faf8f0;color:#252722;border:1.5px solid #252722;border-radius:8px;box-shadow:3px 4px 0 #252722;}
+.table-topbar__logo {height:42px;max-width:130px;}
+.lobby-logo,.tutorial-header__logo {height:48px;max-width:140px;}
+.table-topbar__meta {color:#252722;}
+.turn-badge,.deck-pill,.timer-pill,.conn-status-pill {background:#ecebdd;color:#252722;border:1px solid #a4aa98;border-radius:5px;}
+.timer-pill--challenge {background:#f2b3a2;color:#252722;animation:none;}
+.timer-pill--move {background:#f1d374;color:#252722;}
+.lobby-panel,.lobby-subbox,.tutorial-stage,.tutorial-complete-card,.tutorial-mentor-box,.practice-coach,.tutorial-result-note,.modal-card,.victory-modal,.chat-drawer,.move-controls-panel,.challenge-stage-card,.outcome-stage-card {
+ background:#faf8f0;color:#252722;border:1.5px solid #252722;border-radius:8px;box-shadow:3px 4px 0 #252722;
+}
+.lobby-panel {padding:24px;}
+.lobby-subbox {background:#f6f3e9;box-shadow:none;}
+.lobby-header h2 {font-size:clamp(18px,2.5vw,25px);}
+.room-code-banner {background:#c6d7b4;color:#252722;border:1px solid #252722;border-radius:6px;}
+.room-code-value {overflow-wrap:anywhere;font-size:15px;}
+.backend-honest-banner {background:#ecebdd;border:1px solid #a4aa98;border-radius:6px;color:#252722;}
+.room-member-card,.room-member-card.is-empty-seat,.add-bot-bar {background:#f6f3e9;border:1px solid #a4aa98;border-radius:6px;}
+.room-member-avatar,.player-seat__avatar,.tutorial-mentor-avatar {border:0;background:transparent;border-radius:8px;}
+.empty-seat-circle {background:#ecebdd;}
+input,select,.form-field input[type=text],.inline-input-row input {border:1.5px solid #777b6c;border-radius:6px;background:#fffefa;color:#252722;}
+.count-chip.is-active,.seg-btn.is-active,.claim-chip.is-selected,.target-chip.is-active {background:#c6d7b4;color:#252722;}
+.opponents-ring {gap:18px;}
+.player-seat {background:#faf8f0;border:1.5px solid #a4aa98;border-radius:7px;box-shadow:none;padding:12px;}
+.player-seat.is-active-turn,.player-seat.is-selected-target {border:2px solid #252722;background:#e5edda;box-shadow:3px 3px 0 #252722;}
+.player-seat.is-targetable {border-color:#777b6c;}
+.player-seat__turn-pill,.player-seat__target-cta {background:#c6d7b4;color:#252722;border-radius:4px;}
+.player-seat__mini-card {box-shadow:none;border-radius:2px;}
+.center-status-box {background:#ecebdd;color:#252722;border:1px dashed #777b6c;border-radius:8px;box-shadow:none;}
+.center-status-box h3 {color:#252722;}
+.human-player-dock {background:#e5edda;color:#252722;border:1.5px solid #252722;border-radius:8px;box-shadow:3px 4px 0 #252722;}
+.human-dock-header,.control-label,.my-card-count-badge {color:#252722;}
+.my-card-count-badge {background:#f1d374;border-radius:5px;}
+.move-controls-panel {box-shadow:none;}
+.claim-option-btn {background:#faf8f0;box-shadow:none;}
+.claim-option-btn.is-active {background:#c6d7b4;color:#252722;outline:1px solid #252722;}
+.claim-option-btn.is-active .tag-truth {color:#40583a;}
+.claim-option-btn.is-active .tag-bluff {color:#82352c;}
+.outcome-funny-quote {background:#f1d374;color:#252722;border-radius:5px;}
+.sadooh-card {border:1.5px solid #252722;border-radius:8px;background:#faf8f0;box-shadow:2px 3px 0 #252722;overflow:visible;gap:4px;}
+.sadooh-card__frame-bg {display:none;}
+.sadooh-card__back-img {border-radius:6px;box-shadow:none;}
+.sadooh-card__header {width:100%;height:18%;margin:0;padding:7px;border-bottom:1px solid #252722;}
+.sadooh-card__title {font-size:17px;line-height:1.3;color:#252722;}
+.sadooh-card__art-wrap {width:100%;height:44%;align-items:center;overflow:visible;}
+.sadooh-card__art {width:72%;height:100%;}
+.sadooh-card__tag {display:none;}
+.sadooh-card__footer {width:100%;height:29%;margin:0;padding:6px 9px;}
+.sadooh-card__desc {font-size:12px;line-height:1.6;font-weight:700;color:#252722;}
+.sadooh-card--sm .sadooh-card__desc {font-size:11px;}
+.sadooh-card.is-selected {transform:translateY(-9px);filter:none;outline:3px solid #58724d;outline-offset:3px;}
+.sadooh-card:hover:not(:disabled) {transform:translateY(-5px);}
+.sadooh-card.is-selected:hover {transform:translateY(-9px);}
+.sadooh-card:disabled {opacity:1;}
+.sadooh-card__floating-badge {background:#252722;border:1px solid #252722;border-radius:4px;font-size:11px;top:-13px;}
+.practice-no-pressure {color:#61675b;}
+.practice-coach {background:#e5edda;box-shadow:none;}
+.practice-coach-example,.mentor-instruction-pill {background:#f6f3e9;color:#252722;border-color:#777b6c;}
+.tutorial-progress-step {background:#ecebdd;color:#61675b;border:1px solid #a4aa98;border-radius:5px;}
+.tutorial-progress-step.is-current {background:#f1d374;color:#252722;border-color:#252722;}
+.tutorial-progress-step.is-done {background:#c6d7b4;color:#252722;}
+.tutorial-result-note {background:#e5edda;box-shadow:none;}
+.modal-backdrop {background:#25272280;backdrop-filter:blur(3px);}
+.modal-card__header,.chat-drawer__header {background:#e5edda;color:#252722;border-bottom:1.5px solid #252722;}
+.btn-icon-close {background:#faf8f0;border:1px solid #252722;color:#252722;border-radius:4px;}
+.modal-card__footer,.simple-rules-note,.toggle-row,.stats-summary-box,.victory-standings {background:#ecebdd;color:#252722;}
+.simple-rules-note,.toggle-row,.log-item,.stats-summary-box,.victory-standings {border-radius:6px;}
+.victory-confetti {display:none;}
+.btn-play-confirm {font-size:15px;}
+@media(max-width:720px) {
+ .main-menu-screen {padding:24px 20px;align-items:flex-start;}
+ .main-menu-card {display:flex;flex-direction:column;gap:24px;padding:0;}
+ .main-menu-logo {width:230px;}
+ .main-menu-logo-wrap {gap:2px;}
+ .main-menu-tagline {font-size:24px;max-width:none;}
+ .abu-fahad-welcome {order:1;}
+ .main-menu-actions,.singleplayer-setup-panel {width:100%;}
+ .menu-edition {font-size:12px;padding-bottom:12px;}
+ .main-menu-actions {gap:13px;}
+ .btn-menu {min-height:52px;padding:13px 18px;}
+ .main-menu-actions>.btn-menu--primary {min-height:62px;}
+ .game-table-overlay,.tutorial-backdrop,.multiplayer-lobby-overlay {padding:14px;gap:16px;}
+ .table-topbar {gap:10px;padding:10px;}
+ .table-topbar__meta {font-size:12px;gap:5px;}
+ .lobby-panel {padding:16px;}
+ .human-player-dock {padding:12px;}
+ .sadooh-card--md {width:140px;height:205px;}
+ .sadooh-card__desc {font-size:11px;line-height:1.6;}
+ .opponents-ring {gap:10px;}
+ .player-seat {min-width:125px;padding:8px;}
+}

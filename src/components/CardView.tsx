@@ -14,8 +14,8 @@ interface CardViewProps {
 
 /**
  * مكوّن عرض البطاقة:
- * يستخدم `card-back.png` للبطاقات المقلوبة أو السرية،
- * ويستخدم `card-frame.png` مع رسم الشخصية ووصف قدرتها كنص عربي واضح وحقيقي داخل البطاقة.
+ * يستخدم `card-back.svg` للبطاقات المقلوبة أو السرية،
+ * ويستخدم `card-frame.svg` مع رسم الشخصية ووصف قدرتها كنص عربي واضح وحقيقي داخل البطاقة.
  */
 export const CardView: React.FC<CardViewProps> = ({
   characterId,
@@ -36,7 +36,7 @@ export const CardView: React.FC<CardViewProps> = ({
         aria-label="بطاقة مقلوبة"
       >
         <img
-          src="./assets/card-back.png"
+          src="./assets/card-back.svg"
           alt="ظهر البطاقة"
           className="sadooh-card__back-img"
           draggable={false}
@@ -57,7 +57,7 @@ export const CardView: React.FC<CardViewProps> = ({
       style={{ '--card-accent': charDef.accentColor } as React.CSSProperties}
     >
       <img
-        src="./assets/card-frame.png"
+        src="./assets/card-frame.svg"
         alt=""
         className="sadooh-card__frame-bg"
         draggable={false}

@@ -63,7 +63,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
       >
         <div className="chat-drawer__header">
           <div>
-            <h3>💬 شات الاستراحة العام</h3>
+            <h3> شات الاستراحة العام</h3>
             <span className="chat-drawer__subtitle">
               رسائل عامة لكل الجلسة (تظهر فقاعة 8 ثوانٍ فوق مقعد اللاعب)
             </span>
@@ -95,7 +95,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                     }}
                     title="كتم / إلغاء كتم اللاعب"
                   >
-                    {p.isMuted ? '🔇 مكتوم' : '🔊 كتم'}
+                    {p.isMuted ? ' مكتوم' : ' كتم'}
                   </button>
                   <button
                     type="button"
@@ -103,7 +103,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                     onClick={() => setReportTargetId(p.id)}
                     title="الإبلاغ عن إساءة"
                   >
-                    🚩 إبلاغ
+                     إبلاغ
                   </button>
                 </div>
               ))}

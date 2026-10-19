@@ -47,7 +47,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 
       <div className="player-seat__avatar-wrap">
         <img
-          src={player.avatarAsset}
+          src={player.avatarAsset.replace(/\.png$/, '.svg')}
           alt={player.name}
           className="player-seat__avatar"
           draggable={false}
@@ -60,7 +60,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         />
         {player.hasSanadShield && (
           <span className="player-seat__shield-badge" title="محمي بدرع السند">
-            🛡️ السند
+             السند
           </span>
         )}
       </div>
@@ -76,7 +76,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             {Array.from({ length: miniBacksCount }).map((_, idx) => (
               <img
                 key={idx}
-                src="./assets/card-back.png"
+                src="./assets/card-back.svg"
                 alt=""
                 className="player-seat__mini-card"
                 draggable={false}
@@ -89,7 +89,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 
       {isTargetable && (
         <div className="player-seat__target-cta">
-          {isSelectedTarget ? '✓ تم تحديد الهدف' : 'اضغط للاستهداف 🎯'}
+          {isSelectedTarget ? '✓ تم تحديد الهدف' : 'اضغط للاستهداف '}
         </div>
       )}
     </div>

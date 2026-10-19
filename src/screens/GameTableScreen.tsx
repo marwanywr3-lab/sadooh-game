@@ -299,7 +299,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
       return;
     }
     soundManager.playSadoohAlert();
-    showBubbleForPlayer(HUMAN_ID, 'صادوه! اكشف البطاقة! 🚨');
+    showBubbleForPlayer(HUMAN_ID, 'صادوه! اكشف البطاقة! ');
     setGameState((prev) => resolveChallengeWindow(prev, HUMAN_ID));
   };
 
@@ -369,17 +369,17 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   return (
     <div
       className="game-table-screen"
-      style={{ backgroundImage: `url('./assets/game-table.png')` }}
+      style={{ backgroundImage: `url('./assets/game-table.svg')` }}
     >
       <div className="game-table-overlay">
         {/* الشريط العلوي للمباراة */}
         <header className="table-topbar">
           <div className="table-topbar__brand">
-            <img src="./assets/logo.png" alt="صادوه!" className="table-topbar__logo" />
+            <img src="./assets/logo.svg" alt="صادوه!" className="table-topbar__logo" />
             <div className="table-topbar__meta">
               <span className="turn-badge">الجولة #{view.turnNumber}</span>
-              <span className="deck-pill">🃏 السحب: {view.drawPileCount}</span>
-              <span className="deck-pill">♻️ المستخدمة: {view.discardPileCount}</span>
+              <span className="deck-pill"> السحب: {view.drawPileCount}</span>
+              <span className="deck-pill"> المستخدمة: {view.discardPileCount}</span>
             </div>
           </div>
 
@@ -387,13 +387,13 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
           <div className="table-topbar__timer">
             {view.phase === 'CHOOSING_MOVE' && (
               <div className="timer-pill timer-pill--move">
-                <span>⏱️ دور «{activePlayer?.name}»:</span>
+                <span> دور «{activePlayer?.name}»:</span>
                 <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
               </div>
             )}
             {view.phase === 'CHALLENGE_WINDOW' && (
               <div className="timer-pill timer-pill--challenge">
-                <span>🚨 مهلة تحدي «صادوه!»:</span>
+                <span> مهلة تحدي «صادوه!»:</span>
                 <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
               </div>
             )}
@@ -405,17 +405,17 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
               className="btn-secondary btn-sm"
               onClick={() => setIsChatOpen(true)}
             >
-              💬 الشات ({view.chatMessages.length})
+               الشات ({view.chatMessages.length})
             </button>
             <button
               type="button"
               className="btn-secondary btn-sm"
               onClick={() => setIsLogOpen(true)}
             >
-              📜 السجل ({view.logs.length})
+               السجل ({view.logs.length})
             </button>
             <button type="button" className="btn-ghost btn-sm" onClick={onExitToMenu}>
-              🚪 خروج
+               خروج
             </button>
           </div>
         </header>
@@ -443,7 +443,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             <div className="center-status-box">
               {isMyTurn ? (
                 <>
-                    <h3>🎯 دورك الآن! {practicePaused ? 'خذ وقتك' : `(${view.turnTimerSeconds} ثانية)`}</h3>
+                    <h3> دورك الآن! {practicePaused ? 'خذ وقتك' : `(${view.turnTimerSeconds} ثانية)`}</h3>
                   <p>
                     1) اختر بطاقة فعلية من يدك بالأسفل • 2) اختر الشخصية التي ستعلنها (صدق أو
                     كذب) {needsTargetForSelection ? '• 3) حدد الخصم المستهدف' : ''} ثم ضعها
@@ -452,7 +452,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 </>
               ) : (
                 <>
-                  <h3>⏳ «{activePlayer?.name}» يفكر في حركته...</h3>
+                  <h3> «{activePlayer?.name}» يفكر في حركته...</h3>
                   <p>{guided ? 'استعد! أول ما يحط بطاقته مقلوبة، بتقرر: تصدقه أو تضغط «صادوه!». بنشرح لك وقتها.' : `استعد! أول ما يحط بطاقته مقلوبة، قدامك ${CHALLENGE_TIMER_SECONDS} ثانية تقرر تصدقه ولا تصيده!`}</p>
                 </>
               )}
@@ -468,7 +468,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
               <div className="challenge-stage-card__details">
                 <div className="claim-announcement-badge">
-                  <span>📢 إعلان على الطاولة:</span>
+                  <span> إعلان على الطاولة:</span>
                   <h3>
                     «{claimSpeaker?.name}» يدّعي أنه يلعب{' '}
                     <strong style={{ color: claimedCharDef.accentColor }}>
@@ -486,19 +486,19 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                       className="btn-sadooh-mega"
                       onClick={handleHumanPressSadooh}
                     >
-                      🚨 صادوه! {practicePaused ? '(اكشف بطاقته)' : `(${view.turnTimerSeconds} ث)`}
+                       صادوه! {practicePaused ? '(اكشف بطاقته)' : `(${view.turnTimerSeconds} ث)`}
                     </button>
                     <button
                       type="button"
                       className="btn-secondary"
                       onClick={handleHumanPassChallenge}
                     >
-                      👍 عدّها له (لا أتحدى)
+                       عدّها له (لا أتحدى)
                     </button>
                   </div>
                 ) : (
                   <div className="waiting-opponents-challenge">
-                    <span>👀 الخصوم ينظرون في عيونك... هل يضغط أحدهم «صادوه!»؟ ({view.turnTimerSeconds} ث)</span>
+                    <span> الخصوم ينظرون في عيونك... هل يضغط أحدهم «صادوه!»؟ ({view.turnTimerSeconds} ث)</span>
                   </div>
                 )}
               </div>
@@ -514,15 +514,15 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                     size="sm"
                     badgeText={
                       view.lastOutcomePublic.wasTruthful
-                        ? '✅ طلع صادق!'
-                        : '🚨 طلع كذاب!'
+                        ? ' طلع صادق!'
+                        : ' طلع كذاب!'
                     }
                   />
                 ) : (
                   <CardView
                     faceDown
                     size="sm"
-                    badgeText="🔒 بقيت البطاقة سرية"
+                    badgeText=" بقيت البطاقة سرية"
                   />
                 )}
               </div>
@@ -539,7 +539,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 {view.lastOutcomePublic.myPrivateReveal && (
                   <div className="private-malqoof-reveal">
                     <div>
-                      <strong>🕵️ كشف «الملقوف» السري (تراه أنت فقط):</strong>
+                      <strong> كشف «الملقوف» السري (تراه أنت فقط):</strong>
                       <p>
                         كشفت سرًا هذه البطاقة في يد «
                         {
@@ -564,13 +564,13 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
                 <div className="outcome-next-row">
                   {remote ? (
-                    <span>📖 اقرأ النتيجة بهدوء — الدور التالي بعد {view.turnTimerSeconds} ثانية</span>
+                    <span> اقرأ النتيجة بهدوء — الدور التالي بعد {view.turnTimerSeconds} ثانية</span>
                   ) : <button
                     type="button"
                     className="btn-primary btn-sm"
                     onClick={() => setGameState((prev) => advanceToNextTurn(prev))}
                   >
-                    قرأت النتيجة — الدور التالي ⬅️
+                    قرأت النتيجة — الدور التالي 
                   </button>}
                 </div>
               </div>
@@ -586,16 +586,16 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
           <div className="human-dock-header">
             <div className="human-status-info">
-              <strong>👤 {myPublicProfile?.name} (أنت)</strong>
+              <strong> {myPublicProfile?.name} (أنت)</strong>
               <span className="my-card-count-badge">
                 بطاقات يدك: {view.myHand.length}
               </span>
               {myPublicProfile?.hasSanadShield && (
-                <span className="sanad-active-pill">🛡️ محمي بدرع السند</span>
+                <span className="sanad-active-pill"> محمي بدرع السند</span>
               )}
             </div>
 
-            {uiError && <div className="dock-error-pill">⚠️ {uiError}</div>}
+            {uiError && <div className="dock-error-pill"> {uiError}</div>}
           </div>
 
           <div className="human-dock-layout">
@@ -683,8 +683,8 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                           }`}
                           onClick={() => setSelectedTargetId(opp.id)}
                         >
-                          🎯 {opp.name} ({opp.cardCount})
-                          {opp.hasSanadShield ? ' 🛡️' : ''}
+                           {opp.name} ({opp.cardCount})
+                          {opp.hasSanadShield ? ' ' : ''}
                         </button>
                       ))}
                     </div>
@@ -710,7 +710,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                             }`}
                             onClick={() => setSelectedSecondaryCardId(c.id)}
                           >
-                            🃏 {CHARACTERS[c.characterId].nameAr}
+                             {CHARACTERS[c.characterId].nameAr}
                           </button>
                         ))}
                     </div>
@@ -722,7 +722,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   className="btn-primary btn-play-confirm"
                   onClick={handleConfirmMove}
                 >
-                  🃏 ضع البطاقة مقلوبة وأعلن «{CHARACTERS[selectedClaimChar].nameAr}»
+                   ضع البطاقة مقلوبة وأعلن «{CHARACTERS[selectedClaimChar].nameAr}»
                 </button>
               </div>
             )}
@@ -733,19 +733,19 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         {view.phase === 'GAME_OVER' && view.winnerPlayerId && (
           <div className="modal-backdrop">
             <div className="victory-modal" role="dialog" aria-label="نتيجة المباراة">
-              <div className="victory-confetti">🎉 ✨ 🏆 ✨ 🎉</div>
+              <div className="victory-confetti">    </div>
               <img
                 src={
-                  view.players.find((p) => p.id === view.winnerPlayerId)?.avatarAsset ||
-                  './assets/abu-fahad.png'
+                  view.players.find((p) => p.id === view.winnerPlayerId)?.avatarAsset.replace(/\.png$/, '.svg') ||
+                  './assets/abu-fahad.svg'
                 }
                 alt="الفائز"
                 className="victory-avatar"
               />
               <h2>
                 {view.winnerPlayerId === HUMAN_ID
-                  ? '🔥 كفو يا وحش! فزت بالجلسة!'
-                  : `🏆 فاز «${
+                  ? ' كفو يا وحش! فزت بالجلسة!'
+                  : ` فاز «${
                       view.players.find((p) => p.id === view.winnerPlayerId)?.name
                     }» بالمباراة!`}
               </h2>
@@ -759,7 +759,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 {view.players.map((p) => (
                   <div key={p.id} className="standing-row">
                     <span>
-                      {p.id === view.winnerPlayerId ? '🥇 ' : '• '}
+                      {p.id === view.winnerPlayerId ? ' ' : '• '}
                       {p.name}
                     </span>
                     <strong>
@@ -777,14 +777,14 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   className="btn-primary btn-lg"
                   onClick={handleRestartMatch}
                 >
-                  🔄 العب مباراة جديدة
+                   العب مباراة جديدة
                 </button>
                 <button
                   type="button"
                   className="btn-secondary btn-lg"
                   onClick={onExitToMenu}
                 >
-                  🏠 القائمة الرئيسية
+                   القائمة الرئيسية
                 </button>
               </div>
             </div>

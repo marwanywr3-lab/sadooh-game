@@ -20,12 +20,12 @@ export interface IMultiplayerRoomService {
 }
 
 const BOT_AVATARS = [
-  './assets/abu-fahad.png',
-  './assets/alkabeer.png',
-  './assets/malqoof.png',
-  './assets/nashal.png',
-  './assets/mosarref.png',
-  './assets/mokhabbes.png',
+  './assets/abu-fahad.svg',
+  './assets/alkabeer.svg',
+  './assets/malqoof.svg',
+  './assets/nashal.svg',
+  './assets/mosarref.svg',
+  './assets/mokhabbes.svg',
 ];
 
 const BOT_NAMES = ['أبو فهد', 'أبو سارة', 'عزّام', 'تركي', 'سلمان', 'نايف', 'وليد'];
@@ -50,7 +50,7 @@ export class PreviewMultiplayerRoomService implements IMultiplayerRoomService {
           name: initialPlayerName,
           isHost: true,
           isBot: false,
-          avatarAsset: './assets/sanad.png',
+          avatarAsset: './assets/sanad.svg',
           isConnected: true,
           isReady: true,
           isMuted: false,
@@ -61,7 +61,7 @@ export class PreviewMultiplayerRoomService implements IMultiplayerRoomService {
           isHost: false,
           isBot: true,
           botDifficulty: 'medium',
-          avatarAsset: './assets/abu-fahad.png',
+          avatarAsset: './assets/abu-fahad.svg',
           isConnected: true,
           isReady: true,
           isMuted: false,
@@ -72,7 +72,7 @@ export class PreviewMultiplayerRoomService implements IMultiplayerRoomService {
           isHost: false,
           isBot: true,
           botDifficulty: 'medium',
-          avatarAsset: './assets/malqoof.png',
+          avatarAsset: './assets/malqoof.svg',
           isConnected: true,
           isReady: true,
           isMuted: false,

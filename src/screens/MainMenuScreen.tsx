@@ -27,54 +27,53 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   return (
     <div
       className="main-menu-screen"
-      style={{ backgroundImage: `url('./assets/menu-background.png')` }}
+      style={{ backgroundImage: `url('./assets/menu-background.svg')` }}
     >
       <div className="main-menu-overlay">
         <div className="main-menu-card">
-          {/* شعار لعبة صادوه! */}
+          <span className="menu-edition">لعبة جمعتنا / ٠١</span>
           <div className="main-menu-logo-wrap">
             <img
-              src="./assets/logo.png"
+              src="./assets/logo.svg"
               alt="شعار صادوه!"
               className="main-menu-logo"
               draggable={false}
             />
             <h1 className="main-menu-title-fallback">صادوه!</h1>
             <p className="main-menu-tagline">
-              خلّص بطاقاتك، واخدع خصومك… وإذا شكّيت فيهم، صادوه!
+              ورق، سوالف، وشوية خداع.
             </p>
           </div>
 
           {/* ترحيب أبو فهد */}
           <div className="abu-fahad-welcome">
             <img
-              src="./assets/abu-fahad.png"
+              src="./assets/abu-fahad.svg"
               alt="أبو فهد"
               className="abu-fahad-welcome__img"
               draggable={false}
             />
             <div className="abu-fahad-welcome__bubble">
-              <strong>أبو فهد:</strong> «يا مرحبا ومسهلا في الاستراحة! القهوة جاهزة والورق مغسول..
-              تبي تتحداني أنا والشباب ولا تدخل غرفة جماعية؟»
+              <strong>حيّ الله الربع.</strong><br/>خلّص ورقك قبلهم. وإذا شكّيت في واحد… صادوه!
             </div>
           </div>
 
           {!showSetupBox ? (
-            <div className="main-menu-actions">
+            <div className="main-menu-actions"><p className="menu-section-label">على الطاولة</p>
               <button
                 type="button"
-                className="btn-menu btn-menu--primary"
+                className="btn-menu btn-menu--warm"
                 onClick={() => setShowSetupBox(true)}
               >
-                🎮 العب ضد الكمبيوتر
+                تدرّب لحالك
               </button>
 
               <button
                 type="button"
-                className="btn-menu btn-menu--secondary"
+                className="btn-menu btn-menu--primary"
                 onClick={onOpenMultiplayer}
               >
-                🌐 اللعب الجماعي
+                اجمع الربع ←
               </button>
 
               <div className="main-menu-subgrid">
@@ -83,7 +82,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                   className="btn-menu btn-menu--warm"
                   onClick={onOpenHowToPlay}
                 >
-                  📖 كيف تلعب؟
+                  كيف نلعب؟
                 </button>
 
                 <button
@@ -91,7 +90,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                   className="btn-menu btn-menu--warm"
                   onClick={onOpenSettings}
                 >
-                  ⚙️ الإعدادات
+                  الإعدادات
                 </button>
               </div>
 
@@ -100,7 +99,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 className="btn-menu btn-menu--accent"
                 onClick={onStartTutorial}
               >
-                🎓 جرّبها مع شرح خطوة بخطوة
+                أول مرة؟ نجربها سوا
               </button>
             </div>
           ) : (
@@ -168,7 +167,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                     )
                   }
                 >
-                  🔥 ابدأ الجلسة الآن!
+                   ابدأ الجلسة الآن!
                 </button>
                 <button
                   type="button"
