@@ -40,8 +40,7 @@ Deno.serve(async(req:Request)=>{
   const requestId=cleanText(body.requestId,64);
   if(!/^[a-f0-9-]{36}$/i.test(requestId))return reply({error:'معرف الطلب غير صالح.'},400);
   if(body.type==='CREATE_ROOM'){
-   const ip=await digest(req.headers.get('x-forwarded-for')?.split(',')[0]||uid);
-   if(!await rpc('sadooh_allow',{p_key:`create:${ip}`,p_window:3600,p_max:5}))return reply({error:'بلغت حد إنشاء الغرف؛ حاول لاحقًا.'},429);
+   // Room creation has no hourly quota. The general request throttle above still applies.
    const code=crypto.randomUUID().replaceAll('-','').toUpperCase(),now=Date.now();
    const s=createRoom(code,uid,cleanText(body.payload?.playerName,24),capacity(body.payload?.maxPlayers),now);
    s.receipts.push(`${uid}:${requestId}`);
