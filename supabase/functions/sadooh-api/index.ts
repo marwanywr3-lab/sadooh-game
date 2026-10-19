@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { createRoom, tick, reduceEvent, projection, allProjections, type SavedRoom } from '../../../server/roomEngine';
+import { createRoom, createPartyRoom, isDisplay, tick, reduceEvent, projection, allProjections, type SavedRoom } from '../../../server/roomEngine';
 import { parseEvent, digest, cleanText, capacity } from '../../../server/security';
 
 const url=Deno.env.get('SUPABASE_URL')!;
@@ -39,10 +39,10 @@ Deno.serve(async(req:Request)=>{
   if(!await rpc('sadooh_allow',{p_key:`request:${uid}`,p_window:10,p_max:30}))return reply({error:'طلبات كثيرة؛ انتظر قليلًا.'},429);
   const requestId=cleanText(body.requestId,64);
   if(!/^[a-f0-9-]{36}$/i.test(requestId))return reply({error:'معرف الطلب غير صالح.'},400);
-  if(body.type==='CREATE_ROOM'){
+  if(body.type==='CREATE_ROOM'||body.type==='CREATE_PARTY_ROOM'){
    // Room creation has no hourly quota. The general request throttle above still applies.
    const code=crypto.randomUUID().replaceAll('-','').toUpperCase(),now=Date.now();
-   const s=createRoom(code,uid,cleanText(body.payload?.playerName,24),capacity(body.payload?.maxPlayers),now);
+   const s=body.type==='CREATE_PARTY_ROOM'?createPartyRoom(code,uid,capacity(body.payload?.maxPlayers),now):createRoom(code,uid,cleanText(body.payload?.playerName,24),capacity(body.payload?.maxPlayers),now);
    s.receipts.push(`${uid}:${requestId}`);
    const ok=await rpc('sadooh_commit',{p_code:code,p_revision:-1,p_state:s,p_views:allProjections(s,now),p_report:null});
    if(!ok)throw Error('تعذر إنشاء الغرفة.');return reply({...projection(s,uid,now),revision:0});
@@ -53,7 +53,7 @@ Deno.serve(async(req:Request)=>{
    const loaded=await rpc('sadooh_load',{p_code:code});if(!loaded)return reply({error:'الغرفة غير موجودة أو انتهت.'},404);
    const s=loaded.state as SavedRoom,now=Number(loaded.now),revision=Number(loaded.revision);
    const isMember=s.room.members.some(m=>m.id===uid&&!m.isBot);
-   if(!isMember&&event?.type!=='JOIN_ROOM')return reply({error:'لست عضوًا في الغرفة.'},403);
+   if(!isMember&&!isDisplay(s,uid)&&event?.type!=='JOIN_ROOM')return reply({error:'لست عضوًا في الغرفة.'},403);
    if(s.receipts.includes(`${uid}:${requestId}`))return reply({...projection(s,uid,now),revision});
    let changed=tick(s,now),report=null,errorAr:string|null=null;
    if(event){try{report=reduceEvent(s,uid,event,now,body.context);changed=true;}catch(e){errorAr=e instanceof Error?e.message:'طلب غير صالح.';}}

@@ -477,7 +477,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   <p className="claim-ability-line">{claimedCharDef.descriptionAr}</p>
                 </div>
 
-                {view.pendingClaimPublic.playerId !== HUMAN_ID ? (
+                {view.hasPassedChallenge ? <p className="party-passed">عدّيتها. ننتظر قرار الباقين.</p> : view.pendingClaimPublic.playerId !== HUMAN_ID ? (
                   <div className="challenge-cta-group">
                     <button
                       type="button"

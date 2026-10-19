@@ -7,7 +7,7 @@ import { projectGameStateForPlayer } from '../src/game/engine/stateProjector';
 import { decideBotMove, decideBotChallenge } from '../src/game/bots/localBotEngine';
 import { secureRandom, cleanText, capacity } from '../server/security';
 
-export type SavedRoom={room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
+export type SavedRoom={party?:{displayUserId:string};partyPasses?:string[];room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
 export type Report={id:string;reporter:string;target:string;reason:string;evidence:unknown};
 export type Projection={room:RoomState;view:ReturnType<typeof projectGameStateForPlayer>|null;deadline:number;nextActionAt:number;serverNow:number;revision?:number};
 const BOT_AVATARS=['abu-fahad','alkabeer','malqoof','nashal','sanad','mosarref','mokhabbes'];
@@ -17,7 +17,14 @@ function member(id:string,name:string,host=false,isBot=false,difficulty:BotDiffi
 export function createRoom(code:string,userId:string,name:string,max:number,now:number):SavedRoom {
  return {room:{roomCode:code,inviteUrl:`https://sadoh.marwanbarbood.com/?room=${code}`,hostPlayerId:userId,maxPlayers:capacity(max),status:'waiting',connectionStatus:'connected',members:[member(userId,cleanText(name,24),true)],chatHistory:[]},game:null,muted:{},lastSeen:{[userId]:now},chatAt:{},deadline:0,nextBot:0,expires:now+86400000,receipts:[]};
 }
+export function createPartyRoom(code:string,displayUserId:string,max:number,now:number):SavedRoom {
+ const s=createRoom(code,displayUserId,'شاشة العرض',max,now);
+ s.party={displayUserId};s.room.partyMode=true;s.room.members=[];s.room.hostPlayerId='';
+ s.room.inviteUrl+='&party=1';return s;
+}
+export function isDisplay(s:SavedRoom,userId:string){return s.party?.displayUserId===userId;}
 function phaseChanged(s:SavedRoom,g:GameState,now:number){
+ s.partyPasses=[];
  s.game={...g,logs:g.logs.slice(0,100),chatMessages:[]};
  s.deadline=now+1000*(g.phase==='CHOOSING_MOVE'?MOVE_TIMER_SECONDS:g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
  s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+BOT_CHALLENGE_DELAY_MS:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+BOT_MOVE_DELAY_MS:0;
@@ -45,20 +52,25 @@ export function tick(s:SavedRoom,now:number):boolean {
  return false;
 }
 export function projection(s:SavedRoom,userId:string,now:number):Projection {
- if(!s.room.members.some(m=>m.id===userId&&!m.isBot))throw Error('لست عضوًا في الغرفة.');
+ const display=isDisplay(s,userId);
+ if(!display&&!s.room.members.some(m=>m.id===userId&&!m.isBot))throw Error('لست عضوًا في الغرفة.');
  const muted=s.muted[userId]||[];
- const room={...s.room,members:s.room.members.map(m=>({...m,isConnected:m.isBot||now-(s.lastSeen[m.id]||0)<45000,isMuted:muted.includes(m.id)})),chatHistory:s.room.chatHistory.filter(m=>!muted.includes(m.senderId))};
- const view=s.game?projectGameStateForPlayer(s.game,userId):null;
+ const room={...s.room,members:s.room.members.map(m=>({...m,isConnected:m.isBot||now-(s.lastSeen[m.id]||0)<45000,isMuted:muted.includes(m.id)})),chatHistory:display?[]:s.room.chatHistory.filter(m=>!muted.includes(m.senderId))};
+ const view=s.game?projectGameStateForPlayer(s.game,display?'public_display_no_player':userId):null;
+ if(view){view.hasPassedChallenge=!display&&!!s.partyPasses?.includes(userId);if(display){view.myHand=[];view.chatMessages=[];if(view.lastOutcomePublic)view.lastOutcomePublic.myPrivateReveal=null;}}
  if(view){view.turnTimerSeconds=Math.max(0,Math.ceil((s.deadline-now)/1000));view.chatMessages=room.chatHistory;view.players=view.players.map(p=>({...p,isConnected:room.members.find(m=>m.id===p.id)?.isConnected||false,isMuted:muted.includes(p.id)}));}
  return {room,view,deadline:s.deadline,nextActionAt:s.game&&s.game.phase!=='GAME_OVER'?Math.min(s.deadline,s.nextBot||Infinity):0,serverNow:now};
 }
-export function allProjections(s:SavedRoom,now:number){return s.room.members.filter(m=>!m.isBot).map(m=>({userId:m.id,payload:projection(s,m.id,now)}));}
+export function allProjections(s:SavedRoom,now:number){return [...s.room.members.filter(m=>!m.isBot).map(m=>m.id),...(s.party?[s.party.displayUserId]:[])].map(userId=>({userId,payload:projection(s,userId,now)}));}
 export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,now:number,context?:{matchId?:string;turnNumber?:number}):Report|null {
  const e=event;
+ if(isDisplay(s,userId))throw Error('شاشة العرض للمشاهدة فقط.');
  if(e.type==='JOIN_ROOM'){
   if(s.room.members.some(m=>m.id===userId&&!m.isBot)){s.lastSeen[userId]=now;return null;}
   if(s.room.status!=='waiting'||s.room.members.length>=s.room.maxPlayers)throw Error('الغرفة ممتلئة أو بدأت المباراة.');
-  s.room.members.push(member(userId,cleanText(e.payload.playerName,24)));s.lastSeen[userId]=now;return null;
+  const first=s.room.partyMode&&!s.room.members.some(m=>!m.isBot);
+  s.room.members.push(member(userId,cleanText(e.payload.playerName,24),first));
+  if(first)s.room.hostPlayerId=userId;s.lastSeen[userId]=now;return null;
  }
  const me=s.room.members.find(m=>m.id===userId&&!m.isBot);if(!me)throw Error('لست عضوًا في الغرفة.');
  const host=()=>{if(s.room.hostPlayerId!==userId)throw Error('للمضيف فقط.');};
@@ -89,7 +101,13 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
  }
  case 'PRESS_SADOOH':case 'PASS_CHALLENGE':{
   const g=s.game;if(!g||g.phase!=='CHALLENGE_WINDOW'||g.matchId!==e.payload.matchId||g.turnNumber!==e.payload.turnNumber||g.pendingClaim?.playerId===userId)throw Error('انتهت نافذة التحدي أو الطلب غير صالح.');
-  if(e.type==='PRESS_SADOOH')phaseChanged(s,resolveChallengeWindow(g,userId,secureRandom),now);break;
+  if(s.room.partyMode&&s.partyPasses?.includes(userId))throw Error('اخترت تعدّيها لهذا الدور.');
+  if(e.type==='PRESS_SADOOH')phaseChanged(s,resolveChallengeWindow(g,userId,secureRandom),now);
+  else if(s.room.partyMode){
+   s.partyPasses=[...new Set([...(s.partyPasses||[]),userId])];
+   const eligible=g.players.filter(p=>p.id!==g.pendingClaim!.playerId);
+   if(eligible.every(p=>!p.isBot&&s.partyPasses!.includes(p.id)))phaseChanged(s,resolveChallengeWindow(g,null,secureRandom),now);
+  }break;
  }
  case 'SEND_CHAT':{
   if(now-(s.chatAt[userId]||0)<1000)throw Error('انتظر ثانية بين الرسائل.');s.chatAt[userId]=now;
@@ -104,7 +122,7 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
  case 'LEAVE_ROOM':
   if(s.room.status==='waiting'){
    s.room.members=s.room.members.filter(m=>m.id!==userId);delete s.lastSeen[userId];
-   if(me.isHost){const next=s.room.members.find(m=>!m.isBot);if(next){next.isHost=true;s.room.hostPlayerId=next.id;}else s.expires=now;}
+   if(me.isHost){const next=s.room.members.find(m=>!m.isBot);if(next){next.isHost=true;s.room.hostPlayerId=next.id;}else if(s.party)s.room.hostPlayerId='';else s.expires=now;}
   }else{s.lastSeen[userId]=0;}
   break;
  case 'RECONNECT_MATCH':break;

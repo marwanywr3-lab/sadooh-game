@@ -1,3 +1,4 @@
+import {PartyScreen} from './screens/PartyScreen';
 import {ThemeContext} from './components/Theme';
 import React, { useEffect, useState } from 'react';
 import { BotDifficulty } from './types/game';
@@ -13,13 +14,14 @@ import { GameTableScreen } from './screens/GameTableScreen';
 import { HowToPlayModal } from './components/HowToPlayModal';
 import { SettingsModal } from './components/SettingsModal';
 
-type ActiveScreen = 'menu' | 'tutorial' | 'game' | 'multiplayer';
+type ActiveScreen = 'menu' | 'tutorial' | 'game' | 'multiplayer' | 'party';
 
 export default function App() {
   const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
 
   // عند أول تشغيل، اعرض الجولة التعليمية التفاعلية مع «أبو فهد» تلقائيًا (مع إمكانية تخطيها فورًا)
   const [screen, setScreen] = useState<ActiveScreen>(() => {
+    if(/^[a-f0-9]{32}$/i.test(new URLSearchParams(location.search).get('room')||''))return 'multiplayer';
     const initial = loadUserSettings();
     return initial.tutorialCompleted ? 'menu' : 'tutorial';
   });
@@ -42,6 +44,7 @@ export default function App() {
     playerName: settings.playerName,
   });
 
+  const [partyJoin,setPartyJoin]=useState(new URLSearchParams(location.search).get('party')==='1');
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -91,7 +94,8 @@ export default function App() {
         <MainMenuScreen
           settings={settings}
           onStartSinglePlayer={handleStartSinglePlayer}
-          onOpenMultiplayer={() => setScreen('multiplayer')}
+          onOpenMultiplayer={() => {setPartyJoin(false);setScreen('multiplayer');}}
+          onOpenParty={()=>setScreen('party')}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onStartTutorial={() => setScreen('tutorial')}
@@ -106,8 +110,11 @@ export default function App() {
         />
       )}
 
+      {screen === 'party'&&<PartyScreen onBack={()=>setScreen('menu')} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
+
       {screen === 'multiplayer' && (
         <MultiplayerLobbyScreen
+          joinOnly={partyJoin}
           initialPlayerName={settings.playerName}
           onBackToMenu={() => setScreen('menu')}
           onPlayLocalWithSetup={(botCount, difficulty, playerName) =>

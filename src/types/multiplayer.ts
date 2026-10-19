@@ -23,6 +23,7 @@ export interface RoomMember {
 }
 
 export interface RoomState {
+  partyMode?: boolean;
   roomCode: string;
   inviteUrl: string;
   hostPlayerId: string;
@@ -37,6 +38,7 @@ export interface RoomState {
  * الرسائل المرسلة من العميل إلى الخادم (Client -> Cloudflare Durable Object WebSocket)
  */
 export type ClientToServerEvent =
+  | { type: 'CREATE_PARTY_ROOM'; payload: { maxPlayers: number } }
   | { type: 'CREATE_ROOM'; payload: { playerName: string; maxPlayers: number } }
   | { type: 'JOIN_ROOM'; payload: { roomCode: string; playerName: string; reconnectToken?: string } }
   | { type: 'LEAVE_ROOM'; payload: { roomCode: string } }

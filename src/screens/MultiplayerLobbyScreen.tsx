@@ -9,6 +9,7 @@ import { ChatDrawer } from '../components/ChatDrawer';
 import { CHAT_BUBBLE_MS } from '../game/rules/deck';
 
 interface MultiplayerLobbyScreenProps {
+  joinOnly?:boolean;
   initialPlayerName: string;
   onBackToMenu: () => void;
   onPlayLocalWithSetup: (botCount: number, difficulty: BotDifficulty, playerName: string) => void;
@@ -19,6 +20,7 @@ interface MultiplayerLobbyScreenProps {
  * تعرض بوضوح أن الأزرار التي تتطلب خادمًا حقيقيًا «بانتظار تفعيل اللعب الجماعي»، دون أي نجاح وهمي.
  */
 export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
+  joinOnly=false,
   initialPlayerName,
   onBackToMenu,
   onPlayLocalWithSetup,
@@ -108,7 +110,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
       className="multiplayer-lobby-screen"
       style={{ backgroundImage: `url('./assets/menu-background.svg')` }}
     >
-      <div className="multiplayer-lobby-overlay">
+      <div className={`multiplayer-lobby-overlay ${joinOnly?'party-phone':''}`}>
         <header className="lobby-header">
           <div className="lobby-header__right">
             <BrandLogo alt="صادوه!" className="lobby-logo" />
@@ -183,7 +185,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
         <div className={`lobby-grid ${roomState.roomCode ? 'has-room' : 'no-room'}`}>
           {/* العمود الأيمن: إعدادات اللاعب، إنشاء غرفة، أو الانضمام برمز/رابط */}
           <section className="lobby-panel">
-            <h3>جهّز جلستك</h3>
+            <h3>{joinOnly?'العب مع بعض — جوالك':'جهّز جلستك'}</h3>
 
             <div className="form-field">
               <span>اسم اللاعب في الغرفة:</span>
@@ -206,6 +208,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
             </div>
 
             <div className="lobby-subbox">
+              {!joinOnly&&<>
               <h4> إنشاء غرفة جديدة</h4>
               <div className="form-field">
                 <span>عدد اللاعبين المستهدف ({roomState.maxPlayers} لاعبين):</span>
@@ -244,7 +247,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                 }
               >
                  إنشاء غرفة جديدة
-              </button>
+              </button></>}
             </div>
 
             <div className="lobby-subbox"><h4>عندك دعوة؟</h4><div className="inline-input-row"><input aria-label="رابط الدعوة أو رمز الغرفة" value={joinCodeInput} onChange={e=>setJoinCodeInput(e.target.value)} placeholder="الصق الرابط أو رمز الغرفة" maxLength={2048}/><button className="btn-secondary" onClick={()=>{let code=joinCodeInput.trim();try{code=new URL(code).searchParams.get('room')||code;}catch{}service.sendEvent({type:'JOIN_ROOM',payload:{roomCode:code.toUpperCase(),playerName}});}}>انضم</button></div></div>

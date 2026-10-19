@@ -5,6 +5,7 @@ import App from './App';
 import './styles/theme.css';
 import './styles/simple.css';
 import './styles/dark.css';
+import './styles/party.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

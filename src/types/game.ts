@@ -158,6 +158,7 @@ export interface PublicPlayerView {
 }
 
 export interface ClientProjectedGameState {
+  hasPassedChallenge?: boolean;
   matchId: string;
   viewerPlayerId: string;
   myHand: CardInstance[];
