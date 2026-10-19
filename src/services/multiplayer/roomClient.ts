@@ -4,6 +4,11 @@ import type { ClientToServerEvent, RoomState, ConnectionStatus } from '../../typ
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '../../config/supabase';
 type Projection={room:RoomState;view:ClientProjectedGameState|null;revision:number;deadline:number;nextActionAt:number;serverNow:number;notice?:string};
 const KEY='sadooh.room.v2';
+// One Auth client per tab also survives React remounts and avoids competing token refreshes.
+let sharedClient:SupabaseClient|undefined;
+function getClient(){
+ return sharedClient??=createClient(import.meta.env.VITE_SUPABASE_URL||SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||SUPABASE_PUBLISHABLE_KEY,{auth:{storage:sessionStorage,storageKey:'sadooh.auth.v1',persistSession:true,autoRefreshToken:true}});
+}
 export class SupabaseRoomService {
  private state:RoomState={roomCode:'',inviteUrl:'',hostPlayerId:'',maxPlayers:4,status:'waiting',connectionStatus:'disconnected',members:[],chatHistory:[]};
  private listeners=new Set<(state:RoomState,banner:string|null)=>void>();
@@ -14,7 +19,7 @@ export class SupabaseRoomService {
  private deadline=0;private offset=0;private nextActionAt=0;private queue:Promise<void>=Promise.resolve();
  view:ClientProjectedGameState|null=null;
  constructor(_name:string){
-  this.client=createClient(import.meta.env.VITE_SUPABASE_URL||SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||SUPABASE_PUBLISHABLE_KEY,{auth:{storage:sessionStorage,storageKey:'sadooh.auth.v1',persistSession:true,autoRefreshToken:true}});
+  this.client=getClient();
   try{this.code=sessionStorage.getItem(KEY)||'';}catch{/* storage disabled */}
  }
  get playerId(){return this.userId;}
