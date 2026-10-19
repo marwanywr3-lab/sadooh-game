@@ -1,3 +1,4 @@
+import {PassPhoneScreen} from './screens/PassPhoneScreen';
 import {PartyScreen} from './screens/PartyScreen';
 import {ThemeContext} from './components/Theme';
 import React, { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { GameTableScreen } from './screens/GameTableScreen';
 import { HowToPlayModal } from './components/HowToPlayModal';
 import { SettingsModal } from './components/SettingsModal';
 
-type ActiveScreen = 'menu' | 'tutorial' | 'game' | 'multiplayer' | 'party';
+type ActiveScreen = 'menu' | 'tutorial' | 'game' | 'multiplayer' | 'party' | 'passphone';
 
 export default function App() {
   const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
@@ -96,6 +97,7 @@ export default function App() {
           onStartSinglePlayer={handleStartSinglePlayer}
           onOpenMultiplayer={() => {setPartyJoin(false);setScreen('multiplayer');}}
           onOpenParty={()=>setScreen('party')}
+          onOpenPassPhone={()=>setScreen('passphone')}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onStartTutorial={() => setScreen('tutorial')}
@@ -110,6 +112,7 @@ export default function App() {
         />
       )}
 
+      {screen === 'passphone'&&<PassPhoneScreen onBack={()=>setScreen('menu')}/>}
       {screen === 'party'&&<PartyScreen onBack={()=>setScreen('menu')} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
 
       {screen === 'multiplayer' && (

@@ -44,3 +44,6 @@
  .party-status h1 {font-size:36px;}
  .party-roster article {padding:8px 10px;gap:7px;}
 }
+
+.pass-phone{min-height:100vh;background:var(--ui-page);color:var(--ui-ink);padding:20px clamp(14px,4vw,60px)}
+.pass-panel{max-width:680px;margin:40px auto;line-height:1.9}.pass-panel h1{font-size:clamp(30px,5vw,52px);line-height:1.5;margin-bottom:18px}.pass-panel p{margin:16px 0}.pass-panel>.btn-primary{width:100%;margin-top:20px}.pass-panel select,.pass-panel input{width:100%;max-width:100%;background:var(--ui-card);color:var(--ui-ink)}.pass-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin:18px 0}.pass-actions>button{flex:1}.pass-cards{display:flex;gap:12px;overflow-x:auto;padding:16px 5px 24px}.pass-cards>.sadooh-card{flex-shrink:0}.pass-handoff{text-align:center;padding:30px 0}.pass-handoff button{margin:22px 0;width:100%}.pass-counts{display:flex;flex-wrap:wrap;gap:10px;margin-top:35px;border-top:1px solid var(--ui-softline);padding-top:20px}.pass-counts span{background:var(--ui-card);border:1px solid var(--ui-softline);padding:7px 12px;border-radius:5px}.pass-secret{padding:18px;border:2px solid var(--ui-line);border-radius:8px;margin:20px 0}

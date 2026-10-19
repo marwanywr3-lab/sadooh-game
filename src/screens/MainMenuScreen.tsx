@@ -9,6 +9,7 @@ interface MainMenuScreenProps {
   onStartSinglePlayer: (botCount: number, difficulty: BotDifficulty, playerName: string) => void;
   onOpenMultiplayer: () => void;
   onOpenParty:()=>void;
+  onOpenPassPhone:()=>void;
   onOpenHowToPlay: () => void;
   onOpenSettings: () => void;
   onStartTutorial: () => void;
@@ -19,6 +20,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   onStartSinglePlayer,
   onOpenMultiplayer,
   onOpenParty,
+  onOpenPassPhone,
   onOpenHowToPlay,
   onOpenSettings,
   onStartTutorial,
@@ -105,6 +107,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 أول مرة؟ نجربها سوا
               </button>
               <button type="button" className="btn-menu btn-menu--secondary" onClick={onOpenParty}>العب مع بعض</button>
+              <button type="button" className="btn-menu btn-menu--warm" onClick={onOpenPassPhone}>العب من جوال واحد</button>
               <InstallButton/>
             </div>
           ) : (
