@@ -9,6 +9,7 @@ import { secureRandom, cleanText, capacity } from '../server/security';
 export type SavedRoom={room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
 export type Report={id:string;reporter:string;target:string;reason:string;evidence:unknown};
 export type Projection={room:RoomState;view:ReturnType<typeof projectGameStateForPlayer>|null;deadline:number;nextActionAt:number;serverNow:number;revision?:number};
+const BOT_PROFILES=[['أبو فهد','abu-fahad'],['أبو سارة','alkabeer'],['عزّام','malqoof'],['تركي','nashal'],['سلمان','sanad'],['نايف','mosarref'],['وليد','mokhabbes']];
 function member(id:string,name:string,host=false,isBot=false,difficulty:BotDifficulty='medium') {
  return {id,name,isHost:host,isBot,botDifficulty:isBot?difficulty:undefined,avatarAsset:isBot?'./assets/abu-fahad.png':'./assets/sanad.png',isConnected:true,isReady:true};
 }
@@ -63,7 +64,11 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
  const waiting=()=>{host();if(s.room.status!=='waiting')throw Error('بدأت المباراة.');};
  s.lastSeen[userId]=now;
  switch(e.type){
- case 'ADD_BOT':waiting();if(s.room.members.length>=s.room.maxPlayers)throw Error('الغرفة ممتلئة.');s.room.members.push(member(crypto.randomUUID(),'أبو فهد (آلي)',false,true,e.payload.difficulty));break;
+ case 'ADD_BOT':{
+  waiting();if(s.room.members.length>=s.room.maxPlayers)throw Error('الغرفة ممتلئة.');
+  const profile=BOT_PROFILES.find(([name])=>!s.room.members.some(m=>m.isBot&&m.name===`${name} (آلي)`))||BOT_PROFILES[0];
+  s.room.members.push({...member(crypto.randomUUID(),`${profile[0]} (آلي)`,false,true,e.payload.difficulty),avatarAsset:`./assets/${profile[1]}.png`});break;
+ }
  case 'REMOVE_BOT':waiting();s.room.members=s.room.members.filter(m=>m.id!==e.payload.botId||!m.isBot);break;
  case 'UPDATE_MAX_PLAYERS':waiting();if(e.payload.maxPlayers<s.room.members.length)throw Error('السعة أصغر من عدد الأعضاء.');s.room.maxPlayers=capacity(e.payload.maxPlayers);break;
  case 'START_MATCH':{
