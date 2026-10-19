@@ -65,7 +65,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
           <div>
             <h3>💬 شات الاستراحة العام</h3>
             <span className="chat-drawer__subtitle">
-              رسائل عامة لكل الجلسة (تظهر فقاعة 4 ثوانٍ فوق مقعد اللاعب)
+              رسائل عامة لكل الجلسة (تظهر فقاعة 8 ثوانٍ فوق مقعد اللاعب)
             </span>
           </div>
           <button type="button" className="btn-icon-close" onClick={onClose}>

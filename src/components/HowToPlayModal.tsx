@@ -1,6 +1,7 @@
 import React from 'react';
 import { CHARACTER_LIST } from '../game/rules/characters';
 import { CardView } from './CardView';
+import { MOVE_TIMER_SECONDS, CHALLENGE_TIMER_SECONDS } from '../game/rules/deck';
 
 interface HowToPlayModalProps {
   isOpen: boolean;
@@ -42,14 +43,14 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({
             <div className="rule-box">
               <h4>2. الصدق أو الكذب 🎭</h4>
               <p>
-                في دورك (خلال 15 ثانية)، اختر بطاقة من يدك وضعها مقلوبة، ثم أعلن أنك تلعب
+                في دورك (خلال {MOVE_TIMER_SECONDS} ثانية)، اختر بطاقة من يدك وضعها مقلوبة، ثم أعلن أنك تلعب
                 إحدى الشخصيات الست — يمكنك قول الحقيقة أو الكذب!
               </p>
             </div>
             <div className="rule-box">
               <h4>3. تحدي «صادوه!» 🚨</h4>
               <p>
-                أمام الخصوم 5 ثوانٍ لضغط زر <strong>«صادوه!»</strong>. إذا لم يتحدَّك أحد،
+                أمام الخصوم {CHALLENGE_TIMER_SECONDS} ثانية لضغط زر <strong>«صادوه!»</strong>. إذا لم يتحدَّك أحد،
                 تنفذ القدرة المعلنة وتظل بطاقتك سرية!
               </p>
             </div>

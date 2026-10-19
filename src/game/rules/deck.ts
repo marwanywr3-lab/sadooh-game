@@ -9,8 +9,12 @@ export const COPIES_PER_CHARACTER = 8;
 export const INITIAL_HAND_SIZE = 4;
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 8;
-export const MOVE_TIMER_SECONDS = 15;
-export const CHALLENGE_TIMER_SECONDS = 5;
+export const MOVE_TIMER_SECONDS = 30;
+export const CHALLENGE_TIMER_SECONDS = 12;
+export const OUTCOME_READING_SECONDS = 18;
+export const BOT_MOVE_DELAY_MS = 4000;
+export const BOT_CHALLENGE_DELAY_MS = 7000;
+export const CHAT_BUBBLE_MS = 8000;
 
 /**
  * خلط المصفوفة بخوارزمية Fisher-Yates مع إمكانية تمرير دالة عشوائية مخصصة للاختبارات الحتمية

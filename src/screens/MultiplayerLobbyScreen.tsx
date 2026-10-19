@@ -5,6 +5,7 @@ import { SupabaseRoomService } from '../services/multiplayer/roomClient';
 import { GameTableScreen } from './GameTableScreen';
 import type { ClientProjectedGameState } from '../types/game';
 import { ChatDrawer } from '../components/ChatDrawer';
+import { CHAT_BUBBLE_MS } from '../game/rules/deck';
 
 interface MultiplayerLobbyScreenProps {
   initialPlayerName: string;
@@ -59,7 +60,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
         }
         return copy;
       });
-    }, 4000);
+    }, CHAT_BUBBLE_MS);
   };
 
   const handleCopyInvite = () => {

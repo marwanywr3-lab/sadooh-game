@@ -7,6 +7,7 @@ import {
   ClientProjectedGameState,
 } from '../types/game';
 import { CHARACTER_LIST, CHARACTERS } from '../game/rules/characters';
+import { CHALLENGE_TIMER_SECONDS, BOT_MOVE_DELAY_MS, BOT_CHALLENGE_DELAY_MS, CHAT_BUBBLE_MS } from '../game/rules/deck';
 import {
   advanceToNextTurn,
   createMatch,
@@ -91,7 +92,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         delete next[playerId];
         return next;
       });
-    }, 4000);
+    }, CHAT_BUBBLE_MS);
   }, []);
 
   // ضبط الاختيارات الافتراضية عند بداية دور اللاعب البشري
@@ -191,7 +192,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
         return res.nextState;
       });
-    }, 1400);
+    }, BOT_MOVE_DELAY_MS);
 
     return () => window.clearTimeout(botDelay);
   }, [
@@ -235,7 +236,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         }
         return prev;
       });
-    }, 1800);
+    }, BOT_CHALLENGE_DELAY_MS);
 
     return () => window.clearTimeout(timer);
   }, [
@@ -245,24 +246,8 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     showBubbleForPlayer,
   ]);
 
-  // الانتقال التلقائي للدور التالي بعد عرض نتيجة الجولة (إلا إذا كان هناك كشف سري للملقوف يقرأه اللاعب)
-  useEffect(() => {
-    if (remote) return;
-    if (gameState.phase !== 'RESOLVING_CHALLENGE') return;
-
-    const hasMyPrivatePeek =
-      view.lastOutcomePublic?.myPrivateReveal != null;
-    const delayMs = hasMyPrivatePeek ? 5200 : 3200;
-
-    const timer = window.setTimeout(() => {
-      setGameState((prev) => {
-        if (prev.phase !== 'RESOLVING_CHALLENGE') return prev;
-        return advanceToNextTurn(prev);
-      });
-    }, delayMs);
-
-    return () => window.clearTimeout(timer);
-  }, [gameState.phase, gameState.turnNumber, view.lastOutcomePublic]);
+  // في اللعب الفردي تبقى النتيجة حتى يؤكد اللاعب أنه انتهى من قراءتها.
+  // في اللعب الجماعي يدير الخادم مهلة القراءة المشتركة.
 
   // تأكيد حركة اللاعب البشري
   const handleConfirmMove = () => {
@@ -458,7 +443,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
               ) : (
                 <>
                   <h3>⏳ «{activePlayer?.name}» يفكر في حركته...</h3>
-                  <p>استعد! أول ما يحط بطاقته مقلوبة، قدامك 5 ثوانٍ تقرر تصدقه ولا تصيده!</p>
+                  <p>استعد! أول ما يحط بطاقته مقلوبة، قدامك {CHALLENGE_TIMER_SECONDS} ثانية تقرر تصدقه ولا تصيده!</p>
                 </>
               )}
             </div>
@@ -568,13 +553,15 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 )}
 
                 <div className="outcome-next-row">
-                  <button
+                  {remote ? (
+                    <span>📖 اقرأ النتيجة بهدوء — الدور التالي بعد {view.turnTimerSeconds} ثانية</span>
+                  ) : <button
                     type="button"
                     className="btn-primary btn-sm"
                     onClick={() => setGameState((prev) => advanceToNextTurn(prev))}
                   >
-                    الدور التالي ⬅️
-                  </button>
+                    قرأت النتيجة — الدور التالي ⬅️
+                  </button>}
                 </div>
               </div>
             </div>

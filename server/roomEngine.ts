@@ -1,6 +1,6 @@
 import type { GameState, BotDifficulty } from '../src/types/game';
 import type { RoomState, ClientToServerEvent } from '../src/types/multiplayer';
-import { createBalancedDeck } from '../src/game/rules/deck';
+import { createBalancedDeck, MOVE_TIMER_SECONDS, CHALLENGE_TIMER_SECONDS, OUTCOME_READING_SECONDS, BOT_MOVE_DELAY_MS, BOT_CHALLENGE_DELAY_MS } from '../src/game/rules/deck';
 import { createMatch, submitPlayerMove, resolveChallengeWindow, executeAutoTimeoutMove, advanceToNextTurn } from '../src/game/engine/gameEngine';
 import { projectGameStateForPlayer } from '../src/game/engine/stateProjector';
 import { decideBotMove, decideBotChallenge } from '../src/game/bots/localBotEngine';
@@ -18,8 +18,8 @@ export function createRoom(code:string,userId:string,name:string,max:number,now:
 }
 function phaseChanged(s:SavedRoom,g:GameState,now:number){
  s.game={...g,logs:g.logs.slice(0,100),chatMessages:[]};
- s.deadline=now+(g.phase==='CHOOSING_MOVE'?15000:g.phase==='CHALLENGE_WINDOW'?5000:g.phase==='RESOLVING_CHALLENGE'?5200:0);
- s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+1800:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+1400:0;
+ s.deadline=now+1000*(g.phase==='CHOOSING_MOVE'?MOVE_TIMER_SECONDS:g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
+ s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+BOT_CHALLENGE_DELAY_MS:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+BOT_MOVE_DELAY_MS:0;
  if(g.phase==='GAME_OVER')s.room.status='finished';
 }
 export function tick(s:SavedRoom,now:number):boolean {

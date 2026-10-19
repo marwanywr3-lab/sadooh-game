@@ -26,9 +26,17 @@ test('server rejects wrong actor, stale turn, fake card and claimant challenge',
 });
 test('ticks cannot advance early; server deadlines resolve a disconnected human',()=>{
  const s=setup();reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100000);
- assert.equal(tick(s,114999),false);assert.equal(s.game!.phase,'CHOOSING_MOVE');
- assert.equal(tick(s,115000),true);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
- assert.equal(tick(s,120000),true);assert.notEqual(s.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(tick(s,129999),false);assert.equal(s.game!.phase,'CHOOSING_MOVE');
+ assert.equal(tick(s,130000),true);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(tick(s,142000),true);assert.notEqual(s.game!.phase,'CHALLENGE_WINDOW');
+});
+test('result remains readable for the whole multiplayer reading window',()=>{
+ const s=setup();reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100000);
+ const g=s.game!,card=g.players[0].hand[0];
+ reduceEvent(s,host,{type:'SUBMIT_MOVE',payload:{cardId:card.id,claimedCharacter:'sanad',targetPlayerId:null}},100001,{matchId:g.matchId,turnNumber:1});
+ tick(s,112001);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
+ assert.equal(tick(s,130000),false);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
+ assert.equal(tick(s,130001),true);assert.equal(s.game!.turnNumber,2);
 });
 test('mute is per viewer, reports capture evidence and outsiders cannot get a projection',()=>{
  const s=setup();reduceEvent(s,guest,{type:'SEND_CHAT',payload:{text:'حي الله الشباب'}},100000);
