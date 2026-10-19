@@ -45,7 +45,12 @@ export default function App() {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-const handleUpdateSettings = (partial: Partial<UserSettings>) => {
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark-mode', settings.darkMode);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', settings.darkMode ? '#181d1a' : '#f6f3e9');
+  }, [settings.darkMode]);
+
+  const handleUpdateSettings = (partial: Partial<UserSettings>) => {
     const updated = saveUserSettings(partial);
     setSettings(updated);
   };

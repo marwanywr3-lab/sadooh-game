@@ -174,7 +174,7 @@ input,select,.form-field input[type=text],.inline-input-row input {border:1.5px 
 .tutorial-progress-step.is-current {background:var(--ui-yellow);color:var(--ui-ink);border-color:var(--ui-ink);}
 .tutorial-progress-step.is-done {background:var(--ui-green);color:var(--ui-ink);}
 .tutorial-result-note {background:var(--ui-green-pale);box-shadow:none;}
-.modal-backdrop {background:var(--ui-ink)80;backdrop-filter:blur(3px);}
+.modal-backdrop {background:#25272280;backdrop-filter:blur(3px);}
 .modal-card__header,.chat-drawer__header {background:var(--ui-green-pale);color:var(--ui-ink);border-bottom:1.5px solid var(--ui-ink);}
 .btn-icon-close {background:var(--ui-card);border:1px solid var(--ui-ink);color:var(--ui-ink);border-radius:4px;}
 .modal-card__footer,.simple-rules-note,.toggle-row,.stats-summary-box,.victory-standings {background:var(--ui-muted);color:var(--ui-ink);}
