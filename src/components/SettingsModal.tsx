@@ -1,3 +1,4 @@
+import {ThemeToggle} from './Theme';
 import React from 'react';
 import { UserSettings } from '../services/storage/localSettings';
 import { BotDifficulty } from '../types/game';
@@ -85,7 +86,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </label>
 
-<div className="toggle-row">
+<ThemeToggle/>
+          <div className="toggle-row">
             <span> تقليل الحركة والتحريكات (Reduce Motion)</span>
             <button
               type="button"

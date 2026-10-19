@@ -1,3 +1,4 @@
+import {BrandLogo,ThemeToggle} from '../components/Theme';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BotDifficulty,
@@ -374,7 +375,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         {/* الشريط العلوي للمباراة */}
         <header className="table-topbar">
           <div className="table-topbar__brand">
-            <img src="./assets/logo.svg" alt="صادوه!" className="table-topbar__logo" />
+            <BrandLogo alt="صادوه!" className="table-topbar__logo" />
             <div className="table-topbar__meta">
               <span className="turn-badge">الجولة #{view.turnNumber}</span>
               <span className="deck-pill"> السحب: {view.drawPileCount}</span>
@@ -398,7 +399,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             )}
           </div>
 
-          <details className="table-more"><summary>المزيد</summary><div className="table-topbar__actions">
+          <details className="table-more"><summary>المزيد</summary><div className="table-topbar__actions"><ThemeToggle/>
             <button
               type="button"
               className="btn-secondary btn-sm"

@@ -1,3 +1,4 @@
+import {BrandLogo} from '../components/Theme';
 import {InstallButton} from '../components/InstallButton';
 import React, { useState } from 'react';
 import { BotDifficulty } from '../types/game';
@@ -34,8 +35,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
         <div className="main-menu-card">
           <span className="menu-edition">لعبة جمعتنا / ٠١</span>
           <div className="main-menu-logo-wrap">
-            <img
-              src="./assets/logo.svg"
+            <BrandLogo
               alt="شعار صادوه!"
               className="main-menu-logo"
               draggable={false}

@@ -1,3 +1,4 @@
+import {BrandLogo} from '../components/Theme';
 import React, { useEffect, useState } from 'react';
 import { BotDifficulty, PublicPlayerView } from '../types/game';
 import { ConnectionStatus, RoomState } from '../types/multiplayer';
@@ -110,7 +111,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
       <div className="multiplayer-lobby-overlay">
         <header className="lobby-header">
           <div className="lobby-header__right">
-            <img src="./assets/logo.svg" alt="صادوه!" className="lobby-logo" />
+            <BrandLogo alt="صادوه!" className="lobby-logo" />
             <div>
               <h2> الغرف الجماعية عبر الإنترنت</h2>
               <span className={`conn-status-pill conn-status--${roomState.connectionStatus}`}>

@@ -1,3 +1,4 @@
+import {BrandLogo} from '../components/Theme';
 import {CardGuide} from '../components/CardGuide';
 import React,{useState} from 'react';
 import {TUTORIAL_STEPS,TUTORIAL_RESULTS,TUTORIAL_PLAYER,createTutorialExample,playTutorialExample,type TutorialStepNumber} from '../game/tutorial/tutorialEngine';
@@ -22,7 +23,7 @@ export const TutorialScreen:React.FC<TutorialScreenProps>=({onCompleteTutorial,o
  const exampleCard=stepNum===3?'malqoof':'sanad';
  return <div className="tutorial-screen" style={{backgroundImage:"url('./assets/game-table.svg')"}}>
   <div className="tutorial-backdrop simple-tutorial">
-   <header className="tutorial-header"><div className="tutorial-header__brand"><img src="./assets/logo.svg" alt="صادوه!" className="tutorial-header__logo"/><div><h2>نجربها سوا، خطوة خطوة</h2><span className="tutorial-step-indicator">{stepNum} من 6 — {step.titleAr}</span></div></div><button className="btn-ghost" onClick={onSkipTutorial}>العودة للقائمة</button></header>
+   <header className="tutorial-header"><div className="tutorial-header__brand"><BrandLogo alt="صادوه!" className="tutorial-header__logo"/><div><h2>نجربها سوا، خطوة خطوة</h2><span className="tutorial-step-indicator">{stepNum} من 6 — {step.titleAr}</span></div></div><button className="btn-ghost" onClick={onSkipTutorial}>العودة للقائمة</button></header>
    <div className="tutorial-progress-bar" aria-label="تقدم التجربة">{([1,2,3,4,5,6] as TutorialStepNumber[]).map(n=><div key={n} className={`tutorial-progress-step ${n===stepNum?'is-current':n<stepNum?'is-done':''}`}>{n}</div>)}</div>
    <div className="tutorial-mentor-box"><div className="tutorial-mentor-avatar-wrap"><img src="./assets/abu-fahad.svg" alt="فهد" className="tutorial-mentor-avatar"/></div><div className="tutorial-mentor-speech"><p className="mentor-speech-main">{step.speechAr}</p><p className="mentor-instruction-pill"> {done?'شوف النتيجة تحت. خذ وقتك، وبعدها كمل.':step.instructionAr}</p></div></div>
    <p className="practice-no-pressure">تجربة بدون مؤقت • ما تحسب فوز أو خسارة • كل خطوة مثال جديد</p>

@@ -5,7 +5,7 @@ import { parseEvent, digest, cleanText, capacity } from '../../../server/securit
 const url=Deno.env.get('SUPABASE_URL')!;
 const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const admin=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
-const origins=['https://marwanywr3-lab.github.io','http://localhost:5173','http://127.0.0.1:5173'];
+const origins=['https://sadoh.marwanbarbood.com','https://marwanywr3-lab.github.io','http://localhost:5173','http://127.0.0.1:5173'];
 async function rpc(name:string,args:Record<string,unknown>){const r=await admin.rpc(name,args);if(r.error)throw Error('تعذر حفظ حالة الغرفة.');return r.data;}
 
 Deno.serve(async(req:Request)=>{

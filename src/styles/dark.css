@@ -1,0 +1,32 @@
+:root.dark-mode {
+ color-scheme:dark;
+ --ui-page:#181d1a;--ui-card:#242c26;--ui-muted:#2f3931;
+ --ui-ink:#e6ede0;--ui-subtle:#bdc7b9;--ui-line:#89947f;--ui-softline:#53654f;
+ --ui-green:#425d3a;--ui-green-pale:#293c2b;--ui-yellow:#e5c663;--ui-rose:#ca8875;--ui-input:#1e2620;
+ --bg-cream:#242c26;--bg-beige:#2f3931;--wood-dark:#e6ede0;--wood-main:#e6ede0;--wood-light:#89947f;
+ --text-dark:#e6ede0;--text-muted:#bdc7b9;--shadow-warm:3px 4px 0 #090e0a;
+}
+.dark-mode .btn-primary,.dark-mode .btn-menu--primary,.dark-mode .timer-pill--move,
+.dark-mode .my-card-count-badge,.dark-mode .tutorial-progress-step.is-current,
+.dark-mode .outcome-funny-quote,.dark-mode .btn-sadooh-mega,.dark-mode .timer-pill--challenge {color:#181d1a;}
+.dark-mode :is(.btn-primary,.btn-secondary,.btn-menu,.btn-ghost,.btn-sadooh-mega,.count-chip,.seg-btn,.target-chip,.claim-chip,.btn-mini,.quick-reaction-chip,.toggle-btn,.claim-option-btn,.sadooh-card,.table-topbar,.lobby-header,.tutorial-header,.lobby-panel,.tutorial-stage,.tutorial-mentor-box,.practice-coach,.tutorial-result-note,.modal-card,.victory-modal,.chat-drawer,.challenge-stage-card,.outcome-stage-card,.human-player-dock,.table-more summary) {border-color:#7d8c71;box-shadow:2px 3px 0 #090e0a;}
+.dark-mode :is(.room-code-banner,.card-guide-item,.lobby-subbox,.room-member-card,.add-bot-bar,.move-controls-panel,.table-more[open]>.table-topbar__actions) {border-color:#53654f;}
+.dark-mode :is(.btn-primary,.btn-secondary,.btn-menu):hover {box-shadow:4px 5px 0 #090e0a;}
+.dark-mode .sadooh-card__header {border-color:#53654f;}
+.dark-mode .sadooh-card__floating-badge {background:#d3e3c8;color:#181d1a;border-color:#53654f;}
+.dark-mode .sadooh-card.is-selected {outline-color:#bdd6a8;}
+.dark-mode .player-seat.is-active-turn,.dark-mode .player-seat.is-selected-target {border-color:#bdd6a8;box-shadow:2px 3px 0 #090e0a;}
+.dark-mode .player-seat__shield-badge,.dark-mode .sanad-active-pill {background:#425d3a;color:#e6ede0;}
+.dark-mode .tag-truth,.dark-mode .claim-option-btn.is-active .tag-truth {color:#c5e1b4;}
+.dark-mode .tag-bluff,.dark-mode .claim-option-btn.is-active .tag-bluff {color:#f2b5a4;}
+.dark-mode .simple-rules-details {border-color:#53654f;}
+.dark-mode .toggle-btn.is-on {background:#425d3a;color:#e6ede0;}
+.dark-mode :is(.log-item,.stats-summary-box,.victory-standings,.chat-drawer__quick,.chat-drawer__moderation-bar,.chat-drawer__banner,.chat-drawer__report-box,.private-malqoof-reveal) {background:#2f3931;color:#e6ede0;border-color:#53654f;}
+.dark-mode :is(.chat-msg--me,.chat-msg--other,.quick-reaction-chip,.moderation-chip,.btn-mini,.toggle-row,.rule-box,.special-rules-callout) {background:#293c2b;color:#e6ede0;border-color:#53654f;}
+.dark-mode :is(.player-seat__chat-bubble,.human-chat-bubble,.member-chat-bubble) {background:#344330;color:#e6ede0;border-color:#89947f;}
+.dark-mode :is(.host-badge,.bot-badge,.copied-toast) {background:#425d3a;color:#e6ede0;}
+.dark-mode :is(.tutorial-inline-error,.dock-error-pill,.chat-drawer__error,.reconnect-card) {background:#4c2e29;color:#f7d5ca;border-color:#b67e6e;}
+.dark-mode .modal-backdrop {background:#000a;}
+.dark-mode .victory-avatar {background:#2f3931;border-color:#53654f;}
+.theme-toggle {gap:12px;}
+.table-topbar__actions .theme-toggle {padding:8px;font-size:14px;white-space:nowrap;}

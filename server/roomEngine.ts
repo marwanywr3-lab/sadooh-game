@@ -15,7 +15,7 @@ function member(id:string,name:string,host=false,isBot=false,difficulty:BotDiffi
  return {id,name,isHost:host,isBot,botDifficulty:isBot?difficulty:undefined,avatarAsset:isBot?'./assets/abu-fahad.png':'./assets/sanad.png',isConnected:true,isReady:true};
 }
 export function createRoom(code:string,userId:string,name:string,max:number,now:number):SavedRoom {
- return {room:{roomCode:code,inviteUrl:`https://marwanywr3-lab.github.io/sadooh-game-site/?room=${code}`,hostPlayerId:userId,maxPlayers:capacity(max),status:'waiting',connectionStatus:'connected',members:[member(userId,cleanText(name,24),true)],chatHistory:[]},game:null,muted:{},lastSeen:{[userId]:now},chatAt:{},deadline:0,nextBot:0,expires:now+86400000,receipts:[]};
+ return {room:{roomCode:code,inviteUrl:`https://sadoh.marwanbarbood.com/?room=${code}`,hostPlayerId:userId,maxPlayers:capacity(max),status:'waiting',connectionStatus:'connected',members:[member(userId,cleanText(name,24),true)],chatHistory:[]},game:null,muted:{},lastSeen:{[userId]:now},chatAt:{},deadline:0,nextBot:0,expires:now+86400000,receipts:[]};
 }
 function phaseChanged(s:SavedRoom,g:GameState,now:number){
  s.game={...g,logs:g.logs.slice(0,100),chatMessages:[]};

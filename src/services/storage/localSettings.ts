@@ -4,6 +4,7 @@ export interface UserSettings {
   playerName: string;
   defaultBotCount: number; // 2..7 (إجمالي 3..8 لاعبين)
   defaultDifficulty: BotDifficulty;
+  darkMode: boolean;
   reduceMotion: boolean;
   tutorialCompleted: boolean;
   matchesPlayed: number;
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   playerName: 'سلطان',
   defaultBotCount: 3, // 4 لاعبين على الطاولة افتراضيًا
   defaultDifficulty: 'medium',
+  darkMode: false,
   reduceMotion: false,
   tutorialCompleted: false,
   matchesPlayed: 0,

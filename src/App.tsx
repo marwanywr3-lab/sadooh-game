@@ -1,3 +1,4 @@
+import {ThemeContext} from './components/Theme';
 import React, { useEffect, useState } from 'react';
 import { BotDifficulty } from './types/game';
 import {
@@ -75,6 +76,7 @@ const handleUpdateSettings = (partial: Partial<UserSettings>) => {
   };
 
   return (
+    <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}>
     <div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
       dir="rtl"
@@ -142,5 +144,6 @@ const handleUpdateSettings = (partial: Partial<UserSettings>) => {
         onClose={() => setIsSettingsOpen(false)}
       />
     </div>
+    </ThemeContext.Provider>
   );
 }

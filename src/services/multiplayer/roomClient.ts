@@ -44,7 +44,7 @@ export class SupabaseRoomService {
  private accept(p:Projection){
   if(!p?.room||p.room.roomCode!==this.code||p.revision<this.revision)return;
   this.revision=p.revision;this.offset=p.serverNow-Date.now();this.deadline=p.deadline;this.nextActionAt=p.nextActionAt;
-  this.state={...p.room,connectionStatus:this.state.connectionStatus==='reconnecting'?'reconnecting':'connected'};
+  this.state={...p.room,inviteUrl:`https://sadoh.marwanbarbood.com/?room=${p.room.roomCode}`,connectionStatus:this.state.connectionStatus==='reconnecting'?'reconnecting':'connected'};
   this.view=p.view;this.emit(p.notice||null);if(this.view)for(const fn of this.matchListeners)fn(this.view);this.scheduleTick();
  }
  private scheduleTick(){
