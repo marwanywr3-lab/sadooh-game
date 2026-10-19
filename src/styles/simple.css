@@ -222,3 +222,11 @@ input,select,.form-field input[type=text],.inline-input-row input {border:1.5px 
  .table-more {flex-shrink:0;}
  .challenge-stage-card,.outcome-stage-card {width:100%;min-width:0;}
 }
+@media(max-width:600px) {
+ .table-center-stage {min-height:0;}
+ .table-topbar__brand {flex-direction:column;align-items:flex-start;gap:4px;}
+ .table-topbar__logo {flex-shrink:0;}
+ .table-topbar__meta {width:100%;min-width:0;}
+ .table-topbar__meta .turn-badge {display:none;}
+ .table-more {align-self:flex-start;}
+}
