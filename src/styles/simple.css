@@ -202,3 +202,23 @@ input,select,.form-field input[type=text],.inline-input-row input {border:1.5px 
  .opponents-ring {gap:10px;}
  .player-seat {min-width:125px;padding:8px;}
 }
+/* Contain intrinsic card widths so narrow viewports never crop the table. */
+.game-table-overlay {width:100%;min-width:0;}
+.game-table-screen,.table-topbar,.human-player-dock,.human-dock-layout,.human-hand-scroll,.table-center-stage,.opponents-ring {min-width:0;}
+.human-hand-scroll {max-width:100%;}
+@media(max-width:600px) {
+ .game-table-overlay {justify-content:flex-start;padding:10px;gap:14px;}
+ .table-topbar {gap:8px;}
+ .table-topbar__brand {min-width:0;flex:1;}
+ .table-topbar__meta {flex-wrap:wrap;gap:4px;}
+ .table-topbar__meta .deck-pill {display:none;}
+ .human-hand-scroll {min-width:0;width:100%;flex:none;}
+ .human-dock-layout {min-width:0;width:100%;gap:12px;}
+ .human-player-dock {padding:12px 8px;}
+ .human-dock-header {flex-wrap:wrap;}
+ .move-controls-panel {min-width:0;max-width:100%;width:100%;}
+ .center-status-box {width:100%;padding:10px;}
+ .table-center-stage {flex:none;width:100%;}
+ .table-more {flex-shrink:0;}
+ .challenge-stage-card,.outcome-stage-card {width:100%;min-width:0;}
+}
