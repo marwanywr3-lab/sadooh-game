@@ -62,6 +62,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   const [selectedClaimChar, setSelectedClaimChar] = useState<CharacterId>('sanad');
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [selectedSecondaryCardId, setSelectedSecondaryCardId] = useState<string | null>(null);
+  const [showBluff,setShowBluff]=useState(false);
   const [uiError, setUiError] = useState<string | null>(null);
 
   // نوافذ الشات والسجل
@@ -107,6 +108,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     if (view.phase === 'CHOOSING_MOVE' && isMyTurn && view.myHand.length > 0) {
       const firstCard = view.myHand[0];
       setSelectedCardId(firstCard.id);
+      setShowBluff(false);
       setSelectedClaimChar(firstCard.characterId);
       const validOpponents = opponents.filter((o) => o.cardCount > 0);
       setSelectedTargetId(
@@ -399,7 +401,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             )}
           </div>
 
-          <div className="table-topbar__actions">
+          <details className="table-more"><summary>المزيد</summary><div className="table-topbar__actions">
             <button
               type="button"
               className="btn-secondary btn-sm"
@@ -417,7 +419,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             <button type="button" className="btn-ghost btn-sm" onClick={onExitToMenu}>
                خروج
             </button>
-          </div>
+          </div></details>
         </header>
 
         {guided && !remote && <PracticeCoach view={view} selectedCardId={selectedCardId} claimedCharacter={selectedClaimChar} />}
@@ -445,9 +447,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 <>
                     <h3> دورك الآن! {practicePaused ? 'خذ وقتك' : `(${view.turnTimerSeconds} ثانية)`}</h3>
                   <p>
-                    1) اختر بطاقة فعلية من يدك بالأسفل • 2) اختر الشخصية التي ستعلنها (صدق أو
-                    كذب) {needsTargetForSelection ? '• 3) حدد الخصم المستهدف' : ''} ثم ضعها
-                    مقلوبة.
+                    اختر بطاقة، وقل اسمها أو غيّره للخداع.
                   </p>
                 </>
               ) : (
@@ -626,6 +626,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                       }
                       onClick={() => {
                         setSelectedCardId(card.id);
+                        setSelectedClaimChar(card.characterId);setShowBluff(false);
                         if (selectedSecondaryCardId === card.id) {
                           const other = view.myHand.find((c) => c.id !== card.id);
                           setSelectedSecondaryCardId(other ? other.id : null);
@@ -640,56 +641,13 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             {/* لوحة اختيار الشخصية المعلنة والهدف عندما يكون الدور على اللاعب */}
             {isMyTurn && view.phase === 'CHOOSING_MOVE' && (
               <div className="move-controls-panel">
-                <div className="control-group">
-                  <span className="control-label">
-                    الشخصية التي ستعلنها (صدق أو كذب):
-                  </span>
-                  <div className="character-claim-grid">
-                    {CHARACTER_LIST.map((char) => {
-                      const chosenCardObj = view.myHand.find(
-                        (c) => c.id === selectedCardId
-                      );
-                      const isTruthfulClaim =
-                        chosenCardObj?.characterId === char.id;
-                      return (
-                        <button
-                          key={char.id}
-                          type="button"
-                          className={`claim-option-btn ${
-                            selectedClaimChar === char.id ? 'is-active' : ''
-                          }`}
-                          onClick={() => setSelectedClaimChar(char.id)}
-                        >
-                          <span>{char.nameAr}</span>
-                          <small className={isTruthfulClaim ? 'tag-truth' : 'tag-bluff'}>
-                            {isTruthfulClaim ? 'صدق' : 'خداع'}
-                          </small>
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="control-group simple-move-choice">
+                  <span className="control-label">بتقول: <strong>{CHARACTERS[selectedClaimChar].nameAr}</strong></span>
+                  <p className="selected-ability">{CHARACTERS[selectedClaimChar].descriptionAr}</p>
+                  <button type="button" className="btn-secondary btn-sm" aria-expanded={showBluff} onClick={()=>setShowBluff(!showBluff)}>{showBluff?'إخفاء الأسماء':'تبي تخدعهم؟ غيّر الاسم'}</button>
+                  {showBluff&&<label className="bluff-select">وش بتقول لهم؟<select value={selectedClaimChar} onChange={e=>setSelectedClaimChar(e.target.value as CharacterId)}>{CHARACTER_LIST.map(c=><option value={c.id} key={c.id}>{c.nameAr}{view.myHand.find(c=>c.id===selectedCardId)?.characterId===c.id?' — صدق':' — خداع'}</option>)}</select></label>}
                 </div>
-
-                {needsTargetForSelection && (
-                  <div className="control-group">
-                    <span className="control-label">الخصم المستهدف بالقدرة:</span>
-                    <div className="target-chips-row">
-                      {opponents.map((opp) => (
-                        <button
-                          key={opp.id}
-                          type="button"
-                          className={`target-chip ${
-                            selectedTargetId === opp.id ? 'is-active' : ''
-                          }`}
-                          onClick={() => setSelectedTargetId(opp.id)}
-                        >
-                           {opp.name} ({opp.cardCount})
-                          {opp.hasSanadShield ? ' ' : ''}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {needsTargetForSelection&&<label className="bluff-select">على مين؟<select value={selectedTargetId||''} onChange={e=>setSelectedTargetId(e.target.value)}>{opponents.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
 
                 {needsSecondaryCardPicker && (
                   <div className="control-group">
@@ -722,7 +680,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   className="btn-primary btn-play-confirm"
                   onClick={handleConfirmMove}
                 >
-                   ضع البطاقة مقلوبة وأعلن «{CHARACTERS[selectedClaimChar].nameAr}»
+                   العب وقل: «{CHARACTERS[selectedClaimChar].nameAr}»
                 </button>
               </div>
             )}

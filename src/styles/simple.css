@@ -1,4 +1,72 @@
 /* A quiet, geometric identity for a Saudi card table. */
+.lobby-grid.no-room {grid-template-columns:minmax(0,620px);justify-content:center;}
+.lobby-grid.no-room>.lobby-panel:nth-child(2) {display:none;}
+.lobby-grid.has-room {grid-template-columns:minmax(0,760px);justify-content:center;}
+.lobby-grid.has-room>.lobby-panel:first-child {display:none;}
+.card-guide {width:100%;margin-top:22px;padding-top:18px;border-top:1px solid #a4aa98;text-align:right;}
+.card-guide>p {font-size:14px;color:#61675b;margin:5px 0 15px;}
+.card-guide-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.card-guide-item {display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #777b6c;border-radius:7px;background:#f6f3e9;min-width:0;}
+.card-guide-item img {width:70px;height:70px;flex-shrink:0;}
+.card-guide-item h4 {font-size:17px;}
+.card-guide-item p {font-size:14px;line-height:1.7;margin:3px 0 0;}
+.table-more {position:relative;}
+.table-more summary {cursor:pointer;border:1px solid #252722;background:#faf8f0;border-radius:5px;padding:7px 14px;font-weight:800;}
+.table-more[open]>.table-topbar__actions {position:absolute;top:45px;left:0;z-index:20;min-width:180px;padding:12px;display:flex;flex-direction:column;background:#faf8f0;border:1.5px solid #252722;border-radius:7px;box-shadow:3px 4px 0 #252722;}
+.simple-move-choice {display:flex;flex-direction:column;align-items:stretch;gap:10px;}
+.bluff-select {display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:700;font-size:14px;}
+.bluff-select select {padding:9px;min-width:140px;max-width:100%;}
+.selected-ability {font-size:14px;line-height:1.7;color:#61675b;}
+@media(max-width:900px) {
+ .card-guide-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .human-dock-layout {flex-direction:column;align-items:stretch;}
+ .move-controls-panel {max-width:none;min-width:0;width:100%;}
+ .human-hand-scroll {width:100%;}
+}
+@media(max-width:600px) {
+ .card-guide-item {padding:10px;gap:8px;flex-direction:column;text-align:center;}
+ .card-guide-item img {width:76px;height:76px;}
+ .card-guide-item p {font-size:13px;}
+ .table-topbar__brand {flex:1;min-width:0;}
+ .table-topbar__logo {height:32px;width:85px;}
+ .table-topbar__meta .deck-pill {display:none;}
+ .table-topbar__meta {flex-wrap:wrap;}
+ .game-table-overlay {gap:14px;padding:10px;justify-content:flex-start;}
+ .opponents-ring {gap:7px;}
+ .player-seat {min-width:96px;max-width:150px;flex:1;padding:7px;}
+ .player-seat__avatar {width:36px;height:36px;}
+ .player-seat__name {font-size:13px;}
+ .player-seat__mini-fan,.player-seat__target-cta {display:none;}
+ .player-seat__card-count {font-size:12px;}
+ .center-status-box {padding:10px;}
+ .center-status-box p {font-size:13px;}
+ .human-player-dock {padding:12px 8px;}
+ .human-hand-scroll {display:flex;gap:9px;padding:16px 5px 8px;overflow-x:auto;}
+ .human-hand-scroll .sadooh-card {width:108px;height:145px;}
+ .human-hand-scroll .sadooh-card__header {height:28%;padding:5px;}
+ .human-hand-scroll .sadooh-card__art-wrap {height:63%;padding-bottom:8px;}
+ .human-hand-scroll .sadooh-card__footer {display:none;}
+ .human-hand-scroll .sadooh-card__title {font-size:15px;}
+ .human-dock-header {font-size:14px;gap:6px;}
+ .move-controls-panel {padding:12px;gap:12px;}
+ .btn-play-confirm {width:100%;min-height:48px;}
+ .challenge-stage-card,.outcome-stage-card {padding:14px;gap:14px;flex-wrap:wrap;}
+ .challenge-stage-card h3,.outcome-stage-card h3 {font-size:18px;}
+ .outcome-summary-text {font-size:15px;}
+ .lobby-header {padding:12px;}
+ .lobby-header__right {gap:8px;flex-wrap:wrap;}
+ .lobby-logo {height:34px;}
+ .lobby-grid {grid-template-columns:minmax(0,1fr);}
+ .inline-input-row {flex-wrap:wrap;}
+ .inline-input-row input {min-width:0;flex:1;}
+ .room-code-banner {flex-wrap:wrap;gap:10px;}
+ .tutorial-mentor-box {padding:12px;flex-direction:row;text-align:right;gap:10px;}
+ .tutorial-mentor-avatar {width:48px;height:48px;}
+ .mentor-speech-main {font-size:15px;}
+ .mentor-instruction-pill {font-size:13px;}
+ .tutorial-header h2 {font-size:18px;}
+}
+@media(min-width:1600px) {.game-table-overlay {width:100%;}.human-hand-scroll {justify-content:center;}}
 :root {
  --bg-cream:#faf8f0; --bg-beige:#ecebdd; --wood-dark:#252722; --wood-main:#252722;
  --wood-light:#777b6c; --orange-warm:#e5c45d; --orange-bright:#f1d374;

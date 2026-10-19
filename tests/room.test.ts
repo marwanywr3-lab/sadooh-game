@@ -1,8 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {BOT_NAMES,pickBotNames} from '../src/game/bots/names';
+import {createMatch} from '../src/game/engine/gameEngine';
+test('bot names come from the owner list, stay unique, and shuffle for new matches',()=>{
+ const a=createMatch({humanPlayerName:'لاعب',botCount:7,botDifficulty:'easy',rng:()=>0.1});
+ const b=createMatch({humanPlayerName:'لاعب',botCount:7,botDifficulty:'easy',rng:()=>0.8});
+ const names=a.players.filter(p=>p.isBot).map(p=>p.name);
+ assert.ok(names.every(n=>BOT_NAMES.includes(n)));assert.equal(new Set(names).size,7);
+ assert.notDeepEqual(names,b.players.filter(p=>p.isBot).map(p=>p.name));
+ assert.ok(!pickBotNames(7,()=>0.3,['خالد']).includes('خالد'));
+});
 import {createRoom,reduceEvent,projection,tick} from '../server/roomEngine';
 const host='11111111-1111-4111-8111-111111111111',guest='22222222-2222-4222-8222-222222222222',third='33333333-3333-4333-8333-333333333333';
 function setup(){const s=createRoom('A'.repeat(32),host,'المضيف',4,100000);reduceEvent(s,guest,{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'ضيف'}},100000);reduceEvent(s,third,{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'ضيف آخر'}},100000);return s;}
+test('online bot names use the same requested list when adding and restarting',()=>{
+ const s=createRoom('B'.repeat(32),host,'المضيف',4,100000);
+ reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},100001);
+ reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},100002);
+ assert.ok(s.room.members.filter(m=>m.isBot).every(m=>BOT_NAMES.includes(m.name)));
+ reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100003);
+ assert.equal(new Set(s.game!.players.map(p=>p.name)).size,3);
+ s.room.status='finished';
+ reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100004);
+ assert.deepEqual(s.game!.players.map(p=>p.name),s.room.members.map(m=>m.name));
+ assert.ok(s.game!.players.filter(p=>p.isBot).every(p=>BOT_NAMES.includes(p.name)));
+});
 test('host privileges and waiting room capacity cannot be bypassed',()=>{
  const s=setup();assert.throws(()=>reduceEvent(s,guest,{type:'ADD_BOT',payload:{difficulty:'hard'}},100000));
  assert.throws(()=>reduceEvent(s,host,{type:'UPDATE_MAX_PLAYERS',payload:{maxPlayers:2}},100000));

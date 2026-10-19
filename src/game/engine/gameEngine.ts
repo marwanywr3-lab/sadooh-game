@@ -1,3 +1,4 @@
+import {pickBotNames} from '../bots/names';
 import {
   BotDifficulty,
   BotLegalMemory,
@@ -32,20 +33,12 @@ export interface CreateMatchOptions {
   customDrawPile?: CardInstance[];
 }
 
-const SAUDI_BOT_PROFILES: Array<{ name: string; avatar: string }> = [
-  { name: 'أبو فهد', avatar: './assets/abu-fahad.svg' },
-  { name: 'أبو سارة', avatar: './assets/alkabeer.svg' },
-  { name: 'عزّام', avatar: './assets/malqoof.svg' },
-  { name: 'تركي', avatar: './assets/nashal.svg' },
-  { name: 'سلمان', avatar: './assets/sanad.svg' },
-  { name: 'نايف', avatar: './assets/mosarref.svg' },
-  { name: 'وليد', avatar: './assets/mokhabbes.svg' },
-];
+const BOT_AVATARS=['abu-fahad','alkabeer','malqoof','nashal','sanad','mosarref','mokhabbes'];
 
 const FUNNY_CAUGHT_QUOTES = [
   'قفطناك يا وحش! الكذبة ما مشيت هالمرة!',
   'صادوه بالرادار! وين تبي تروح بالكذبة؟',
-  'أبو فهد يبتسم: عيونك فضحتك قبل بطاقتك!',
+  'عيونك فضحتك قبل بطاقتك!',
   'هاه؟ قلنا لك الاستراحة ما يمشي فيها التلفيق!',
 ];
 
@@ -112,8 +105,9 @@ export function createMatch(options: CreateMatchOptions): GameState {
       isConnected: true,
     });
 
+    const names=pickBotNames(clampedBots,rng,[options.humanPlayerName.trim()]);
     for (let i = 0; i < clampedBots; i++) {
-      const profile = SAUDI_BOT_PROFILES[i % SAUDI_BOT_PROFILES.length];
+      const profile = {name:names[i],avatar:`./assets/${BOT_AVATARS[i % BOT_AVATARS.length]}.svg`};
       const botHand = deck.slice(0, INITIAL_HAND_SIZE);
       deck = deck.slice(INITIAL_HAND_SIZE);
       players.push({

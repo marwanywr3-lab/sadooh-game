@@ -45,11 +45,11 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             </p>
           </div>
 
-          {/* ترحيب أبو فهد */}
+          {/* ترحيب فهد */}
           <div className="abu-fahad-welcome">
             <img
               src="./assets/abu-fahad.svg"
-              alt="أبو فهد"
+              alt="فهد"
               className="abu-fahad-welcome__img"
               draggable={false}
             />

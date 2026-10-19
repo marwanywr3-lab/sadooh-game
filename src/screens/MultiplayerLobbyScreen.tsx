@@ -34,7 +34,6 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
   const leave=()=>{service.leave();onBackToMenu();};
   const [playerName, setPlayerName] = useState(initialPlayerName);
   const [joinCodeInput, setJoinCodeInput] = useState(new URLSearchParams(location.search).get('room') || '');
-  const [inviteLinkInput, setInviteLinkInput] = useState('');
   const [botDiffToAdd, setBotDiffToAdd] = useState<BotDifficulty>('medium');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [copiedNotice, setCopiedNotice] = useState<string | null>(null);
@@ -180,10 +179,10 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
           </div>
         )}
 
-        <div className="lobby-grid">
+        <div className={`lobby-grid ${roomState.roomCode ? 'has-room' : 'no-room'}`}>
           {/* العمود الأيمن: إعدادات اللاعب، إنشاء غرفة، أو الانضمام برمز/رابط */}
           <section className="lobby-panel">
-            <h3> هويتك وإدارة الدخول (بدون تسجيل حساب)</h3>
+            <h3>جهّز جلستك</h3>
 
             <div className="form-field">
               <span>اسم اللاعب في الغرفة:</span>
@@ -247,62 +246,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
               </button>
             </div>
 
-            <div className="lobby-subbox">
-              <h4> الانضمام برمز غرفة</h4>
-              <div className="inline-input-row">
-                <input
-                  type="text"
-                  value={joinCodeInput}
-                  onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                  placeholder="مثال: EST-482"
-                  maxLength={10}
-                />
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() =>
-                    service.sendEvent({
-                      type: 'JOIN_ROOM',
-                      payload: {
-                        roomCode: joinCodeInput.trim() || 'EST-482',
-                        playerName,
-                      },
-                    })
-                  }
-                >
-                  انضمام
-                </button>
-              </div>
-            </div>
-
-            <div className="lobby-subbox">
-              <h4> الانضمام برابط دعوة</h4>
-              <div className="inline-input-row">
-                <input
-                  type="text"
-                  value={inviteLinkInput}
-                  onChange={(e) => setInviteLinkInput(e.target.value)}
-                  placeholder="الصق رابط الدعوة هنا..."
-                />
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() =>
-                    service.sendEvent({
-                      type: 'JOIN_ROOM',
-                      payload: {
-                        roomCode: inviteLinkInput.includes('room=')
-                          ? inviteLinkInput.split('room=')[1].slice(0, 7)
-                          : 'INVITE',
-                        playerName,
-                      },
-                    })
-                  }
-                >
-                  دخول بالرابط
-                </button>
-              </div>
-            </div>
+            <div className="lobby-subbox"><h4>عندك دعوة؟</h4><div className="inline-input-row"><input aria-label="رابط الدعوة أو رمز الغرفة" value={joinCodeInput} onChange={e=>setJoinCodeInput(e.target.value)} placeholder="الصق الرابط أو رمز الغرفة" maxLength={2048}/><button className="btn-secondary" onClick={()=>{let code=joinCodeInput.trim();try{code=new URL(code).searchParams.get('room')||code;}catch{}service.sendEvent({type:'JOIN_ROOM',payload:{roomCode:code.toUpperCase(),playerName}});}}>انضم</button></div></div>
 
           </section>
 
@@ -325,8 +269,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
             {copiedNotice && <div className="copied-toast">{copiedNotice}</div>}
 
             <h3>
-               أعضاء الغرفة ({roomState.members.length} / {roomState.maxPlayers}) — غرف
-              مختلطة (بشر + آليين)
+               الربع ({roomState.members.length} / {roomState.maxPlayers})
             </h3>
 
             <div className="room-members-list">

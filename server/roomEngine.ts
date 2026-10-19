@@ -1,3 +1,4 @@
+import {pickBotNames} from '../src/game/bots/names';
 import type { GameState, BotDifficulty } from '../src/types/game';
 import type { RoomState, ClientToServerEvent } from '../src/types/multiplayer';
 import { createBalancedDeck, MOVE_TIMER_SECONDS, CHALLENGE_TIMER_SECONDS, OUTCOME_READING_SECONDS, BOT_MOVE_DELAY_MS, BOT_CHALLENGE_DELAY_MS } from '../src/game/rules/deck';
@@ -9,7 +10,7 @@ import { secureRandom, cleanText, capacity } from '../server/security';
 export type SavedRoom={room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
 export type Report={id:string;reporter:string;target:string;reason:string;evidence:unknown};
 export type Projection={room:RoomState;view:ReturnType<typeof projectGameStateForPlayer>|null;deadline:number;nextActionAt:number;serverNow:number;revision?:number};
-const BOT_PROFILES=[['أبو فهد','abu-fahad'],['أبو سارة','alkabeer'],['عزّام','malqoof'],['تركي','nashal'],['سلمان','sanad'],['نايف','mosarref'],['وليد','mokhabbes']];
+const BOT_AVATARS=['abu-fahad','alkabeer','malqoof','nashal','sanad','mosarref','mokhabbes'];
 function member(id:string,name:string,host=false,isBot=false,difficulty:BotDifficulty='medium') {
  return {id,name,isHost:host,isBot,botDifficulty:isBot?difficulty:undefined,avatarAsset:isBot?'./assets/abu-fahad.png':'./assets/sanad.png',isConnected:true,isReady:true};
 }
@@ -66,13 +67,16 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
  switch(e.type){
  case 'ADD_BOT':{
   waiting();if(s.room.members.length>=s.room.maxPlayers)throw Error('الغرفة ممتلئة.');
-  const profile=BOT_PROFILES.find(([name])=>!s.room.members.some(m=>m.isBot&&m.name===`${name} (آلي)`))||BOT_PROFILES[0];
-  s.room.members.push({...member(crypto.randomUUID(),`${profile[0]} (آلي)`,false,true,e.payload.difficulty),avatarAsset:`./assets/${profile[1]}.png`});break;
+  const name=pickBotNames(1,secureRandom,s.room.members.map(m=>m.name))[0];
+  const avatar=BOT_AVATARS[Math.floor(secureRandom()*BOT_AVATARS.length)];
+  s.room.members.push({...member(crypto.randomUUID(),name,false,true,e.payload.difficulty),avatarAsset:`./assets/${avatar}.svg`});break;
  }
  case 'REMOVE_BOT':waiting();s.room.members=s.room.members.filter(m=>m.id!==e.payload.botId||!m.isBot);break;
  case 'UPDATE_MAX_PLAYERS':waiting();if(e.payload.maxPlayers<s.room.members.length)throw Error('السعة أصغر من عدد الأعضاء.');s.room.maxPlayers=capacity(e.payload.maxPlayers);break;
  case 'START_MATCH':{
   host();if(s.room.status==='in_progress')throw Error('المباراة قائمة.');if(s.room.members.length<3)throw Error('أضف لاعبين أو خصومًا آليين ليصبح العدد 3 على الأقل.');
+  const names=pickBotNames(s.room.members.filter(m=>m.isBot).length,secureRandom,s.room.members.filter(m=>!m.isBot).map(m=>m.name));
+  let ni=0;s.room.members=s.room.members.map(m=>m.isBot?{...m,name:names[ni++]}:m);
   const deck=createBalancedDeck(8,secureRandom).map(c=>({...c,id:crypto.randomUUID()}));
   const players=s.room.members.map(m=>({...m,hand:deck.splice(0,4),hasSanadShield:false}));
   const g=createMatch({matchId:crypto.randomUUID(),mode:'multiplayer',humanPlayerName:me.name,botCount:2,botDifficulty:'medium',customPlayers:players,customDrawPile:deck,rng:secureRandom});
