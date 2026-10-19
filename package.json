@@ -1,0 +1,33 @@
+{
+  "name": "sadooh-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "لعبة صادوه! — لعبة بطاقات سعودية جماعية كوميدية تعتمد على الخداع وكشف الكذب",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "tsx scripts/test-engine.ts",
+    "test:security": "tsx --test tests/security.test.ts",
+    "test:rooms": "tsx --test tests/room.test.ts",
+    "test:live": "tsx scripts/test-live.ts",
+    "build:edge": "node scripts/build-edge.mjs",
+    "check": "npm test && npm run test:security && npm run test:rooms && npm run build && npm run build:edge"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "6.1.2",
+    "esbuild": "0.28.2",
+    "tsx": "^4.0.0",
+    "typescript": "~5.6.2",
+    "vite": "8.3.4"
+  }
+}

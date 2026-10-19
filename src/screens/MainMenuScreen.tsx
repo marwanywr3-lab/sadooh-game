@@ -1,0 +1,187 @@
+import React, { useState } from 'react';
+import { BotDifficulty } from '../types/game';
+import { UserSettings } from '../services/storage/localSettings';
+
+interface MainMenuScreenProps {
+  settings: UserSettings;
+  onStartSinglePlayer: (botCount: number, difficulty: BotDifficulty, playerName: string) => void;
+  onOpenMultiplayer: () => void;
+  onOpenHowToPlay: () => void;
+  onOpenSettings: () => void;
+  onStartTutorial: () => void;
+}
+
+export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
+  settings,
+  onStartSinglePlayer,
+  onOpenMultiplayer,
+  onOpenHowToPlay,
+  onOpenSettings,
+  onStartTutorial,
+}) => {
+  const [showSetupBox, setShowSetupBox] = useState(false);
+  const [playerName, setPlayerName] = useState(settings.playerName);
+  const [botCount, setBotCount] = useState(settings.defaultBotCount);
+  const [difficulty, setDifficulty] = useState<BotDifficulty>(settings.defaultDifficulty);
+
+  return (
+    <div
+      className="main-menu-screen"
+      style={{ backgroundImage: `url('./assets/menu-background.png')` }}
+    >
+      <div className="main-menu-overlay">
+        <div className="main-menu-card">
+          {/* شعار لعبة صادوه! */}
+          <div className="main-menu-logo-wrap">
+            <img
+              src="./assets/logo.png"
+              alt="شعار صادوه!"
+              className="main-menu-logo"
+              draggable={false}
+            />
+            <h1 className="main-menu-title-fallback">صادوه!</h1>
+            <p className="main-menu-tagline">
+              لعبة البطاقات السعودية الكوميدية — سهلة التعلّم في 30 ثانية، وتبي ذكاء عشان تفوز!
+            </p>
+          </div>
+
+          {/* ترحيب أبو فهد */}
+          <div className="abu-fahad-welcome">
+            <img
+              src="./assets/abu-fahad.png"
+              alt="أبو فهد"
+              className="abu-fahad-welcome__img"
+              draggable={false}
+            />
+            <div className="abu-fahad-welcome__bubble">
+              <strong>أبو فهد:</strong> «يا مرحبا ومسهلا في الاستراحة! القهوة جاهزة والورق مغسول..
+              تبي تتحداني أنا والشباب ولا تدخل غرفة جماعية؟»
+            </div>
+          </div>
+
+          {!showSetupBox ? (
+            <div className="main-menu-actions">
+              <button
+                type="button"
+                className="btn-menu btn-menu--primary"
+                onClick={() => setShowSetupBox(true)}
+              >
+                🎮 العب ضد الكمبيوتر
+              </button>
+
+              <button
+                type="button"
+                className="btn-menu btn-menu--secondary"
+                onClick={onOpenMultiplayer}
+              >
+                🌐 اللعب الجماعي
+              </button>
+
+              <div className="main-menu-subgrid">
+                <button
+                  type="button"
+                  className="btn-menu btn-menu--warm"
+                  onClick={onOpenHowToPlay}
+                >
+                  📖 كيف تلعب؟
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-menu btn-menu--warm"
+                  onClick={onOpenSettings}
+                >
+                  ⚙️ الإعدادات
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="btn-menu btn-menu--accent"
+                onClick={onStartTutorial}
+              >
+                🎓 إعادة الجولة التعليمية (مع أبو فهد)
+              </button>
+            </div>
+          ) : (
+            <div className="singleplayer-setup-panel">
+              <h3>إعداد جلسة اللعب ضد الكمبيوتر</h3>
+
+              <label className="form-field">
+                <span>اسمك على الطاولة:</span>
+                <input
+                  type="text"
+                  value={playerName}
+                  maxLength={20}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="اكتب اسمك..."
+                />
+              </label>
+
+              <div className="form-field">
+                <span>عدد اللاعبين الإجمالي على الطاولة ({botCount + 1} لاعبين):</span>
+                <div className="player-count-chips">
+                  {[2, 3, 4, 5, 6, 7].map((bCount) => (
+                    <button
+                      key={bCount}
+                      type="button"
+                      className={`count-chip ${botCount === bCount ? 'is-active' : ''}`}
+                      onClick={() => setBotCount(bCount)}
+                    >
+                      {bCount + 1} لاعبين
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-field">
+                <span>مستوى الصعوبة:</span>
+                <div className="segmented-control">
+                  {(
+                    [
+                      { id: 'easy', label: 'سهل (مبتدئ)' },
+                      { id: 'medium', label: 'متوسط (متوازن)' },
+                      { id: 'hard', label: 'صعب (محترفين)' },
+                    ] as Array<{ id: BotDifficulty; label: string }>
+                  ).map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      className={`seg-btn ${difficulty === d.id ? 'is-active' : ''}`}
+                      onClick={() => setDifficulty(d.id)}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="setup-actions-row">
+                <button
+                  type="button"
+                  className="btn-primary btn-lg"
+                  onClick={() =>
+                    onStartSinglePlayer(
+                      botCount,
+                      difficulty,
+                      playerName.trim() || 'سلطان'
+                    )
+                  }
+                >
+                  🔥 ابدأ الجلسة الآن!
+                </button>
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={() => setShowSetupBox(false)}
+                >
+                  رجوع
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
