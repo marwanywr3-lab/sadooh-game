@@ -20,6 +20,7 @@ export default function App() {
 
   // عند أول تشغيل، اعرض الجولة التعليمية التفاعلية مع «أبو فهد» تلقائيًا (مع إمكانية تخطيها فورًا)
   const [screen, setScreen] = useState<ActiveScreen>(() => {
+    if (new URLSearchParams(window.location.search).get('learn') === '1') return 'tutorial';
     const initial = loadUserSettings();
     return initial.tutorialCompleted ? 'menu' : 'tutorial';
   });
@@ -28,6 +29,7 @@ export default function App() {
     botCount: number;
     difficulty: BotDifficulty;
     playerName: string;
+    guided?: boolean;
   }>({
     botCount: settings.defaultBotCount,
     difficulty: settings.defaultDifficulty,
@@ -65,6 +67,12 @@ export default function App() {
     setScreen('menu');
   };
 
+  const handleStartGuidedPractice = () => {
+    handleUpdateSettings({ tutorialCompleted: true });
+    setMatchConfig({botCount:2,difficulty:'easy',playerName:settings.playerName,guided:true});
+    setScreen('game');
+  };
+
   return (
     <div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
@@ -86,6 +94,7 @@ export default function App() {
         <TutorialScreen
           onCompleteTutorial={handleFinishOrSkipTutorial}
           onSkipTutorial={handleFinishOrSkipTutorial}
+          onStartPractice={handleStartGuidedPractice}
         />
       )}
 
@@ -104,8 +113,10 @@ export default function App() {
           humanPlayerName={matchConfig.playerName}
           botCount={matchConfig.botCount}
           botDifficulty={matchConfig.difficulty}
+          guided={matchConfig.guided}
           onExitToMenu={() => setScreen('menu')}
           onRecordMatchEnd={(humanWon) => {
+            if (matchConfig.guided) return;
             handleUpdateSettings({
               matchesPlayed: settings.matchesPlayed + 1,
               matchesWon: settings.matchesWon + (humanWon ? 1 : 0),

@@ -22,12 +22,14 @@ import { CardView } from '../components/CardView';
 import { PlayerSeat } from '../components/PlayerSeat';
 import { ChatDrawer } from '../components/ChatDrawer';
 import { ActionLogModal } from '../components/ActionLogModal';
+import { PracticeCoach } from '../components/PracticeCoach';
 import { soundManager } from '../services/audio/soundEffects';
 
 import type { SupabaseRoomService } from '../services/multiplayer/roomClient';
 
 interface GameTableScreenProps {
   remote?: { service: SupabaseRoomService; view: ClientProjectedGameState };
+  guided?: boolean;
   humanPlayerName: string;
   botCount: number;
   botDifficulty: BotDifficulty;
@@ -39,6 +41,7 @@ interface GameTableScreenProps {
 
 export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   remote,
+  guided = false,
   humanPlayerName,
   botCount,
   botDifficulty,
@@ -79,6 +82,10 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   const activePlayer = view.players[view.currentPlayerIndex];
   const isMyTurn = activePlayer?.id === HUMAN_ID;
   const opponents = view.players.filter((p) => p.id !== HUMAN_ID);
+  const practicePaused = guided && !remote && (
+    (view.phase === 'CHOOSING_MOVE' && isMyTurn) ||
+    (view.phase === 'CHALLENGE_WINDOW' && view.pendingClaimPublic?.playerId !== HUMAN_ID)
+  );
 
   // إظهار فقاعة نصية فوق مقعد اللاعب لمدة 4 ثوانٍ
   const showBubbleForPlayer = useCallback((playerId: string, text: string) => {
@@ -124,7 +131,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
   // عداد الوقت (15 ثانية لاختيار الحركة، و5 ثوانٍ لنافذة التحدي)
   useEffect(() => {
-    if (remote) return;
+    if (remote || practicePaused) return;
     if (gameState.phase !== 'CHOOSING_MOVE' && gameState.phase !== 'CHALLENGE_WINDOW') {
       return;
     }
@@ -153,7 +160,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [gameState.phase, gameState.turnNumber]);
+  }, [gameState.phase, gameState.turnNumber, practicePaused]);
 
   // ذكاء الخصوم الآليين في اختيار الحركة عندما يكون الدور على بوت
   useEffect(() => {
@@ -205,7 +212,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
   // ذكاء الخصوم الآليين في نافذة التحدي (5 ثوانٍ): هل يضغط أحد البوتات «صادوه!»؟
   useEffect(() => {
-    if (remote) return;
+    if (remote || practicePaused) return;
     if (gameState.phase !== 'CHALLENGE_WINDOW' || !gameState.pendingClaim) return;
 
     const botChallengers = gameState.players.filter(
@@ -244,6 +251,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     gameState.turnNumber,
     botDifficulty,
     showBubbleForPlayer,
+    practicePaused,
   ]);
 
   // في اللعب الفردي تبقى النتيجة حتى يؤكد اللاعب أنه انتهى من قراءتها.
@@ -380,13 +388,13 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             {view.phase === 'CHOOSING_MOVE' && (
               <div className="timer-pill timer-pill--move">
                 <span>⏱️ دور «{activePlayer?.name}»:</span>
-                <strong>{view.turnTimerSeconds} ث</strong>
+                <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
               </div>
             )}
             {view.phase === 'CHALLENGE_WINDOW' && (
               <div className="timer-pill timer-pill--challenge">
                 <span>🚨 مهلة تحدي «صادوه!»:</span>
-                <strong>{view.turnTimerSeconds} ث</strong>
+                <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
               </div>
             )}
           </div>
@@ -412,6 +420,8 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
           </div>
         </header>
 
+        {guided && !remote && <PracticeCoach view={view} selectedCardId={selectedCardId} claimedCharacter={selectedClaimChar} />}
+
         {/* مقاعد الخصوم حول الطاولة */}
         <section className="opponents-ring" aria-label="الخصوم حول الطاولة">
           {opponents.map((opp) => (
@@ -433,7 +443,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             <div className="center-status-box">
               {isMyTurn ? (
                 <>
-                  <h3>🎯 دورك الآن! ({view.turnTimerSeconds} ثانية)</h3>
+                    <h3>🎯 دورك الآن! {practicePaused ? 'خذ وقتك' : `(${view.turnTimerSeconds} ثانية)`}</h3>
                   <p>
                     1) اختر بطاقة فعلية من يدك بالأسفل • 2) اختر الشخصية التي ستعلنها (صدق أو
                     كذب) {needsTargetForSelection ? '• 3) حدد الخصم المستهدف' : ''} ثم ضعها
@@ -443,7 +453,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
               ) : (
                 <>
                   <h3>⏳ «{activePlayer?.name}» يفكر في حركته...</h3>
-                  <p>استعد! أول ما يحط بطاقته مقلوبة، قدامك {CHALLENGE_TIMER_SECONDS} ثانية تقرر تصدقه ولا تصيده!</p>
+                  <p>{guided ? 'استعد! أول ما يحط بطاقته مقلوبة، بتقرر: تصدقه أو تضغط «صادوه!». بنشرح لك وقتها.' : `استعد! أول ما يحط بطاقته مقلوبة، قدامك ${CHALLENGE_TIMER_SECONDS} ثانية تقرر تصدقه ولا تصيده!`}</p>
                 </>
               )}
             </div>
@@ -476,7 +486,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                       className="btn-sadooh-mega"
                       onClick={handleHumanPressSadooh}
                     >
-                      🚨 صادوه! ({view.turnTimerSeconds} ث)
+                      🚨 صادوه! {practicePaused ? '(اكشف بطاقته)' : `(${view.turnTimerSeconds} ث)`}
                     </button>
                     <button
                       type="button"

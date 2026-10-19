@@ -1941,3 +1941,30 @@ select {
     padding: 6px 9px;
   }
 }
+/* Short, self-paced lessons retain the original table and card design. */
+.simple-tutorial { gap: 18px; }
+.practice-no-pressure { text-align: center; color: #fff6de; margin: 0; font-size: 15px; }
+.tutorial-goal { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px; font-size: 24px; }
+.tutorial-short-copy { max-width: 580px; text-align: center; font-size: 19px; line-height: 1.8; margin: 8px auto; }
+.tutorial-example-label { font-size: 20px; font-weight: 800; text-align: center; }
+.tutorial-inline-error { color: #a32c17; background: #fff4e6; padding: 10px 16px; border-radius: 12px; }
+.tutorial-result-note { background: #fff8e5; color: #4a2a17; border: 2px solid #e7ba71; border-radius: 18px; padding: 18px; max-width: 620px; text-align: center; font-size: 19px; line-height: 1.8; }
+.tutorial-result-note p { margin: 6px 0; }
+.tutorial-result-note span { font-size: 15px; }
+.tutorial-back-button { align-self: center; }
+.simple-rules { line-height: 1.9; font-size: 18px; }
+.simple-rules-goal { font-size: 23px; text-align: center; font-weight: 800; }
+.simple-rules-list { padding-inline-start: 26px; }
+.simple-rules-list li { margin-bottom: 12px; }
+.simple-rules-note { background: #fff2d5; border-radius: 12px; padding: 12px; }
+.simple-rules-details { margin-top: 16px; border-top: 1px solid #dbbf99; padding-top: 12px; }
+.simple-rules-details summary { cursor: pointer; font-weight: 800; }
+.practice-coach { background: #fff7df; color: #4a2a17; border: 2px solid #e7ba71; border-radius: 16px; padding: 12px 18px; max-width: 800px; width: 100%; box-sizing: border-box; align-self: center; line-height: 1.7; font-size: 18px; }
+.practice-coach p { margin: 5px 0; }
+.practice-coach small { display: block; font-size: 13px; opacity: .8; }
+.practice-coach-example { background: #f3e2bc; border-radius: 10px; padding: 6px 10px; }
+@media(max-width: 600px) {
+ .tutorial-goal { font-size: 20px; gap: 10px; }
+ .practice-coach { font-size: 16px; padding: 10px 12px; }
+ .tutorial-short-copy, .tutorial-result-note, .simple-rules { font-size: 17px; }
+}

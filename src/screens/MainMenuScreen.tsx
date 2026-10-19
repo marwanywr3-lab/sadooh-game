@@ -41,7 +41,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             />
             <h1 className="main-menu-title-fallback">صادوه!</h1>
             <p className="main-menu-tagline">
-              لعبة البطاقات السعودية الكوميدية — سهلة التعلّم في 30 ثانية، وتبي ذكاء عشان تفوز!
+              خلّص بطاقاتك، واخدع خصومك… وإذا شكّيت فيهم، صادوه!
             </p>
           </div>
 
@@ -100,7 +100,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 className="btn-menu btn-menu--accent"
                 onClick={onStartTutorial}
               >
-                🎓 إعادة الجولة التعليمية (مع أبو فهد)
+                🎓 جرّبها مع شرح خطوة بخطوة
               </button>
             </div>
           ) : (
