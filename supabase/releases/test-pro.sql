@@ -2,9 +2,9 @@
 begin;
 insert into auth.users(id,email,email_confirmed_at,is_anonymous,aud,role) values
 ('10000000-0000-4000-8000-000000000001','pro-fixture@example.invalid',now(),false,'authenticated','authenticated'),
-('10000000-0000-4000-8000-000000000002','sadoh.inquiries@gmail.com',now(),false,'authenticated','authenticated'),
+('10000000-0000-4000-8000-000000000002','marmralibarbood@gmail.com',now(),false,'authenticated','authenticated'),
 ('10000000-0000-4000-8000-000000000003','alshbab33@gmail.com',now(),false,'authenticated','authenticated'),
-('10000000-0000-4000-8000-000000000004','alshbabb33@gmail.com',null,false,'authenticated','authenticated');
+('10000000-0000-4000-8000-000000000004','marbrahim.aljrbood@gmail.com',null,false,'authenticated','authenticated');
 update sadooh_private.pro_config set enforced=true;
 set local role service_role;
 do $$

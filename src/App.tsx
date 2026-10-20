@@ -1,4 +1,4 @@
-import {BrandLogo} from './components/Theme';
+import {BrandLogo,ProBrandContext} from './components/Theme';
 import {AccountPanel} from './components/AccountPanel';
 import {accountClient,accountRequest,proSettings,type Account} from './services/account';
 import {PassPhoneScreen} from './screens/PassPhoneScreen';
@@ -44,13 +44,15 @@ export default function App() {
   });
 
   const [account,setAccount]=useState<Account|null>(null);
+  const [previewPrefs,setPreviewPrefs]=useState<{background:string;position:string}|null>(null);
+  const appearance=account?.isPro?(previewPrefs||account.prefs):{};
   const [enforced,setEnforced]=useState(true);
   const [checkingAccount,setCheckingAccount]=useState(true);
   const [accountOpen,setAccountOpen]=useState(false),[proOpen,setProOpen]=useState(false),[passwordRecovery,setPasswordRecovery]=useState(false);
   const refreshAccount=async()=>{try{const session=(await accountClient.auth.getSession()).data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{/* A brief network interruption must not unmount a running local game. Server actions still validate the session. */}}else setAccount(null);}finally{setCheckingAccount(false);}};
   useEffect(()=>{void proSettings().then(s=>setEnforced(!!s.subscriptionsEnabled)).catch(()=>{});void refreshAccount();const sub=accountClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){setPasswordRecovery(true);setAccountOpen(true);}setTimeout(()=>{void refreshAccount();},0);});const timer=setInterval(()=>{void refreshAccount();},60000);return()=>{sub.data.subscription.unsubscribe();clearInterval(timer);};},[]);
   useEffect(()=>{if(account?.username&&!loadUserSettings().tutorialCompleted){setSettings(saveUserSettings({tutorialCompleted:true}));}},[account?.username]);
-  const onlineAllowed=(!enforced||!!account?.username)&&!account?.requiresAdminCode;
+  const onlineAllowed=(!enforced||!!account?.username);
   const openPro=()=>{setProOpen(true);setAccountOpen(true);};
   const [partyJoin,setPartyJoin]=useState(new URLSearchParams(location.search).get('party')==='1');
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
@@ -91,13 +93,13 @@ export default function App() {
     setScreen('game');
   };
 
-  if(!account?.username||account.requiresAdminCode)return <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}><main className="entry-screen" dir="rtl" lang="ar"><BrandLogo alt="صادوه!"/><p>حيّاك في صادوه. سجّل مرة، وبعدها تدخل على طول.</p>{checkingAccount?<p role="status">جاري فتح حسابك…</p>:<AccountPanel entryMode account={account} enforced={enforced} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{}}/>}</main></ThemeContext.Provider>;
+  if(!account?.username)return <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}><main className="entry-screen" dir="rtl" lang="ar"><BrandLogo alt="صادوه!"/><p>حيّاك في صادوه. سجّل مرة، وبعدها تدخل على طول.</p>{checkingAccount?<p role="status">جاري فتح حسابك…</p>:<AccountPanel entryMode account={account} onPreview={setPreviewPrefs} enforced={enforced} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{}}/>}</main></ThemeContext.Provider>;
   return (
     <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}>
-    <div
+    <ProBrandContext.Provider value={!!account?.isPro}><div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
-      data-pro-position={account?.isPro?account.prefs.position:undefined}
-      style={account?.isPro&&account.prefs.background?{['--pro-background' as string]:account.prefs.background}:undefined}
+      data-pro-position={account?.isPro?appearance.position:undefined}
+      style={account?.isPro&&appearance.background?{['--pro-background' as string]:appearance.background,['--ui-page' as string]:appearance.background}:undefined}
       dir="rtl"
       lang="ar"
     >
@@ -156,7 +158,7 @@ export default function App() {
         />
       )}
 
-      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);if(!onlineAllowed)setScreen('menu');}}/></div>}
+      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);setPreviewPrefs(null);if(!onlineAllowed)setScreen('menu');}}/></div>}
       <HowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}
@@ -172,7 +174,7 @@ export default function App() {
         onUpdateSettings={handleUpdateSettings}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </div>
+    </div></ProBrandContext.Provider>
     </ThemeContext.Provider>
   );
 }

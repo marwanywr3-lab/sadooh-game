@@ -1,8 +1,11 @@
 import React,{createContext,useContext} from 'react';
 export const ThemeContext=createContext({dark:false,toggle:()=>{}});
+export const ProBrandContext=createContext(false);
 export const BrandLogo:React.FC<React.ImgHTMLAttributes<HTMLImageElement>>=props=>{
  const {dark}=useContext(ThemeContext);
- return <img {...props} src={dark?'./assets/logo-dark.svg':'./assets/logo.svg'}/>;
+ const pro=useContext(ProBrandContext);
+ const logo=<img {...props} src={dark?'./assets/logo-dark.svg':'./assets/logo.svg'}/>;
+ return pro?<span className="pro-brand">{logo}<span className="brand-pro-badge" aria-label="مشترك Pro">PRO</span></span>:logo;
 };
 export const ThemeToggle:React.FC=()=>{
  const {dark,toggle}=useContext(ThemeContext);

@@ -25,8 +25,8 @@ declare u record; a sadooh_private.accounts; permanent boolean; is_admin boolean
 begin
  select * into u from sadooh_private.account_identity(p_uid);
  if u.id is null or u.is_anonymous or u.email is null then raise exception 'CONFIRM_EMAIL'; end if;
- permanent:=lower(u.email) in ('barboodmarwan@gmail.com','alshbabb33@gmail.com');
- is_admin:=lower(u.email)='sadoh.inquiries@gmail.com';
+ permanent:=lower(u.email) in ('barboodmarwan@gmail.com','marbrahim.aljrbood@gmail.com');
+ is_admin:=lower(u.email)='marmralibarbood@gmail.com';
  insert into sadooh_private.accounts(user_id) values(p_uid) on conflict do nothing;
  select * into a from sadooh_private.accounts where user_id=p_uid for update;
  pro:=permanent or a.pro_until>clock_timestamp(); pro:=coalesce(pro,false);
