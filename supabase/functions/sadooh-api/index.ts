@@ -44,8 +44,8 @@ Deno.serve(async(req:Request)=>{
   const verified=!!user.email&&!user.is_anonymous;
   if(body.type==='ACCOUNT'){
    if(!verified)return reply({error:'سجّل دخولك أولًا.'},403);
-   if(!['GET','SAVE_NAME','SAVE_PREFS','ISSUE','REDEEM'].includes(body.action))return reply({error:'طلب حساب غير صالح.'},400);
-   if(['ISSUE','REDEEM'].includes(body.action)&&!await rpc('sadooh_allow',{p_key:'pro:'+uid,p_window:600,p_max:10}))return reply({error:'محاولات كثيرة. حاول بعد عشر دقائق.'},429);
+   if(!['GET','SAVE_NAME','SAVE_PREFS','REDEEM'].includes(body.action))return reply({error:'طلب حساب غير صالح.'},400);
+   if(body.action==='REDEEM'&&!await rpc('sadooh_allow',{p_key:'pro:'+uid,p_window:600,p_max:10}))return reply({error:'محاولات كثيرة. حاول بعد عشر دقائق.'},429);
    if(body.action==='SAVE_NAME')body.value={username:cleanText(body.value?.username,24)};
    const result=await rpc('sadooh_account',{p_uid:uid,p_action:body.action,p_value:body.value||{}});
    return reply(result);
