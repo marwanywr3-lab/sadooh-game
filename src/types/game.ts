@@ -27,6 +27,7 @@ export interface CardInstance {
 export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface PlayerState {
+  isPro?:boolean;
   id: string;
   name: string;
   isBot: boolean;
@@ -146,6 +147,7 @@ export interface GameState {
  * الحالة العامة المسموح بعرضها للاعب محدد (تخفي بطاقات الخصوم وبطاقة الطاولة المقلوبة والكومة)
  */
 export interface PublicPlayerView {
+  isPro?:boolean;
   id: string;
   name: string;
   isBot: boolean;

@@ -1,3 +1,5 @@
+import {AccountPanel} from './components/AccountPanel';
+import {accountClient,accountRequest,proSettings,type Account} from './services/account';
 import {PassPhoneScreen} from './screens/PassPhoneScreen';
 import {PartyScreen} from './screens/PartyScreen';
 import {ThemeContext} from './components/Theme';
@@ -45,6 +47,13 @@ export default function App() {
     playerName: settings.playerName,
   });
 
+  const [account,setAccount]=useState<Account|null>(null);
+  const [enforced,setEnforced]=useState(true);
+  const [accountOpen,setAccountOpen]=useState(false),[proOpen,setProOpen]=useState(false),[passwordRecovery,setPasswordRecovery]=useState(false);
+  const refreshAccount=async()=>{const session=(await accountClient.auth.getSession()).data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{setAccount(null);}}else setAccount(null);};
+  useEffect(()=>{void proSettings().then(s=>setEnforced(!!s.subscriptionsEnabled)).catch(()=>{});void refreshAccount();const sub=accountClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){setPasswordRecovery(true);setAccountOpen(true);}setTimeout(()=>{void refreshAccount();},0);});const timer=setInterval(()=>{void refreshAccount();},60000);return()=>{sub.data.subscription.unsubscribe();clearInterval(timer);};},[]);
+  const onlineAllowed=!enforced||!!account?.username;
+  const openPro=()=>{setProOpen(true);setAccountOpen(true);};
   const [partyJoin,setPartyJoin]=useState(new URLSearchParams(location.search).get('party')==='1');
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -88,6 +97,8 @@ export default function App() {
     <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}>
     <div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
+      data-pro-position={account?.isPro?account.prefs.position:undefined}
+      style={account?.isPro&&account.prefs.background?{['--pro-background' as string]:account.prefs.background}:undefined}
       dir="rtl"
       lang="ar"
     >
@@ -98,6 +109,9 @@ export default function App() {
           onOpenMultiplayer={() => {setPartyJoin(false);setScreen('multiplayer');}}
           onOpenParty={()=>setScreen('party')}
           onOpenPassPhone={()=>setScreen('passphone')}
+          onOpenAccount={()=>{setProOpen(false);setAccountOpen(true);}}
+          onOpenPro={openPro}
+          accountName={account?.username}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onStartTutorial={() => setScreen('tutorial')}
@@ -113,12 +127,12 @@ export default function App() {
       )}
 
       {screen === 'passphone'&&<PassPhoneScreen onBack={()=>setScreen('menu')}/>}
-      {screen === 'party'&&<PartyScreen onBack={()=>setScreen('menu')} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
+      {screen === 'party'&&onlineAllowed&&<PartyScreen onBack={()=>setScreen('menu')} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
 
-      {screen === 'multiplayer' && (
+      {screen === 'multiplayer' && onlineAllowed && (
         <MultiplayerLobbyScreen
           joinOnly={partyJoin}
-          initialPlayerName={settings.playerName}
+          initialPlayerName={account?.username||settings.playerName}
           onBackToMenu={() => setScreen('menu')}
           onPlayLocalWithSetup={(botCount, difficulty, playerName) =>
             handleStartSinglePlayer(botCount, difficulty, playerName)
@@ -143,6 +157,7 @@ export default function App() {
         />
       )}
 
+      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);if(!onlineAllowed)setScreen('menu');}}/></div>}
       <HowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}

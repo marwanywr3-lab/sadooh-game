@@ -584,7 +584,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
           <div className="human-dock-header">
             <div className="human-status-info">
-              <strong> {myPublicProfile?.name} (أنت)</strong>
+              <strong> {myPublicProfile?.name} (أنت)</strong>{myPublicProfile?.isPro&&<span className="pro-badge">PRO</span>}
               <span className="my-card-count-badge">
                 بطاقات يدك: {view.myHand.length}
               </span>
