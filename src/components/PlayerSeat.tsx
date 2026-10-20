@@ -1,3 +1,4 @@
+import {ProBadge} from './ProBadge';
 import React from 'react';
 import { PublicPlayerView } from '../types/game';
 
@@ -67,7 +68,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 
       <div className="player-seat__info">
         <div className="player-seat__name-row">
-          <span className="player-seat__name">{player.name}</span>{player.isPro&&<span className="pro-badge">PRO</span>}
+          <span className="player-seat__name">{player.name}</span>{player.isPro&&<ProBadge color={player.proBadgeColor}/>}
           {isCurrentTurn && <span className="player-seat__turn-pill">دوره</span>}
         </div>
 

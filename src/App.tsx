@@ -1,3 +1,4 @@
+import {badgeInk} from './components/ProBadge';
 import {BrandLogo,ProBrandContext} from './components/Theme';
 import {AccountPanel} from './components/AccountPanel';
 import {accountClient,accountRequest,proSettings,type Account} from './services/account';
@@ -44,7 +45,7 @@ export default function App() {
   });
 
   const [account,setAccount]=useState<Account|null>(null);
-  const [previewPrefs,setPreviewPrefs]=useState<{background:string;position:string}|null>(null);
+  const [previewPrefs,setPreviewPrefs]=useState<{background:string;position:string;badgeColor:string}|null>(null);
   const appearance=account?.isPro?(previewPrefs||account.prefs):{};
   const [enforced,setEnforced]=useState(true);
   const [checkingAccount,setCheckingAccount]=useState(true);
@@ -99,7 +100,7 @@ export default function App() {
     <ProBrandContext.Provider value={!!account?.isPro}><div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
       data-pro-position={account?.isPro?appearance.position:undefined}
-      style={account?.isPro&&appearance.background?{['--pro-background' as string]:appearance.background,['--ui-page' as string]:appearance.background}:undefined}
+      style={account?.isPro&&appearance.background?{['--pro-background' as string]:appearance.background,['--ui-page' as string]:appearance.background,['--pro-badge-color' as string]:appearance.badgeColor||'#f2d96f',['--pro-badge-ink' as string]:badgeInk(appearance.badgeColor)}:undefined}
       dir="rtl"
       lang="ar"
     >
@@ -113,6 +114,7 @@ export default function App() {
           onOpenAccount={()=>{setProOpen(false);setAccountOpen(true);}}
           onOpenPro={openPro}
           accountName={account?.username}
+          isPro={!!account?.isPro}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onStartTutorial={() => setScreen('tutorial')}

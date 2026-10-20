@@ -14,7 +14,7 @@ export function projectGameStateForPlayer(
   const publicPlayers: PublicPlayerView[] = state.players.map((p) => ({
     id: p.id,
     name: p.name,
-    isPro:p.isPro,
+    isPro:p.isPro,proBadgeColor:p.proBadgeColor,
     isBot: p.isBot,
     botDifficulty: p.botDifficulty,
     avatarAsset: p.avatarAsset,

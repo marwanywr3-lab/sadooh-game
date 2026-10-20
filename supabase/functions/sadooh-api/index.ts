@@ -64,7 +64,7 @@ Deno.serve(async(req:Request)=>{
    // Room creation has no hourly quota. The general request throttle above still applies.
    const code=crypto.randomUUID().replaceAll('-','').toUpperCase(),now=Date.now();
    const s=body.type==='CREATE_PARTY_ROOM'?createPartyRoom(code,uid,capacity(body.payload?.maxPlayers),now):createRoom(code,uid,cleanText(body.payload?.playerName,24),capacity(body.payload?.maxPlayers),now);
-   if(profile&&body.type==='CREATE_ROOM')s.room.members[0].isPro=profile.isPro;
+   if(profile&&body.type==='CREATE_ROOM'){s.room.members[0].isPro=profile.isPro;s.room.members[0].proBadgeColor=profile.prefs?.badgeColor||'#f2d96f';}
    s.receipts.push(`${uid}:${requestId}`);
    const ok=await rpc('sadooh_commit',{p_code:code,p_revision:-1,p_state:s,p_views:allProjections(s,now),p_report:null});
    if(!ok)throw Error('تعذر إنشاء الغرفة.');return reply({...projection(s,uid,now),revision:0});
@@ -81,7 +81,7 @@ Deno.serve(async(req:Request)=>{
    let changed=tick(s,now),report=null,errorAr:string|null=null;
    if(event){try{report=reduceEvent(s,uid,event,now,body.context);changed=true;}catch(e){errorAr=e instanceof Error?e.message:'طلب غير صالح.';}}
    else if(now-(s.lastSeen[uid]||0)>15000){s.lastSeen[uid]=now;changed=true;}
-   if(profile){const m=s.room.members.find(m=>m.id===uid);if(m){m.isPro=profile.isPro;if(profile.username)m.name=profile.username;}if(s.game){const p=s.game.players.find(p=>p.id===uid);if(p){p.isPro=profile.isPro;if(profile.username)p.name=profile.username;}}}
+   if(profile){const m=s.room.members.find(m=>m.id===uid);if(m){m.isPro=profile.isPro;m.proBadgeColor=profile.prefs?.badgeColor||'#f2d96f';if(profile.username)m.name=profile.username;}if(s.game){const p=s.game.players.find(p=>p.id===uid);if(p){p.isPro=profile.isPro;p.proBadgeColor=profile.prefs?.badgeColor||'#f2d96f';if(profile.username)p.name=profile.username;}}}
    if(!changed){if(errorAr)return reply({error:errorAr},400);return reply({...projection(s,uid,now),revision});}
    s.receipts=[...s.receipts,`${uid}:${requestId}`].slice(-100);
    const ok=await rpc('sadooh_commit',{p_code:code,p_revision:revision,p_state:s,p_views:allProjections(s,now),p_report:report});

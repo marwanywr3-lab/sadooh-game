@@ -28,6 +28,7 @@ export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface PlayerState {
   isPro?:boolean;
+  proBadgeColor?:string;
   id: string;
   name: string;
   isBot: boolean;
@@ -148,6 +149,7 @@ export interface GameState {
  */
 export interface PublicPlayerView {
   isPro?:boolean;
+  proBadgeColor?:string;
   id: string;
   name: string;
   isBot: boolean;

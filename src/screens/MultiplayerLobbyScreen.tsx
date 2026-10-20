@@ -1,3 +1,4 @@
+import {ProBadge} from '../components/ProBadge';
 import {BrandLogo} from '../components/Theme';
 import React, { useEffect, useState } from 'react';
 import { BotDifficulty, PublicPlayerView } from '../types/game';
@@ -87,7 +88,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
   const publicPlayersForChat: PublicPlayerView[] = roomState.members.map((m) => ({
     id: m.id,
     name: m.name,
-    isPro:m.isPro,
+    isPro:m.isPro,proBadgeColor:m.proBadgeColor,
     isBot: m.isBot,
     botDifficulty: m.botDifficulty,
     avatarAsset: m.avatarAsset,
@@ -292,7 +293,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   />
                   <div className="room-member-info">
                     <div className="room-member-title">
-                      <strong>{member.name}</strong>{member.isPro&&<span className="pro-badge">PRO</span>}
+                      <strong>{member.name}</strong>{member.isPro&&<ProBadge color={member.proBadgeColor}/>}
                       {member.isHost && <span className="host-badge"> المضيف</span>}
                       {member.isBot && (
                         <span className="bot-badge">

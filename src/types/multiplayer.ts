@@ -12,6 +12,7 @@ export type ConnectionStatus =
 
 export interface RoomMember {
   isPro?:boolean;
+  proBadgeColor?:string;
   id: string;
   name: string;
   isHost: boolean;

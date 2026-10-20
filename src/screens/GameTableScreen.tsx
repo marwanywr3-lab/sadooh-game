@@ -1,3 +1,4 @@
+import {ProBadge} from '../components/ProBadge';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -584,7 +585,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
           <div className="human-dock-header">
             <div className="human-status-info">
-              <strong> {myPublicProfile?.name} (أنت)</strong>{myPublicProfile?.isPro&&<span className="pro-badge">PRO</span>}
+              <strong> {myPublicProfile?.name} (أنت)</strong>{myPublicProfile?.isPro&&<ProBadge color={myPublicProfile.proBadgeColor}/>}
               <span className="my-card-count-badge">
                 بطاقات يدك: {view.myHand.length}
               </span>

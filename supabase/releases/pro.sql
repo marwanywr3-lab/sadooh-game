@@ -35,8 +35,8 @@ begin
   update sadooh_private.accounts set username=trim(p_value->>'username') where user_id=p_uid;
  elsif p_action='SAVE_PREFS' then
   if not pro then raise exception 'PRO_REQUIRED'; end if;
-  if coalesce(p_value->>'background','') !~ '^#[0-9a-fA-F]{6}$' or coalesce(p_value->>'position','') not in ('top','bottom','left','right') then raise exception 'INVALID_PREFS'; end if;
-  update sadooh_private.accounts set prefs=jsonb_build_object('background',p_value->>'background','position',p_value->>'position') where user_id=p_uid;
+  if coalesce(p_value->>'badgeColor',a.prefs->>'badgeColor','#f2d96f') !~ '^#[0-9a-fA-F]{6}$' or coalesce(p_value->>'background','') !~ '^#[0-9a-fA-F]{6}$' or coalesce(p_value->>'position','') not in ('top','bottom','left','right') then raise exception 'INVALID_PREFS'; end if;
+  update sadooh_private.accounts set prefs=jsonb_build_object('background',p_value->>'background','position',p_value->>'position','badgeColor',coalesce(p_value->>'badgeColor',a.prefs->>'badgeColor','#f2d96f')) where user_id=p_uid;
  elsif p_action='ISSUE' then
   if not is_admin then raise exception 'ADMIN_ONLY'; end if;
   code:=upper(replace(gen_random_uuid()::text,'-',''));
