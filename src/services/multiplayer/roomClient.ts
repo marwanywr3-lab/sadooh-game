@@ -1,4 +1,3 @@
-import {accountClient} from '../account';
 import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js';
 import type { ClientProjectedGameState } from '../../types/game';
 import type { ClientToServerEvent, RoomState, ConnectionStatus } from '../../types/multiplayer';
@@ -36,13 +35,12 @@ export class SupabaseRoomService {
  simulateConnectionToggle(_status:ConnectionStatus){this.reconnect();}
  reconnect(){if(this.code)this.sendEvent({type:'RECONNECT_MATCH',payload:{roomCode:this.code,playerId:this.userId,reconnectToken:''}});else this.emit('أنشئ غرفة أو انضم عبر الدعوة.');}
  private async authenticate(){
-  if(this.storageKey===KEY){const account=await accountClient.auth.getSession();if(account.data.session&&!account.data.session.user.is_anonymous)this.client=accountClient;}
   const current=await this.client.auth.getSession();
   if(!current.data.session){const r=await this.client.auth.signInAnonymously();if(r.error)throw Error('تعذر دخول الضيف. تحقق من الاتصال أو إعدادات Supabase.');this.userId=r.data.user!.id;}
   else this.userId=current.data.session.user.id;
  }
  private async call(type:string,payload:unknown={},context?:unknown):Promise<Projection>{
-  const result=await this.client.functions.invoke('sadooh-api',{body:{type,payload:type==='CREATE_PARTY_ROOM'?{...(payload as object),accountToken:(await accountClient.auth.getSession()).data.session?.access_token}:payload,context,roomCode:this.code,requestId:crypto.randomUUID()}});
+  const result=await this.client.functions.invoke('sadooh-api',{body:{type,payload,context,roomCode:this.code,requestId:crypto.randomUUID()}});
   if(result.error){let msg='تعذر الوصول إلى خادم اللعبة.';try{const response=(result.error as {context?:Response}).context;if(response){const body=await response.json();msg=body.error||msg;}}catch{/* network error */}throw Error(msg);}
   return result.data;
  }

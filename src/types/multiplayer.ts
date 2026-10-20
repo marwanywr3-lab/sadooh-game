@@ -11,7 +11,6 @@ export type ConnectionStatus =
   | 'disconnected';
 
 export interface RoomMember {
-  isPro?:boolean;
   id: string;
   name: string;
   isHost: boolean;

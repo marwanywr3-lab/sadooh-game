@@ -10,9 +10,6 @@ interface MainMenuScreenProps {
   onOpenMultiplayer: () => void;
   onOpenParty:()=>void;
   onOpenPassPhone:()=>void;
-  onOpenAccount:()=>void;
-  onOpenPro:()=>void;
-  accountName?:string;
   onOpenHowToPlay: () => void;
   onOpenSettings: () => void;
   onStartTutorial: () => void;
@@ -24,7 +21,6 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   onOpenMultiplayer,
   onOpenParty,
   onOpenPassPhone,
-  onOpenAccount,onOpenPro,accountName,
   onOpenHowToPlay,
   onOpenSettings,
   onStartTutorial,
@@ -112,7 +108,6 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
               </button>
               <button type="button" className="btn-menu btn-menu--secondary" onClick={onOpenParty}>العب مع بعض</button>
               <button type="button" className="btn-menu btn-menu--warm" onClick={onOpenPassPhone}>العب من جوال واحد</button>
-              <div className="main-menu-subgrid"><button className="btn-menu btn-menu--warm" onClick={onOpenAccount}>{accountName||'تسجيل الدخول'}</button><button className="btn-menu btn-menu--accent" onClick={onOpenPro}>خلك Pro</button></div>
               <InstallButton/>
             </div>
           ) : (
