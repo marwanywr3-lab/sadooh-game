@@ -1,3 +1,4 @@
+import {PRO_ERRORS} from '../../../server/proPolicy';
 import { createClient } from '@supabase/supabase-js';
 import { createRoom, createPartyRoom, isDisplay, tick, reduceEvent, projection, allProjections, type SavedRoom } from '../../../server/roomEngine';
 import { parseEvent, digest, cleanText, capacity } from '../../../server/security';
@@ -6,14 +7,15 @@ const url=Deno.env.get('SUPABASE_URL')!;
 const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const admin=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
 const origins=['https://sadoh.marwanbarbood.com','https://marwanywr3-lab.github.io','http://localhost:5173','http://127.0.0.1:5173'];
-async function rpc(name:string,args:Record<string,unknown>){const r=await admin.rpc(name,args);if(r.error)throw Error('تعذر حفظ حالة الغرفة.');return r.data;}
+async function rpc(name:string,args:Record<string,unknown>){const r=await admin.rpc(name,args);if(r.error){throw Error(PRO_ERRORS[r.error.message]||'تعذر حفظ البيانات.');}return r.data;}
 
+function sessionId(jwt:string){try{const part=jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(atob(part.padEnd(Math.ceil(part.length/4)*4,'='))).session_id||null;}catch{return null;}}
 Deno.serve(async(req:Request)=>{
  const origin=req.headers.get('Origin')||'';
  const cors={'Access-Control-Allow-Origin':origins.includes(origin)?origin:origins[0],'Vary':'Origin','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Cache-Control':'no-store'};
  const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json','X-Content-Type-Options':'nosniff'}});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
- if(req.method==='GET')return reply({ok:true,service:'sadooh-api',backend:'supabase'});
+ if(req.method==='GET')return reply({ok:true,service:'sadooh-api',backend:'supabase',subscriptionsEnabled:await rpc('sadooh_pro_enabled',{})});
  if(req.method!=='POST')return reply({error:'طريقة غير مسموحة.'},405);
  if(origin&&!origins.includes(origin))return reply({error:'Origin غير مسموح.'},403);
  try{
@@ -39,10 +41,46 @@ Deno.serve(async(req:Request)=>{
   if(!await rpc('sadooh_allow',{p_key:`request:${uid}`,p_window:10,p_max:30}))return reply({error:'طلبات كثيرة؛ انتظر قليلًا.'},429);
   const requestId=cleanText(body.requestId,64);
   if(!/^[a-f0-9-]{36}$/i.test(requestId))return reply({error:'معرف الطلب غير صالح.'},400);
+  const enforced=await rpc('sadooh_pro_enabled',{});
+  const verified=!!user.email&&!user.is_anonymous;
+  const isAdminEmail=user.email?.toLowerCase()==='sadoh.inquiries@gmail.com';
+  let gate:any=isAdminEmail?await rpc('sadooh_admin_gate',{p_uid:uid,p_session:sessionId(jwt)}):null;
+  if(body.type==='ACCOUNT'){
+   if(!verified)return reply({error:'سجّل دخولك أولًا.'},403);
+   if(['ADMIN_SETUP','ADMIN_UNLOCK'].includes(body.action)){
+    if(!isAdminEmail)return reply({error:'للمسؤول فقط.'},403);
+    if(!await rpc('sadooh_allow',{p_key:'admin-code:'+uid,p_window:600,p_max:10}))return reply({error:'محاولات كثيرة. حاول بعد عشر دقائق.'},429);
+    if(typeof body.value?.code!=='string')return reply({error:'رمز الحماية مطلوب.'},400);
+    await rpc('sadooh_admin_gate',{p_uid:uid,p_session:sessionId(jwt),p_action:body.action==='ADMIN_SETUP'?'SETUP':'UNLOCK',p_code:body.value.code});
+    gate=await rpc('sadooh_admin_gate',{p_uid:uid,p_session:sessionId(jwt)});
+    const result=await rpc('sadooh_account',{p_uid:uid});return reply({...result,requiresAdminCode:!gate.unlocked,adminCodeSetup:gate.setupRequired,isAdmin:gate.unlocked});
+   }
+   if(gate&&!gate.unlocked&&body.action!=='GET')return reply({error:'أدخل رمز حماية حساب المسؤول أولًا.'},403);
+   if(!['GET','SAVE_NAME','SAVE_PREFS','ISSUE','REDEEM'].includes(body.action))return reply({error:'طلب حساب غير صالح.'},400);
+   if(['ISSUE','REDEEM'].includes(body.action)&&!await rpc('sadooh_allow',{p_key:'pro:'+uid,p_window:600,p_max:10}))return reply({error:'محاولات كثيرة. حاول بعد عشر دقائق.'},429);
+   if(body.action==='SAVE_NAME')body.value={username:cleanText(body.value?.username,24)};
+   const result=await rpc('sadooh_account',{p_uid:uid,p_action:body.action,p_value:body.value||{}});
+   return reply({...result,...(gate?{requiresAdminCode:!gate.unlocked,adminCodeSetup:gate.setupRequired,isAdmin:gate.unlocked}:{})});
+  }
+  if(gate&&!gate.unlocked)return reply({error:'أدخل رمز حماية حساب المسؤول أولًا.'},403);
+  let profile:any=null;
+  if(verified)profile=await rpc('sadooh_account',{p_uid:uid});
+  if(body.type==='CREATE_PARTY_ROOM'&&enforced){
+   const token=body.payload?.accountToken;
+   if(typeof token!=='string')return reply({error:'سجّل دخولك لبدء شاشة العرض.'},403);
+   const owner=await admin.auth.getUser(token);
+   if(owner.error||!owner.data.user?.email||owner.data.user.is_anonymous)return reply({error:'سجّل دخولك أولًا.'},403);
+   if(owner.data.user.email.toLowerCase()==='sadoh.inquiries@gmail.com'){
+    const ownerGate=await rpc('sadooh_admin_gate',{p_uid:owner.data.user.id,p_session:sessionId(token)});if(!ownerGate.unlocked)return reply({error:'افتح حساب المسؤول برمز الحماية أولًا.'},403);
+   }
+   await rpc('sadooh_account',{p_uid:owner.data.user.id});
+  }else if(enforced&&['CREATE_ROOM','JOIN_ROOM'].includes(body.type)&&(!profile||!profile.username))return reply({error:'سجّل دخولك واختر اسم المستخدم أولًا.'},403);
+  if(profile?.username&&['CREATE_ROOM','JOIN_ROOM'].includes(body.type))body.payload={...body.payload,playerName:profile.username};
   if(body.type==='CREATE_ROOM'||body.type==='CREATE_PARTY_ROOM'){
    // Room creation has no hourly quota. The general request throttle above still applies.
    const code=crypto.randomUUID().replaceAll('-','').toUpperCase(),now=Date.now();
    const s=body.type==='CREATE_PARTY_ROOM'?createPartyRoom(code,uid,capacity(body.payload?.maxPlayers),now):createRoom(code,uid,cleanText(body.payload?.playerName,24),capacity(body.payload?.maxPlayers),now);
+   if(profile&&body.type==='CREATE_ROOM')s.room.members[0].isPro=profile.isPro;
    s.receipts.push(`${uid}:${requestId}`);
    const ok=await rpc('sadooh_commit',{p_code:code,p_revision:-1,p_state:s,p_views:allProjections(s,now),p_report:null});
    if(!ok)throw Error('تعذر إنشاء الغرفة.');return reply({...projection(s,uid,now),revision:0});
@@ -54,10 +92,12 @@ Deno.serve(async(req:Request)=>{
    const s=loaded.state as SavedRoom,now=Number(loaded.now),revision=Number(loaded.revision);
    const isMember=s.room.members.some(m=>m.id===uid&&!m.isBot);
    if(!isMember&&!isDisplay(s,uid)&&event?.type!=='JOIN_ROOM')return reply({error:'لست عضوًا في الغرفة.'},403);
+   if(enforced&&!isDisplay(s,uid)&&!verified)return reply({error:'سجّل دخولك أولًا.'},403);
    if(s.receipts.includes(`${uid}:${requestId}`))return reply({...projection(s,uid,now),revision});
    let changed=tick(s,now),report=null,errorAr:string|null=null;
    if(event){try{report=reduceEvent(s,uid,event,now,body.context);changed=true;}catch(e){errorAr=e instanceof Error?e.message:'طلب غير صالح.';}}
    else if(now-(s.lastSeen[uid]||0)>15000){s.lastSeen[uid]=now;changed=true;}
+   if(profile){const m=s.room.members.find(m=>m.id===uid);if(m){m.isPro=profile.isPro;if(profile.username)m.name=profile.username;}if(s.game){const p=s.game.players.find(p=>p.id===uid);if(p){p.isPro=profile.isPro;if(profile.username)p.name=profile.username;}}}
    if(!changed){if(errorAr)return reply({error:errorAr},400);return reply({...projection(s,uid,now),revision});}
    s.receipts=[...s.receipts,`${uid}:${requestId}`].slice(-100);
    const ok=await rpc('sadooh_commit',{p_code:code,p_revision:revision,p_state:s,p_views:allProjections(s,now),p_report:report});

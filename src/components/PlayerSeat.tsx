@@ -67,7 +67,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 
       <div className="player-seat__info">
         <div className="player-seat__name-row">
-          <span className="player-seat__name">{player.name}</span>
+          <span className="player-seat__name">{player.name}</span>{player.isPro&&<span className="pro-badge">PRO</span>}
           {isCurrentTurn && <span className="player-seat__turn-pill">دوره</span>}
         </div>
 

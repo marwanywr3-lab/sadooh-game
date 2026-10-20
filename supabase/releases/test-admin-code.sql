@@ -1,0 +1,26 @@
+begin;
+insert into auth.users(id,email,is_anonymous,aud,role) values('20000000-0000-4000-8000-000000000001','sadoh.inquiries@gmail.com',false,'authenticated','authenticated'),('20000000-0000-4000-8000-000000000002','admin-test@example.invalid',false,'authenticated','authenticated');
+insert into auth.sessions(id,user_id) values('20000000-0000-4000-8000-000000000011','20000000-0000-4000-8000-000000000001'),('20000000-0000-4000-8000-000000000012','20000000-0000-4000-8000-000000000001');
+set local role service_role;
+do $$declare uid uuid:='20000000-0000-4000-8000-000000000001';s1 uuid:='20000000-0000-4000-8000-000000000011';s2 uuid:='20000000-0000-4000-8000-000000000012';r jsonb;
+begin
+ r:=public.sadooh_admin_gate(uid,s1);if not (r->>'setupRequired')::boolean or (r->>'unlocked')::boolean then raise exception 'bad initial gate';end if;
+ begin perform public.sadooh_admin_gate(uid,s1,'SETUP','1234567890123456');raise exception 'weak code accepted';exception when others then if sqlerrm<>'ADMIN_CODE_FORMAT' then raise;end if;end;
+ r:=public.sadooh_admin_gate(uid,s1,'SETUP','Abcdefgh1234567!');if not (r->>'unlocked')::boolean or (r->>'setupRequired')::boolean then raise exception 'setup failed';end if;
+ begin perform public.sadooh_admin_gate(uid,s1,'SETUP','Otherabc1234567!');raise exception 'code overwritten';exception when others then if sqlerrm<>'ADMIN_CODE_ALREADY_SET' then raise;end if;end;
+ r:=public.sadooh_admin_gate(uid,s2);if (r->>'unlocked')::boolean then raise exception 'new login inherited unlock';end if;
+ begin perform public.sadooh_admin_gate(uid,s2,'UNLOCK','Wrongabc1234567!');raise exception 'wrong code accepted';exception when others then if sqlerrm<>'ADMIN_CODE_INVALID' then raise;end if;end;
+ r:=public.sadooh_admin_gate(uid,s2,'UNLOCK','Abcdefgh1234567!');if not (r->>'unlocked')::boolean then raise exception 'unlock failed';end if;
+ begin perform public.sadooh_admin_gate('20000000-0000-4000-8000-000000000002',s1);raise exception 'wrong user allowed';exception when others then if sqlerrm<>'ADMIN_SESSION_REQUIRED' then raise;end if;end;
+ if exists(select 1 from sadooh_private.admin_secrets where hash='Abcdefgh1234567!' or salt='Abcdefgh1234567!') then raise exception 'raw secret saved';end if;
+end $$;
+reset role;
+delete from auth.sessions where id='20000000-0000-4000-8000-000000000011';
+set local role service_role;
+do $$begin begin perform public.sadooh_admin_gate('20000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000011');raise exception 'revoked session allowed';exception when others then if sqlerrm<>'ADMIN_SESSION_REQUIRED' then raise;end if;end;end $$;
+reset role;
+set local role authenticated;
+do $$begin begin perform hash from sadooh_private.admin_secrets;raise exception 'secrets exposed';exception when insufficient_privilege then null;end;end $$;
+reset role;
+select 'PASS: 16-character rules, one-time setup, hashed secret, per-login isolation, wrong code, wrong user, revoked session and private storage' as result;
+rollback;
