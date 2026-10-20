@@ -158,7 +158,7 @@ export default function App() {
         />
       )}
 
-      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);setPreviewPrefs(null);if(!onlineAllowed)setScreen('menu');}}/></div>}
+      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} onPreview={setPreviewPrefs} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);setPreviewPrefs(null);if(!onlineAllowed)setScreen('menu');}}/></div>}
       <HowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}
