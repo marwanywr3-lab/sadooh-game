@@ -39,7 +39,7 @@ body,
 .sadooh-app-root {
   width: 100%;
   min-height: 100vh;
-  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+  font-family: 'Baloo Bhaijaan 2', system-ui, -apple-system, sans-serif;
   background-color: var(--wood-dark);
   color: var(--text-dark);
   direction: rtl;

@@ -35,3 +35,15 @@ test('audio failure cannot prevent the offline shell from installing',async()=>{
  assert.ok(installed.includes('./index.html'));assert.ok(installed.every(file=>!file.includes('/audio/')));
  assert.ok(sw.includes('./assets/audio/victory.wav'));
 });
+
+test('the Arabic font is local, licensed and available to the offline app',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8'),css=fs.readFileSync('dist/fonts.css','utf8');
+ assert.ok(html.includes('./fonts.css'));assert.ok(!html.includes('fonts.googleapis.com'));
+ for(const subset of ['arabic','latin']){
+  const file=`assets/fonts/baloo-bhaijaan-2-${subset}.woff2`;
+  assert.equal(fs.readFileSync('dist/'+file).toString('ascii',0,4),'wOF2');
+  assert.ok(css.includes('./'+file));assert.ok(sw.includes('./'+file));
+ }
+ assert.match(fs.readFileSync('dist/assets/fonts/OFL.txt','utf8'),/SIL OPEN FONT LICENSE/);
+ assert.ok(sw.includes('./fonts.css'));
+});

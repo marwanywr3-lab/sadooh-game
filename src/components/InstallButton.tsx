@@ -14,5 +14,5 @@ export const InstallButton:React.FC=()=>{
   }else setHelp(!help);
  };
  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
- return <div className="install-app"><button type="button" className="btn-menu btn-menu--warm install-app-button" onClick={install}><BrandLogo alt="" hideProBadge/>تحميل صادوه</button>{help&&<p className="install-app-help" role="status">{ios?'افتح اللعبة في Safari، ثم اضغط «مشاركة» واختر «إضافة إلى الشاشة الرئيسية».':'من قائمة المتصفح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». إذا كنت داخل تطبيق، افتح الرابط في Chrome أو Edge.'}</p>}</div>;
+ return <div className="install-app"><button type="button" className="btn-menu btn-menu--warm install-app-button" onClick={install}><BrandLogo interactive={false} alt="" hideProBadge/>تحميل صادوه</button>{help&&<p className="install-app-help" role="status">{ios?'افتح اللعبة في Safari، ثم اضغط «مشاركة» واختر «إضافة إلى الشاشة الرئيسية».':'من قائمة المتصفح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». إذا كنت داخل تطبيق، افتح الرابط في Chrome أو Edge.'}</p>}</div>;
 };

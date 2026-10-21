@@ -381,7 +381,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         {/* الشريط العلوي للمباراة */}
         <header className="table-topbar">
           <div className="table-topbar__brand">
-            <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo alt="صادوه!" className="table-topbar__logo" />
+            <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo onHome={onExitToMenu} alt="صادوه!" className="table-topbar__logo" />
             <div className="table-topbar__meta">
               <span className="turn-badge">الدور #{view.turnNumber}</span>
               <span className="deck-pill"> السحب: {view.drawPileCount}</span>

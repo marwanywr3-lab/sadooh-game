@@ -35,7 +35,7 @@ function OpeningFeedback(){
  return open&&!reduced?<LogoScene opening onSkip={()=>setOpen(false)}/>:null;
 }
 function LogoScene({opening=false,onSkip}:{opening?:boolean;onSkip:()=>void}){
- return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`}><div className="feedback-logo"><BrandLogo alt="صادوه!"/></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>تجاوز الحركة</button></div>;
+ return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt="صادوه!"/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>تجاوز الحركة</button></div>;
 }
 export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:FeedbackState|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);

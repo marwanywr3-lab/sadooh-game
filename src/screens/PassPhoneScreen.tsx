@@ -37,7 +37,7 @@ export function PassPhoneScreen({onBack}:{onBack:()=>void}){
  const next=()=>{if(game){setPrivateOpen(false);setRevealOpen(false);setGame(advanceToNextTurn(game));}};
  const outcome=game?.lastOutcome;
  const owner=game?.players.find(p=>p.id===outcome?.privateReveal?.viewerPlayerId);
- return <main className="pass-phone"><GameFeedback state={game}/><header className="party-header"><BrandLogo alt="صادوه!"/><span>العب من جوال واحد</span><details><summary>المزيد</summary><ThemeToggle/><button className="btn-secondary" onClick={onBack}>القائمة الرئيسية</button></details></header>
+ return <main className="pass-phone"><GameFeedback state={game}/><header className="party-header"><BrandLogo onHome={onBack} alt="صادوه!"/><span>العب من جوال واحد</span><details><summary>المزيد</summary><ThemeToggle/><button className="btn-secondary" onClick={onBack}>القائمة الرئيسية</button></details></header>
  {!game?<section className="pass-panel"><h1>جوال واحد يكفيكم</h1><p>مرّروا الجوال لصاحب الدور. بعد ما يلعب، يحطه بالنص وتقررون: صادوه أو عدّيها.</p><p>اكتبوا أسماءكم حسب ترتيب جلستكم.</p>
  {names.map((name,i)=><label className="form-field" key={i}><span>اللاعب {i+1}</span><input maxLength={20} value={name} placeholder={`اسم اللاعب ${i+1}`} onChange={e=>setNames(names.map((n,j)=>j===i?e.target.value:n))}/></label>)}
  <div className="pass-actions">{names.length<8&&<button className="btn-secondary" onClick={()=>setNames([...names,''])}>إضافة لاعب</button>}{names.length>3&&<button className="btn-secondary" onClick={()=>setNames(names.slice(0,-1))}>حذف آخر لاعب</button>}</div>

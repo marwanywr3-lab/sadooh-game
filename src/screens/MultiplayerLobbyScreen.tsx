@@ -119,7 +119,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
       <div className={`multiplayer-lobby-overlay ${joinOnly?'party-phone':''}`}>
         <header className="lobby-header">
           <div className="lobby-header__right">
-            <BrandLogo alt="صادوه!" className="lobby-logo" />
+            <BrandLogo onHome={leave} alt="صادوه!" className="lobby-logo" />
             <div>
               <h2> الغرف الجماعية عبر الإنترنت</h2>
               <span className={`conn-status-pill conn-status--${roomState.connectionStatus}`}>

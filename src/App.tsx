@@ -1,5 +1,5 @@
 import {badgeInk} from './components/ProBadge';
-import {BrandLogo,ProBrandContext} from './components/Theme';
+import {BrandLogo,ProBrandContext,BrandNavigationContext} from './components/Theme';
 import {AccountPanel} from './components/AccountPanel';
 import {accountClient,accountRequest,proSettings,type Account} from './services/account';
 import {PassPhoneScreen} from './screens/PassPhoneScreen';
@@ -66,6 +66,11 @@ export default function App() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', settings.darkMode ? '#181d1a' : '#f6f3e9');
   }, [settings.darkMode]);
 
+  const goHome=()=>{
+    setScreen('menu');setAccountOpen(false);setIsSettingsOpen(false);setIsHowToPlayOpen(false);setPreviewPrefs(null);
+    const url=new URL(window.location.href);url.searchParams.delete('room');url.searchParams.delete('party');window.history.replaceState(null,'',url);
+  };
+
   const handleUpdateSettings = (partial: Partial<UserSettings>) => {
     const updated = saveUserSettings(partial);
     setSettings(updated);
@@ -99,7 +104,7 @@ export default function App() {
   if(!account?.username)return <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}><main className="entry-screen" dir="rtl" lang="ar"><BrandLogo alt="صادوه!"/><p>حيّاك في صادوه. سجّل مرة، وبعدها تدخل على طول.</p>{checkingAccount?<p role="status">جاري فتح حسابك…</p>:<AccountPanel entryMode account={account} onPreview={setPreviewPrefs} enforced={enforced} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{}}/>}</main></ThemeContext.Provider>;
   return (
     <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}>
-    <ProBrandContext.Provider value={!!account?.isPro}><div
+    <ProBrandContext.Provider value={!!account?.isPro}><BrandNavigationContext.Provider value={{onHome:goHome,onPro:screen==='menu'&&account?.isPro?openPro:undefined}}><div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
       data-pro-position={account?.isPro?appearance.position:undefined}
       style={account?.isPro&&appearance.background?{['--pro-background' as string]:appearance.background,['--ui-page' as string]:appearance.background,['--pro-badge-color' as string]:appearance.badgeColor||'#f2d96f',['--pro-badge-ink' as string]:badgeInk(appearance.badgeColor)}:undefined}
@@ -131,14 +136,14 @@ export default function App() {
         />
       )}
 
-      {screen === 'passphone'&&<PassPhoneScreen onBack={()=>setScreen('menu')}/>}
-      {screen === 'party'&&onlineAllowed&&<PartyScreen onBack={()=>setScreen('menu')} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
+      {screen === 'passphone'&&<PassPhoneScreen onBack={goHome}/>}
+      {screen === 'party'&&onlineAllowed&&<PartyScreen onBack={goHome} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
 
       {screen === 'multiplayer' && onlineAllowed && (
         <MultiplayerLobbyScreen
           joinOnly={partyJoin}
           initialPlayerName={account?.username||settings.playerName}
-          onBackToMenu={() => setScreen('menu')}
+          onBackToMenu={goHome}
           onPlayLocalWithSetup={(botCount, difficulty, playerName) =>
             handleStartSinglePlayer(botCount, difficulty, playerName)
           }
@@ -151,7 +156,7 @@ export default function App() {
           botCount={matchConfig.botCount}
           botDifficulty={matchConfig.difficulty}
           guided={matchConfig.guided}
-          onExitToMenu={() => setScreen('menu')}
+          onExitToMenu={goHome}
           onRecordMatchEnd={(humanWon) => {
             if (matchConfig.guided) return;
             handleUpdateSettings({
@@ -178,7 +183,7 @@ export default function App() {
         onUpdateSettings={handleUpdateSettings}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </div></ProBrandContext.Provider>
+    </div></BrandNavigationContext.Provider></ProBrandContext.Provider>
     </ThemeContext.Provider>
   );
 }

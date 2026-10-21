@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-const files=['./index.html','./manifest.webmanifest'];
+const files=['./index.html','./manifest.webmanifest','./fonts.css'];
 function walk(dir){for(const item of fs.readdirSync('dist/'+dir,{withFileTypes:true})){const file=path.posix.join(dir,item.name);if(item.isDirectory())walk(file);else if(!file.endsWith('.png')||file.startsWith('icons/'))files.push('./'+file);}}
 walk('assets');walk('icons');
 const optional=files.filter(file=>file.startsWith('./assets/audio/'));

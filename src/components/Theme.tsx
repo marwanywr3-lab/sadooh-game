@@ -2,12 +2,17 @@ import {SoundControls} from './Feedback';
 import React,{createContext,useContext} from 'react';
 export const ThemeContext=createContext({dark:false,toggle:()=>{}});
 export const ProBrandContext=createContext(false);
-export const BrandLogo:React.FC<(React.ImgHTMLAttributes<HTMLImageElement>&{hideProBadge?:boolean})>=props=>{
+export const BrandNavigationContext=createContext<{onHome?:()=>void;onPro?:()=>void}>({});
+export const BrandLogo:React.FC<(React.ImgHTMLAttributes<HTMLImageElement>&{hideProBadge?:boolean;interactive?:boolean;onHome?:()=>void})>=props=>{
  const {dark}=useContext(ThemeContext);
- const {hideProBadge,...imageProps}=props;
+ const navigation=useContext(BrandNavigationContext);
+ const {hideProBadge,interactive=true,onHome,...imageProps}=props;
  const pro=useContext(ProBrandContext)&&!hideProBadge;
  const logo=<img {...imageProps} src={dark?'./assets/logo-dark.svg':'./assets/logo.svg'}/>;
- return pro?<span className="pro-brand">{logo}<span className="brand-pro-badge" aria-label="مشترك Pro">PRO</span></span>:logo;
+ const home=onHome||navigation.onHome;
+ const image=interactive&&home?<button type="button" className="brand-home" aria-label="العودة للقائمة الرئيسية" onClick={home}>{logo}</button>:logo;
+ const badge=interactive&&navigation.onPro?<button type="button" className="brand-pro-badge brand-pro-link" aria-label="تخصيص Pro" onClick={navigation.onPro}>PRO</button>:<span className="brand-pro-badge" aria-label="مشترك Pro">PRO</span>;
+ return pro?<span className="pro-brand">{image}{badge}</span>:image;
 };
 export const ThemeToggle:React.FC<{audio?:boolean}>=({audio=true})=>{
  const {dark,toggle}=useContext(ThemeContext);
