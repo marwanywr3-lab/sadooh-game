@@ -1,3 +1,4 @@
+import {FeedbackProvider} from './components/Feedback';
 import './services/pwa';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -9,7 +10,9 @@ import './styles/party.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <FeedbackProvider><App /></FeedbackProvider>
   </React.StrictMode>
 );
 import './styles/pro.css';
+
+import './styles/feedback.css';

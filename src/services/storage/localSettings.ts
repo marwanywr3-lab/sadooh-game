@@ -1,6 +1,8 @@
 import { BotDifficulty } from '../../types/game';
 
 export interface UserSettings {
+  soundEnabled: boolean;
+  soundVolume: number;
   playerName: string;
   defaultBotCount: number; // 2..7 (إجمالي 3..8 لاعبين)
   defaultDifficulty: BotDifficulty;
@@ -14,6 +16,8 @@ export interface UserSettings {
 const STORAGE_KEY = 'sadooh_estiraha_settings_v1';
 
 export const DEFAULT_SETTINGS: UserSettings = {
+  soundEnabled: true,
+  soundVolume: 0.35,
   playerName: 'سلطان',
   defaultBotCount: 3, // 4 لاعبين على الطاولة افتراضيًا
   defaultDifficulty: 'medium',
@@ -29,7 +33,8 @@ export function loadUserSettings(): UserSettings {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
     const parsed = JSON.parse(raw);
-    delete parsed.soundEnabled;
+    parsed.soundEnabled = typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true;
+    parsed.soundVolume = typeof parsed.soundVolume === 'number' && Number.isFinite(parsed.soundVolume) ? Math.max(0,Math.min(1,parsed.soundVolume)) : 0.35;
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
@@ -50,5 +55,6 @@ export function saveUserSettings(next: Partial<UserSettings>): UserSettings {
   } catch {
     // تجاهل أخطاء التخزين في البيئات المقيدة
   }
+  window.dispatchEvent(new Event('sadooh-settings'));
   return merged;
 }

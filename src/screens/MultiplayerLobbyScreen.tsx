@@ -1,6 +1,7 @@
+import {useJoinFeedback} from '../components/Feedback';
 import {ProBadge} from '../components/ProBadge';
 import {BrandLogo} from '../components/Theme';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BotDifficulty, PublicPlayerView } from '../types/game';
 import { ConnectionStatus, RoomState } from '../types/multiplayer';
 import { SupabaseRoomService } from '../services/multiplayer/roomClient';
@@ -32,6 +33,9 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
     'أنشئ غرفة جديدة أو انضم عبر رابط دعوة.'
   );
 
+  const seenWaiting=useRef(false);
+  if(roomState.roomCode&&roomState.status==='waiting'&&roomState.connectionStatus==='connected')seenWaiting.current=true;
+  const joined=useJoinFeedback(roomState.members.map(m=>m.id),roomState.roomCode||'',!!roomState.partyMode);
   const [matchView,setMatchView]=useState<ClientProjectedGameState|null>(null);
   useEffect(()=>service.subscribeMatch(setMatchView),[service]);
   useEffect(()=>{service.reconnect();return()=>service.disconnect();},[service]);
@@ -106,7 +110,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
     disconnected: ' غير متصل بالخادم',
   };
 
-  if(matchView) return <><GameTableScreen remote={{service,view:matchView}} humanPlayerName={playerName} botCount={2} botDifficulty="medium" onExitToMenu={leave} onRecordMatchEnd={()=>{}} />{roomState.connectionStatus!=='connected' && <div role="alert" style={{position:'fixed',top:10,right:10,zIndex:1000,background:'#622',padding:16}}>انقطع الاتصال — نحاول استعادة الجلسة.</div>}{statusBanner && statusBanner!=='متصل بالغرفة.' && <div role="status" style={{position:'fixed',bottom:10,right:10,zIndex:1000,background:'#342711',padding:12}}>{statusBanner}</div>}</>;
+  if(matchView) return <><GameTableScreen freshRemoteStart={seenWaiting.current} feedbackSilent={!!roomState.partyMode} remote={{service,view:matchView}} humanPlayerName={playerName} botCount={2} botDifficulty="medium" onExitToMenu={leave} onRecordMatchEnd={()=>{}} />{roomState.connectionStatus!=='connected' && <div role="alert" style={{position:'fixed',top:10,right:10,zIndex:1000,background:'#622',padding:16}}>انقطع الاتصال — نحاول استعادة الجلسة.</div>}{statusBanner && statusBanner!=='متصل بالغرفة.' && <div role="status" style={{position:'fixed',bottom:10,right:10,zIndex:1000,background:'#342711',padding:12}}>{statusBanner}</div>}</>;
   return (
     <div
       className="multiplayer-lobby-screen"
@@ -280,7 +284,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
 
             <div className="room-members-list">
               {roomState.members.map((member) => (
-                <div key={member.id} className="room-member-card">
+                <div key={member.id} className={`room-member-card ${joined.has(member.id)?'feedback-join':''}`}>
                   {activeBubbleByPlayer[member.id] && (
                     <div className="member-chat-bubble">
                       {activeBubbleByPlayer[member.id]}

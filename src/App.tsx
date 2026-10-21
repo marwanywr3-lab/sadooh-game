@@ -24,6 +24,8 @@ type ActiveScreen = 'menu' | 'tutorial' | 'game' | 'multiplayer' | 'party' | 'pa
 export default function App() {
   const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
 
+  useEffect(()=>{const refresh=()=>setSettings(loadUserSettings());window.addEventListener('sadooh-settings',refresh);return()=>window.removeEventListener('sadooh-settings',refresh);},[]);
+
   // عند أول تشغيل، اعرض الجولة التعليمية التفاعلية مع «أبو فهد» تلقائيًا (مع إمكانية تخطيها فورًا)
   const [screen, setScreen] = useState<ActiveScreen>(() => {
     if(/^[a-f0-9]{32}$/i.test(new URLSearchParams(location.search).get('room')||''))return 'multiplayer';

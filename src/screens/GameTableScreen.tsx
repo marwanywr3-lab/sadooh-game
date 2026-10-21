@@ -1,3 +1,4 @@
+import {GameFeedback,RevealCard} from '../components/Feedback';
 import {ProBadge} from '../components/ProBadge';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -36,12 +37,16 @@ interface GameTableScreenProps {
   botDifficulty: BotDifficulty;
   onExitToMenu: () => void;
   onRecordMatchEnd: (humanWon: boolean) => void;
+  feedbackSilent?: boolean;
+  freshRemoteStart?: boolean;
 }
 
 
 
 export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   remote,
+  feedbackSilent=false,
+  freshRemoteStart=false,
   guided = false,
   humanPlayerName,
   botCount,
@@ -376,9 +381,9 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         {/* الشريط العلوي للمباراة */}
         <header className="table-topbar">
           <div className="table-topbar__brand">
-            <BrandLogo alt="صادوه!" className="table-topbar__logo" />
+            <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo alt="صادوه!" className="table-topbar__logo" />
             <div className="table-topbar__meta">
-              <span className="turn-badge">الجولة #{view.turnNumber}</span>
+              <span className="turn-badge">الدور #{view.turnNumber}</span>
               <span className="deck-pill"> السحب: {view.drawPileCount}</span>
               <span className="deck-pill"> المستخدمة: {view.discardPileCount}</span>
             </div>
@@ -508,9 +513,10 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
             <div className="outcome-stage-card" role="status">
               <div className="outcome-stage-card__card-slot">
                 {view.lastOutcomePublic.revealedCard ? (
-                  <CardView
+                  <RevealCard
+                    silent={feedbackSilent}
+                    eventKey={`${view.matchId}:${view.turnNumber}:public-flip`}
                     characterId={view.lastOutcomePublic.revealedCard.characterId}
-                    size="sm"
                     badgeText={
                       view.lastOutcomePublic.wasTruthful
                         ? ' طلع صادق!'
@@ -713,8 +719,8 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
               </p>
 
               <div className="victory-standings">
-                {view.players.map((p) => (
-                  <div key={p.id} className="standing-row">
+                {view.players.map((p,i) => (
+                  <div key={p.id} className="standing-row feedback-result-row" style={{'--row-delay': `${i*70}ms`} as React.CSSProperties}>
                     <span>
                       {p.id === view.winnerPlayerId ? ' ' : '• '}
                       {p.name}

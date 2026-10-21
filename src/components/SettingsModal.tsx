@@ -1,4 +1,5 @@
 import {ThemeToggle} from './Theme';
+import {SoundControls} from './Feedback';
 import React from 'react';
 import { UserSettings } from '../services/storage/localSettings';
 import { BotDifficulty } from '../types/game';
@@ -86,7 +87,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </label>
 
-<ThemeToggle/>
+<ThemeToggle audio={false}/><SoundControls/>
           <div className="toggle-row">
             <span> تقليل الحركة والتحريكات (Reduce Motion)</span>
             <button

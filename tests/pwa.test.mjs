@@ -26,3 +26,12 @@ test('install manifest uses standalone mode and valid square logo icons',()=>{
  assert.equal(m.display,'standalone');assert.equal(m.scope,'./');assert.equal(m.start_url,'./');
  for(const icon of m.icons){const b=fs.readFileSync('dist/'+icon.src);const size=Number(icon.sizes.split('x')[0]);assert.equal(b.readUInt32BE(16),size);assert.equal(b.readUInt32BE(20),size);}
 });
+
+test('audio failure cannot prevent the offline shell from installing',async()=>{
+ const installed=[];let install;
+ const context={URL,Response,self:{registration:{scope:'https://example.test/'},addEventListener:(type,fn)=>{if(type==='install')install=fn;}},caches:{open:async()=>({addAll:async files=>{installed.push(...files);if(files.some(file=>file.includes('/audio/')))throw Error('audio unavailable');}})}};
+ vm.runInNewContext(sw,context);let completion;
+ install({waitUntil:value=>{completion=value;}});await completion;
+ assert.ok(installed.includes('./index.html'));assert.ok(installed.every(file=>!file.includes('/audio/')));
+ assert.ok(sw.includes('./assets/audio/victory.wav'));
+});

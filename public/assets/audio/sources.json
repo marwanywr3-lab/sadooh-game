@@ -1,0 +1,44 @@
+[
+  {
+    "file": "whoosh.wav",
+    "sourcePack": "casino",
+    "originalFile": "Audio/card-slide-4.ogg",
+    "durationSeconds": 0.459,
+    "sha256": "1cd748d1902dd33e771674de8bca0f3badb201a276c7c5e724a24eebee7a5a80"
+  },
+  {
+    "file": "pop.wav",
+    "sourcePack": "interface",
+    "originalFile": "Audio/pluck_001.ogg",
+    "durationSeconds": 0.102,
+    "sha256": "ed0652253ca7fbc74dfdd6c7220bc4c544fee7ebebe00b6b155f29b1e29e9af4"
+  },
+  {
+    "file": "turn.wav",
+    "sourcePack": "interface",
+    "originalFile": "Audio/select_001.ogg",
+    "durationSeconds": 0.043,
+    "sha256": "f7dc8eecfa7128c25cbc15c8fc772b9ca22d44271f7b532a14da6c0d765288f7"
+  },
+  {
+    "file": "flip.wav",
+    "sourcePack": "casino",
+    "originalFile": "Audio/card-shove-1.ogg",
+    "durationSeconds": 0.5,
+    "sha256": "3253a5c077a97585688734a2ed90e7322495fc7265225249cafe67b536db4ebc"
+  },
+  {
+    "file": "reveal.wav",
+    "sourcePack": "interface",
+    "originalFile": "Audio/confirmation_001.ogg",
+    "durationSeconds": 0.29,
+    "sha256": "820c8de3add5084d9c8232af2fa4ee8ab3df2aef1a327261972d13f8e6dfbafd"
+  },
+  {
+    "file": "victory.wav",
+    "sourcePack": "jingles",
+    "originalFile": "Audio/Pizzicato jingles/jingles_PIZZI01.ogg",
+    "durationSeconds": 1.002,
+    "sha256": "fcd04f1fafc445a914d6de5776e6844f2e695ae7bac3bce5e4ab8da328cd9aaa"
+  }
+]

@@ -1,3 +1,4 @@
+import {GameFeedback,RevealCard} from '../components/Feedback';
 import React,{useEffect,useState} from 'react';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
 import {CardView} from '../components/CardView';
@@ -36,7 +37,7 @@ export function PassPhoneScreen({onBack}:{onBack:()=>void}){
  const next=()=>{if(game){setPrivateOpen(false);setRevealOpen(false);setGame(advanceToNextTurn(game));}};
  const outcome=game?.lastOutcome;
  const owner=game?.players.find(p=>p.id===outcome?.privateReveal?.viewerPlayerId);
- return <main className="pass-phone"><header className="party-header"><BrandLogo alt="صادوه!"/><span>العب من جوال واحد</span><details><summary>المزيد</summary><ThemeToggle/><button className="btn-secondary" onClick={onBack}>القائمة الرئيسية</button></details></header>
+ return <main className="pass-phone"><GameFeedback state={game}/><header className="party-header"><BrandLogo alt="صادوه!"/><span>العب من جوال واحد</span><details><summary>المزيد</summary><ThemeToggle/><button className="btn-secondary" onClick={onBack}>القائمة الرئيسية</button></details></header>
  {!game?<section className="pass-panel"><h1>جوال واحد يكفيكم</h1><p>مرّروا الجوال لصاحب الدور. بعد ما يلعب، يحطه بالنص وتقررون: صادوه أو عدّيها.</p><p>اكتبوا أسماءكم حسب ترتيب جلستكم.</p>
  {names.map((name,i)=><label className="form-field" key={i}><span>اللاعب {i+1}</span><input maxLength={20} value={name} placeholder={`اسم اللاعب ${i+1}`} onChange={e=>setNames(names.map((n,j)=>j===i?e.target.value:n))}/></label>)}
  <div className="pass-actions">{names.length<8&&<button className="btn-secondary" onClick={()=>setNames([...names,''])}>إضافة لاعب</button>}{names.length>3&&<button className="btn-secondary" onClick={()=>setNames(names.slice(0,-1))}>حذف آخر لاعب</button>}</div>
@@ -51,10 +52,10 @@ export function PassPhoneScreen({onBack}:{onBack:()=>void}){
  <button className="btn-primary btn-lg" onClick={()=>{const result=submitPlayerMove(game,{playerId:active!.id,cardId,claimedCharacter:claim,targetPlayerId:CHARACTERS[claim].requiresTarget?target:null,secondaryCardId:secondary||null});if(result.errorAr){setError(result.errorAr);return;}setPrivateOpen(false);setChallenger('');setError('');setGame(result.nextState);}}>العب وأخفِ بطاقاتي</button>{error&&<p role="alert">{error}</p>}
  </>)}
  {game.phase==='CHALLENGE_WINDOW'&&<><h1>حطّوا الجوال بالنص</h1><h2>{active?.name} يقول: {CHARACTERS[game.pendingClaim!.claimedCharacter].nameAr}</h2>{game.pendingClaim?.targetPlayerId&&<p>على {game.players.find(p=>p.id===game.pendingClaim?.targetPlayerId)?.name}</p>}<p>اللي يشك يختار اسمه ويضغط صادوه. إذا اتفقتوا تعدّونها، اضغطوا عدّيها.</p><label className="form-field"><span>مين يقول صادوه؟</span><select value={challenger} onChange={e=>setChallenger(e.target.value)}><option value="">اختر اسمك</option>{game.players.filter(p=>p.id!==active?.id).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label><div className="pass-actions"><button className="btn-primary btn-lg" disabled={!challenger} onClick={()=>resolve(challenger)}>صادوه!</button><button className="btn-secondary btn-lg" onClick={()=>resolve(null)}>عدّيها — محد بيتحدى</button></div></>}
- {(game.phase==='RESOLVING_CHALLENGE'||game.phase==='GAME_OVER')&&<><h1>{game.phase==='GAME_OVER'?`فاز ${game.players.find(p=>p.id===game.winnerPlayerId)?.name}!`:outcome?.challenged?(outcome.wasTruthful?'طلع صادق!':'صادوه! طلع يخدعكم'):'عدّت بدون تحدي'}</h1><p>{outcome?.summaryAr}</p>{outcome?.revealedCard&&<p>البطاقة المكشوفة: {CHARACTERS[outcome.revealedCard.characterId].nameAr}</p>}
+ {(game.phase==='RESOLVING_CHALLENGE'||game.phase==='GAME_OVER')&&<><h1 className={game.phase==='GAME_OVER'?'feedback-winner':''}>{game.phase==='GAME_OVER'?`فاز ${game.players.find(p=>p.id===game.winnerPlayerId)?.name}!`:outcome?.challenged?(outcome.wasTruthful?'طلع صادق!':'صادوه! طلع يخدعكم'):'عدّت بدون تحدي'}</h1><p>{outcome?.summaryAr}</p>{outcome?.revealedCard&&<RevealCard characterId={outcome.revealedCard.characterId} eventKey={`${game.matchId}:${game.turnNumber}:public-flip`}/>}
  {owner&&outcome?.privateReveal&&<div className="pass-secret"><p>معلومة خاصة لـ{owner.name}. عطوه الجوال قبل فتحها.</p>{revealOpen?<><p>بطاقة {game.players.find(p=>p.id===outcome.privateReveal?.targetPlayerId)?.name}: <strong>{CHARACTERS[outcome.privateReveal.revealedCard.characterId].nameAr}</strong></p><button className="btn-secondary" onClick={()=>setRevealOpen(false)}>إخفاء المعلومة</button></>:<button className="btn-secondary" onClick={()=>setRevealOpen(true)}>أنا {owner.name} — اعرض المعلومة</button>}</div>}
  {game.phase!=='GAME_OVER'?<button className="btn-primary btn-lg" onClick={next}>خلصنا قراءة — الدور التالي</button>:<button className="btn-primary btn-lg" onClick={()=>{setPrivateOpen(false);setRevealOpen(false);setGame(createPassPhoneMatch(names.map(n=>n.trim())));}}>العبوا مرة ثانية</button>}</>}
- {!privateOpen&&!revealOpen&&<div className="pass-counts">{game.players.map(p=><span key={p.id}>{p.name}: {p.hand.length} بطاقات</span>)}</div>}
+ {!privateOpen&&!revealOpen&&<div className="pass-counts">{game.players.map((p,i)=><span key={p.id} className={game.phase==='GAME_OVER'?'feedback-result-row':''} style={{'--row-delay':`${i*70}ms`} as React.CSSProperties}>{p.name}: {p.hand.length} بطاقات</span>)}</div>}
  </section>}
  </main>;
 }
