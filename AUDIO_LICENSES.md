@@ -1,22 +1,22 @@
-# Sadooh feedback audio
+# Sadooh sound sources — natural paper recordings
 
-All clips are original Kenney recordings/designs, distributed under CC0. No generative audio or background music is used. Kenney's publisher page declares “No generative AI was used”: https://kenney.itch.io/kenney-game-assets . Individual free packs were downloaded; the paid bundle was not purchased.
+The current game plays only the six paper-* recordings below. All come from **Kenney Casino Audio 1.1**, tagged Foley by its publisher and released under CC0. The previously used electronic interface cues and musical jingle are no longer selected by the audio manager.
 
-| App file | Original recording | Pack |
-| --- | --- | --- |
-| whoosh.wav | Audio/card-slide-4.ogg | Casino Audio 1.1 |
-| pop.wav | Audio/pluck_001.ogg | Interface Sounds 1.0 |
-| turn.wav | Audio/select_001.ogg | Interface Sounds 1.0 |
-| flip.wav | Audio/card-shove-1.ogg | Casino Audio 1.1 |
-| reveal.wav | Audio/confirmation_001.ogg | Interface Sounds 1.0 |
-| victory.wav | Audio/Pizzicato jingles/jingles_PIZZI01.ogg | Music Jingles |
+Official pack: https://kenney.nl/assets/casino-audio
+Publisher's declaration of no generative AI: https://kenney.itch.io/kenney-game-assets
+License: https://creativecommons.org/publicdomain/zero/1.0/
 
-Sources:
-- https://kenney.nl/assets/interface-sounds
-- https://kenney.nl/assets/casino-audio
-- https://kenney.nl/assets/music-jingles
-- License: https://creativecommons.org/publicdomain/zero/1.0/
+| Playback asset | Original file in the downloaded pack |
+| --- | --- |
+| paper-whoosh.wav | Audio/card-fan-1.ogg |
+| paper-pop.wav | Audio/card-place-2.ogg |
+| paper-turn.wav | Audio/card-place-4.ogg |
+| paper-flip.wav | Audio/card-shove-4.ogg |
+| paper-reveal.wav | Audio/cards-pack-take-out-1.ogg |
+| paper-victory.wav | Audio/cards-pack-open-2.ogg |
 
-Original pack license texts are preserved under public/assets/audio/. sources.json records original filenames, output durations and SHA-256 hashes. Processing: mono conversion, WAV PCM16 encoding and 8 ms boundary fades; flip shortened to 0.5 seconds. No synthesis. WAV ensures playback on older iOS versions as well as desktop browsers. The victory cue is one-shot, approximately one second, without looping.
+Only compatibility conversion from the pack's Vorbis files to PCM16 WAV was performed. Original duration, sample rate and channels are preserved. No synthesis, AI generation, pitch shifting, layering, EQ, added fades or sound composition was used. The current victory cue is a physical paper-pack sound rather than music.
 
-Audio is an optional enhancement: browsers can block playback until a trusted gesture; failed loading never blocks gameplay. Assets are cached on first successful playback/fetch, not required for the offline shell to install. First offline use before audio has been fetched remains silent.
+Original source files were checked byte-for-byte against the downloaded pack ZIP. public/assets/audio/sources.json records each original filename and SHA-256 hash, the playback file's SHA-256 hash and duration. The publisher's original license is preserved as casino-LICENSE.txt. The no-AI statement is the publisher's declaration, not an independent audit.
+
+Legacy assets and their license notices remain for older cached app versions; the current client does not load their electronic cues. Browser autoplay rules and the user's mute/volume preferences are respected. Audio is optional, cached after successful loading and never required to install or run the offline app shell.

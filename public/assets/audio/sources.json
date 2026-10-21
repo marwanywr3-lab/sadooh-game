@@ -1,44 +1,74 @@
 [
   {
-    "file": "whoosh.wav",
-    "sourcePack": "casino",
-    "originalFile": "Audio/card-slide-4.ogg",
+    "cue": "whoosh",
+    "file": "paper-whoosh.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/card-fan-1.ogg",
+    "originalSha256": "7a9758ccad8899baef1b9f60b4064e4baa724a548293832fdaea07e6e07e638d",
+    "durationSeconds": 0.721,
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "ae27e80c78f6df6bf81558715837e6128291b6b6a969db1e1de2ec27642f9e80"
+  },
+  {
+    "cue": "pop",
+    "file": "paper-pop.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/card-place-2.ogg",
+    "originalSha256": "903d5050718595e87864dd755643b476ab1a5533080dcc2dddc72570d33ba9f8",
     "durationSeconds": 0.459,
-    "sha256": "1cd748d1902dd33e771674de8bca0f3badb201a276c7c5e724a24eebee7a5a80"
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "fd801bcaa5b7d395376d54d2b908385db592a241283e091ea2c53e5ec1677b94"
   },
   {
-    "file": "pop.wav",
-    "sourcePack": "interface",
-    "originalFile": "Audio/pluck_001.ogg",
-    "durationSeconds": 0.102,
-    "sha256": "ed0652253ca7fbc74dfdd6c7220bc4c544fee7ebebe00b6b155f29b1e29e9af4"
+    "cue": "turn",
+    "file": "paper-turn.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/card-place-4.ogg",
+    "originalSha256": "18e3ba713b7259605fd27cdc048085ed56cf86b32403f070b6cb125019f77183",
+    "durationSeconds": 0.601,
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "d75c8baf1e9cc53bd8193e95dfc5195d131477a342c410baafae45d9a75ea6af"
   },
   {
-    "file": "turn.wav",
-    "sourcePack": "interface",
-    "originalFile": "Audio/select_001.ogg",
-    "durationSeconds": 0.043,
-    "sha256": "f7dc8eecfa7128c25cbc15c8fc772b9ca22d44271f7b532a14da6c0d765288f7"
+    "cue": "flip",
+    "file": "paper-flip.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/card-shove-4.ogg",
+    "originalSha256": "0a1ad3a2f16bd2ed73349e6342426ca7a59a6e26b7e26e36d51d51c2c2349d6f",
+    "durationSeconds": 0.809,
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "44eee79442e3ace777a98e57c895044844236d99e3a105e728ebb23b3f614c0a"
   },
   {
-    "file": "flip.wav",
-    "sourcePack": "casino",
-    "originalFile": "Audio/card-shove-1.ogg",
-    "durationSeconds": 0.5,
-    "sha256": "3253a5c077a97585688734a2ed90e7322495fc7265225249cafe67b536db4ebc"
+    "cue": "reveal",
+    "file": "paper-reveal.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/cards-pack-take-out-1.ogg",
+    "originalSha256": "6d38b979f64d20e4153173187ed67b04c6c004767c0a43eddb65c75fa925a1c4",
+    "durationSeconds": 0.496,
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "28b62e88b5640ff6c6a28339696b1511472629342eb8292e2a2478c98d218362"
   },
   {
-    "file": "reveal.wav",
-    "sourcePack": "interface",
-    "originalFile": "Audio/confirmation_001.ogg",
-    "durationSeconds": 0.29,
-    "sha256": "820c8de3add5084d9c8232af2fa4ee8ab3df2aef1a327261972d13f8e6dfbafd"
-  },
-  {
-    "file": "victory.wav",
-    "sourcePack": "jingles",
-    "originalFile": "Audio/Pizzicato jingles/jingles_PIZZI01.ogg",
-    "durationSeconds": 1.002,
-    "sha256": "fcd04f1fafc445a914d6de5776e6844f2e695ae7bac3bce5e4ab8da328cd9aaa"
+    "cue": "victory",
+    "file": "paper-victory.wav",
+    "sourcePack": "Kenney Casino Audio 1.1",
+    "sourcePage": "https://kenney.nl/assets/casino-audio",
+    "license": "CC0-1.0",
+    "originalFile": "Audio/cards-pack-open-2.ogg",
+    "originalSha256": "49e02479815c69cd303e0d8f12952c0492d5b3e555838f3485cc25a09818e6fb",
+    "durationSeconds": 0.732,
+    "conversion": "Vorbis decode to PCM16 WAV only; original duration and channels preserved",
+    "sha256": "262404c468321bd88956b646cf96267f618483543b962756028c537f348e7846"
   }
 ]

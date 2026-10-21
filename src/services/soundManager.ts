@@ -1,5 +1,5 @@
 export type SoundName='whoosh'|'pop'|'turn'|'flip'|'reveal'|'victory';
-const sources:Record<SoundName,string>={whoosh:'whoosh.wav',pop:'pop.wav',turn:'turn.wav',flip:'flip.wav',reveal:'reveal.wav',victory:'victory.wav'};
+const sources:Record<SoundName,string>={whoosh:'paper-whoosh.wav',pop:'paper-pop.wav',turn:'paper-turn.wav',flip:'paper-flip.wav',reveal:'paper-reveal.wav',victory:'paper-victory.wav'};
 /** Plays licensed recordings through one gain node, including volume control on iOS. */
 export class SoundManager {
   private enabled=true;

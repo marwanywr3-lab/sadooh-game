@@ -4,9 +4,10 @@ import {CardView} from './CardView';
 import type {CharacterId} from '../types/game';
 import {loadUserSettings,saveUserSettings} from '../services/storage/localSettings';
 import {SoundManager,type SoundName} from '../services/soundManager';
-import {FeedbackEvents,type FeedbackState} from '../services/feedbackEvents';
+import {FeedbackEvents,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
 
 const sound=new SoundManager();
+let openingDismissed=false;
 const Context=createContext({reduced:false,play:(_name:SoundName,_key:string)=>{}});
 export function FeedbackProvider({children}:{children:React.ReactNode}){
  const [settings,setSettings]=useState(loadUserSettings);
@@ -29,13 +30,14 @@ export function SoundControls(){
  return <div className="feedback-sound-controls"><label className="toggle-row"><span>المؤثرات الصوتية</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>مستوى الصوت {Math.round(settings.soundVolume*100)}٪</span><input aria-label="مستوى المؤثرات الصوتية" type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label></div>;
 }
 function OpeningFeedback(){
- const [open,setOpen]=useState(true);const {reduced,play}=useContext(Context);
+ const [open,setOpen]=useState(false);const {reduced,play}=useContext(Context);
+ useEffect(()=>{if(!openingDismissed&&!reduced)setOpen(true);},[]);
  useEffect(()=>{const dismiss=()=>setOpen(false);window.addEventListener('sadooh-feedback-start',dismiss);return()=>window.removeEventListener('sadooh-feedback-start',dismiss);},[]);
- useEffect(()=>{if(reduced){setOpen(false);return;}if(!open)return;play('whoosh','app:open');const pop=setTimeout(()=>play('pop','app:pop'),450);const end=setTimeout(()=>setOpen(false),1700);return()=>{clearTimeout(pop);clearTimeout(end);};},[reduced,open]);
+ useEffect(()=>{if(reduced){setOpen(false);return;}if(!open)return;play('whoosh','app:open');const pop=setTimeout(()=>play('pop','app:pop'),850);const end=setTimeout(()=>setOpen(false),FEEDBACK_TIMINGS.opening);return()=>{clearTimeout(pop);clearTimeout(end);};},[reduced,open]);
  return open&&!reduced?<LogoScene opening onSkip={()=>setOpen(false)}/>:null;
 }
 function LogoScene({opening=false,onSkip}:{opening?:boolean;onSkip:()=>void}){
- return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt="صادوه!"/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>تجاوز الحركة</button></div>;
+ return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt="صادوه!"/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>تجاوز الحركة</button></div>;
 }
 export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:FeedbackState|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);
@@ -45,17 +47,17 @@ export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=f
   const event=events.current.observe(state,remote,freshRemoteStart)[0];if(!event||!state)return;
   clearTimeout(popTimer.current);
   const key=`${state.matchId}:${state.turnNumber}:${event}`;
-  if(event==='start')window.dispatchEvent(new Event('sadooh-feedback-start'));
+  if(event==='start'){openingDismissed=true;window.dispatchEvent(new Event('sadooh-feedback-start'));}
   if(document.hidden)return;
   setScene({kind:event,key,turn:state.turnNumber});
-  if(!silent){if(event==='start'){play('whoosh',key);popTimer.current=setTimeout(()=>play('pop',key+':pop'),450);}else if(event==='turn')play('turn',key);else{play('reveal',key+':reveal');popTimer.current=setTimeout(()=>play('victory',key+':winner'),160);}}
+  if(!silent){if(event==='start'){play('whoosh',key);popTimer.current=setTimeout(()=>play('pop',key+':pop'),800);}else if(event==='turn'){play('whoosh',key+':words');popTimer.current=setTimeout(()=>play('turn',key+':number'),FEEDBACK_TIMINGS.roundWords);}else{play('reveal',key+':reveal');popTimer.current=setTimeout(()=>play('victory',key+':winner'),520);}}
  },[state?.matchId,state?.turnNumber,state?.phase,remote,silent,freshRemoteStart]);
- useEffect(()=>{if(!scene)return;const timer=setTimeout(()=>setScene(null),scene.kind==='start'?1500:scene.kind==='turn'?800:1200);return()=>clearTimeout(timer);},[scene]);
- useEffect(()=>{if(scene?.kind==='start'&&state?.phase!=='CHOOSING_MOVE'){setScene(null);clearTimeout(popTimer.current);}},[state?.phase,scene?.kind]);
+ useEffect(()=>{if(!scene)return;const duration=scene.kind==='start'?FEEDBACK_TIMINGS.start:scene.kind==='turn'?FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:FEEDBACK_TIMINGS.results;const timer=setTimeout(()=>setScene(null),duration);return()=>clearTimeout(timer);},[scene]);
+ useEffect(()=>{if(state?.phase==='GAME_OVER')return;if((scene?.kind==='start'||scene?.kind==='turn')&&state?.phase!=='CHOOSING_MOVE'){setScene(null);clearTimeout(popTimer.current);}},[state?.phase,scene?.kind]);
  useEffect(()=>{const hide=()=>{if(document.hidden){clearTimeout(popTimer.current);setScene(null);}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);clearTimeout(popTimer.current);sound.stop();};},[]);
  if(!scene||reduced)return null;
  if(scene.kind==='start')return <LogoScene onSkip={()=>{setScene(null);clearTimeout(popTimer.current);}}/>;
- if(scene.kind==='turn')return <div key={scene.key} className="feedback-turn" aria-hidden="true">الدور {scene.turn}</div>;
+ if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={`جولة جديدة، الجولة ${scene.turn}`} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>جولة</span><span>جديدة</span></div><div className="feedback-round-number" aria-hidden="true"><small>الجولة</small><strong>{new Intl.NumberFormat('ar-SA',{numberingSystem:'arab'}).format(scene.turn)}</strong></div></div>;
  return <div key={scene.key} className="feedback-confetti" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>)}</div>;
 }
 /** Receives only an already-authorized public character. Never accepts a hidden hand. */

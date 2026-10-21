@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import crypto from 'node:crypto';
 const sw=fs.readFileSync('dist/sw.js','utf8');
 function runtime(){
  const handlers={},cached={offline:true};let networkCalls=0;
@@ -33,7 +34,7 @@ test('audio failure cannot prevent the offline shell from installing',async()=>{
  vm.runInNewContext(sw,context);let completion;
  install({waitUntil:value=>{completion=value;}});await completion;
  assert.ok(installed.includes('./index.html'));assert.ok(installed.every(file=>!file.includes('/audio/')));
- assert.ok(sw.includes('./assets/audio/victory.wav'));
+ assert.ok(sw.includes('./assets/audio/paper-victory.wav'));
 });
 
 test('the Arabic font is local, licensed and available to the offline app',()=>{
@@ -46,4 +47,16 @@ test('the Arabic font is local, licensed and available to the offline app',()=>{
  }
  assert.match(fs.readFileSync('dist/assets/fonts/OFL.txt','utf8'),/SIL OPEN FONT LICENSE/);
  assert.ok(sw.includes('./fonts.css'));
+});
+
+test('natural paper feedback files match their documented licensed recordings',()=>{
+ const clips=JSON.parse(fs.readFileSync('dist/assets/audio/sources.json','utf8'));
+ assert.equal(clips.length,6);
+ for(const clip of clips){
+  assert.equal(clip.license,'CC0-1.0');assert.equal(clip.sourcePage,'https://kenney.nl/assets/casino-audio');
+  assert.match(clip.originalSha256,/^[a-f0-9]{64}$/);
+  const bytes=fs.readFileSync('dist/assets/audio/'+clip.file);assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),clip.sha256);
+  assert.ok(clip.durationSeconds>0&&clip.durationSeconds<1.5);
+ }
 });

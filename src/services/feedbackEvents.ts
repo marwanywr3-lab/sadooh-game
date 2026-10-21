@@ -1,5 +1,6 @@
 export type FeedbackState = {matchId:string; turnNumber:number; phase:string};
 export type FeedbackEvent = 'start'|'turn'|'results';
+export const FEEDBACK_TIMINGS={opening:2200,start:2000,roundWords:1900,roundNumber:750,results:1200} as const;
 /** Only semantic transitions trigger feedback; timer snapshots are deliberately ignored. */
 export class FeedbackEvents {
   private previous: FeedbackState|null = null;
