@@ -1,3 +1,4 @@
+import {getRoundNumber} from '../services/feedbackEvents';
 import {GameFeedback,RevealCard} from '../components/Feedback';
 import {ProBadge} from '../components/ProBadge';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
@@ -383,7 +384,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
           <div className="table-topbar__brand">
             <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo onHome={onExitToMenu} alt="صادوه!" className="table-topbar__logo" />
             <div className="table-topbar__meta">
-              <span className="turn-badge">الدور #{view.turnNumber}</span>
+              <span className="turn-badge">الجولة #{getRoundNumber(view.turnNumber,view.players.length)}</span>
               <span className="deck-pill"> السحب: {view.drawPileCount}</span>
               <span className="deck-pill"> المستخدمة: {view.discardPileCount}</span>
             </div>

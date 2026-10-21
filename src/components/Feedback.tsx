@@ -4,7 +4,7 @@ import {CardView} from './CardView';
 import type {CharacterId} from '../types/game';
 import {loadUserSettings,saveUserSettings} from '../services/storage/localSettings';
 import {SoundManager,type SoundName} from '../services/soundManager';
-import {FeedbackEvents,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
+import {FeedbackEvents,getRoundNumber,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
 
 const sound=new SoundManager();
 let openingDismissed=false;
@@ -49,7 +49,7 @@ export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=f
   const key=`${state.matchId}:${state.turnNumber}:${event}`;
   if(event==='start'){openingDismissed=true;window.dispatchEvent(new Event('sadooh-feedback-start'));}
   if(document.hidden)return;
-  setScene({kind:event,key,turn:state.turnNumber});
+  setScene({kind:event,key,turn:getRoundNumber(state.turnNumber,state.players.length)});
   if(!silent){if(event==='start'){play('whoosh',key);popTimer.current=setTimeout(()=>play('pop',key+':pop'),800);}else if(event==='turn'){play('whoosh',key+':words');popTimer.current=setTimeout(()=>play('turn',key+':number'),FEEDBACK_TIMINGS.roundWords);}else{play('reveal',key+':reveal');popTimer.current=setTimeout(()=>play('victory',key+':winner'),520);}}
  },[state?.matchId,state?.turnNumber,state?.phase,remote,silent,freshRemoteStart]);
  useEffect(()=>{if(!scene)return;const duration=scene.kind==='start'?FEEDBACK_TIMINGS.start:scene.kind==='turn'?FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:FEEDBACK_TIMINGS.results;const timer=setTimeout(()=>setScene(null),duration);return()=>clearTimeout(timer);},[scene]);
@@ -57,7 +57,7 @@ export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=f
  useEffect(()=>{const hide=()=>{if(document.hidden){clearTimeout(popTimer.current);setScene(null);}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);clearTimeout(popTimer.current);sound.stop();};},[]);
  if(!scene||reduced)return null;
  if(scene.kind==='start')return <LogoScene onSkip={()=>{setScene(null);clearTimeout(popTimer.current);}}/>;
- if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={`جولة جديدة، الجولة ${scene.turn}`} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>جولة</span><span>جديدة</span></div><div className="feedback-round-number" aria-hidden="true"><small>الجولة</small><strong>{new Intl.NumberFormat('ar-SA',{numberingSystem:'arab'}).format(scene.turn)}</strong></div></div>;
+ if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={`جولة جديدة، الجولة ${scene.turn}`} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`,'--round-total-duration':`${FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>جولة</span><span>جديدة</span></div><div className="feedback-round-number" aria-hidden="true"><small>الجولة</small><strong>{new Intl.NumberFormat('ar-SA',{numberingSystem:'arab'}).format(scene.turn)}</strong></div></div>;
  return <div key={scene.key} className="feedback-confetti" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>)}</div>;
 }
 /** Receives only an already-authorized public character. Never accepts a hidden hand. */
