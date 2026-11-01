@@ -12,7 +12,8 @@ const templates=Object.entries(english).filter(([ar])=>/\{\d+\}/.test(ar)).map((
 }).sort((a,b)=>b.weight-a.weight);
 export function fmt(source:string,args:unknown[]):string{
  const key=normalize(source),text=language==='en'?(english[key]||key):key;
- return text.replace(/\{(\d+)\}/g,(_,n)=>{const value=args[Number(n)];return typeof value==='string'?t(value):String(value??'');});
+ const formatted=text.replace(/\{(\d+)\}/g,(_,n)=>{const value=args[Number(n)];return typeof value==='string'?t(value):String(value??'');});
+ return (/^\s/.test(source)?' ':'')+formatted+(/\s$/.test(source)?' ':'');
 }
 /** Translates presentation text only. Game state and server messages remain unchanged. */
 export function t(source:string,depth=0):string{
