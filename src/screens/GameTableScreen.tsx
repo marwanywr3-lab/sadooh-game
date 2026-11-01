@@ -398,7 +398,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
           <div className="table-topbar__timer">
             {tr(view.phase === 'CHOOSING_MOVE' && (
               <div className="timer-pill timer-pill--move">
-                <span> {" "+t("دور «")+""}{activePlayer?.name}»:</span>
+                <span>{t("الدور:")} <bdi>{activePlayer?.name}</bdi></span>
                 <strong>{tr(practicePaused ? t("خذ وقتك") : fmt("{0} ث",[view.turnTimerSeconds]))}</strong>
               </div>
             ))}
@@ -459,7 +459,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 </>
               ) : (
                 <>
-                  <h3> «{activePlayer?.name}{""+t("» يفكر في حركته...")+""}</h3>
+                  <h3><bdi>{activePlayer?.name}</bdi> {t("يفكر في حركته...")}</h3>
                   <p>{tr(guided ? t("استعد! أول ما يحط بطاقته مقلوبة، بتقرر: تصدقه أو تضغط «صادوه!». بنشرح لك وقتها.") : fmt("استعد! أول ما يحط بطاقته مقلوبة، قدامك {0} ثانية تقرر تصدقه ولا تصيده!",[CHALLENGE_TIMER_SECONDS]))}</p>
                 </>
               ))}
@@ -477,7 +477,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 <div className="claim-announcement-badge">
                   <span> {" "+t("إعلان على الطاولة:")+""}</span>
                   <h3>
-                    «{claimSpeaker?.name}{""+t("» يدّعي أنه يلعب")+""}{tr(' ')}
+                    <bdi>{claimSpeaker?.name}</bdi> {t("يدّعي أنه يلعب")}{tr(' ')}
                     <strong style={{ color: claimedCharDef.accentColor }}>
                       {tr(claimedCharDef.nameAr)}
                     </strong>
@@ -678,7 +678,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   className="btn-primary btn-play-confirm"
                   onClick={handleConfirmMove}
                 >
-                   {" "+t("العب وقل: «")+""}{tr(CHARACTERS[selectedClaimChar].nameAr)}»
+                   {t("العب وقل:")} <bdi>{t(CHARACTERS[selectedClaimChar].nameAr)}</bdi>
                 </button>
               </div>
             ))}

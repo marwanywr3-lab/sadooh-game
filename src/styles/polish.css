@@ -11,3 +11,7 @@
 .sadooh-app-root[style*="--pro-background"] .main-menu-screen{background:var(--pro-background)!important;background-image:none!important}
 @media(max-width:600px){[data-pro-position=right] .human-dock-layout,[data-pro-position=left] .human-dock-layout{flex-direction:column!important}[data-pro-position=right] .move-controls-panel,[data-pro-position=left] .move-controls-panel{flex-basis:auto;width:100%}.table-topbar{gap:8px}.opponents-ring{gap:8px}.language-toggle{font-size:12px}.card-help-button{width:26px;height:26px}.card-help-dialog{width:calc(100vw - 24px)}}
 @media(max-width:600px){.table-topbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}.table-topbar__brand{display:contents}.table-topbar__brand>.brand-home,.table-topbar__brand>.pro-brand{grid-column:1;grid-row:1}.table-topbar__timer{grid-column:2;grid-row:1;min-width:0}.table-more{grid-column:3;grid-row:1}.table-topbar__meta{grid-column:1/-1;grid-row:2;display:flex;justify-content:center;gap:5px;font-size:11px}.table-topbar__meta .deck-pill,.table-topbar__meta .turn-badge{display:inline-flex;font-size:11px;padding:3px 7px;white-space:nowrap}.timer-pill{max-width:100%;flex-wrap:wrap;justify-content:center;font-size:12px}}
+
+html[lang=en],html[lang=en] body,html[lang=en] #root,html[lang=en] .sadooh-app-root{direction:ltr;text-align:left}
+html[lang=en] .main-menu-logo-wrap,html[lang=en] .card-guide,html[lang=en] .tutorial-mentor-box{text-align:left}
+.card-help-dialog [dir=rtl]{text-align:right}.card-help-dialog [dir=ltr]{text-align:left}

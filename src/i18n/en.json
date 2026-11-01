@@ -530,5 +530,9 @@
   "حفظ كلمة المرور الجديدة": "Save new password",
   "تم تغيير كلمة المرور.": "Password changed.",
   "تعذر تغيير كلمة المرور.": "Unable to change the password.",
-  "الترتيب النهائي": "Final standings"
+  "الترتيب النهائي": "Final standings",
+  "الدور:": "Turn:",
+  "العب وقل:": "Play and claim:",
+  "يفكر في حركته...": "is choosing a move…",
+  "يدّعي أنه يلعب": "claims to play"
 }
