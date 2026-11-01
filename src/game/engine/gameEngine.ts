@@ -19,10 +19,12 @@ import {
   MAX_PLAYERS,
   MIN_PLAYERS,
   MOVE_TIMER_SECONDS,
+  normalizeTurnDuration,
 } from '../rules/deck';
 import { getValidTargetPlayers, validateMoveSubmission } from '../rules/validators';
 
 export interface CreateMatchOptions {
+  moveDurationSeconds?:number;
   matchId?: string;
   mode?: 'singleplayer' | 'tutorial' | 'multiplayer_preview' | 'multiplayer';
   humanPlayerName: string;
@@ -139,6 +141,7 @@ export function createMatch(options: CreateMatchOptions): GameState {
   }
 
   return {
+    moveDurationSeconds:normalizeTurnDuration(options.moveDurationSeconds),
     matchId: options.matchId ?? `match_${Date.now()}`,
     mode: options.mode ?? 'singleplayer',
     players,
@@ -147,7 +150,7 @@ export function createMatch(options: CreateMatchOptions): GameState {
     currentPlayerIndex: 0,
     turnNumber: 1,
     phase: 'CHOOSING_MOVE',
-    turnTimerSeconds: MOVE_TIMER_SECONDS,
+    turnTimerSeconds: normalizeTurnDuration(options.moveDurationSeconds),
     pendingClaim: null,
     lastOutcome: null,
     winnerPlayerId: null,
@@ -992,7 +995,7 @@ export function advanceToNextTurn(
     currentPlayerIndex: nextPlayerIndex,
     turnNumber: nextTurnNumber,
     phase: 'CHOOSING_MOVE',
-    turnTimerSeconds: MOVE_TIMER_SECONDS,
+    turnTimerSeconds: normalizeTurnDuration(state.moveDurationSeconds),
     pendingClaim: null,
     lastOutcome: null,
     emptiedByMainPlayMap,

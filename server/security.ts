@@ -35,7 +35,8 @@ export function parseEvent(raw: string | ArrayBuffer): ClientToServerEvent {
     case 'SEND_CHAT': cleanText(p.text); if (/(https?:|www\.|\.[a-z]{2,}(?:\/|\b)|!\[)/iu.test(p.text)) throw Error('الروابط والصور غير مسموحة.'); break;
     case 'MUTE_PLAYER': cleanText(p.targetPlayerId, 64); if (typeof p.muted !== 'boolean') throw Error('طلب غير صالح.'); break;
     case 'REPORT_ABUSE': cleanText(p.targetPlayerId, 64); cleanText(p.reason, 300); if (p.messageId != null) cleanText(p.messageId, 64); break;
-    case 'START_MATCH': case 'LEAVE_ROOM': break;
+    case 'START_MATCH': if(p.turnDurationSeconds!==undefined&&(!Number.isInteger(p.turnDurationSeconds)||p.turnDurationSeconds<30||p.turnDurationSeconds>180))throw Error('وقت الدور من 30 إلى 180 ثانية.');break;
+    case 'LEAVE_ROOM': break;
     default: throw Error('حدث غير مدعوم.');
   }
   return e;

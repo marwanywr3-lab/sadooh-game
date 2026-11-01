@@ -1,0 +1,13 @@
+
+.language-toggle{position:fixed;top:max(8px,env(safe-area-inset-top));inset-inline-end:12px;z-index:980;min-height:36px;font-family:inherit}
+.main-menu-card{padding-top:48px}.table-topbar{padding-top:42px}.party-header{padding-top:40px}
+.card-with-help{position:relative;display:inline-flex;flex:0 0 auto;vertical-align:middle;max-width:100%;padding-top:14px}
+.card-help-button{position:absolute;top:0;inset-inline-end:5px;z-index:4;width:28px;height:28px;border:1.5px solid var(--ui-ink);border-radius:50%;background:var(--ui-card);color:var(--ui-ink);font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;box-shadow:1px 2px 0 var(--ui-line)}
+.card-help-button:focus-visible{outline:3px solid #e5b72e;outline-offset:3px}
+.card-help-backdrop{z-index:1400}.card-help-dialog{max-width:480px;max-height:85dvh;overflow:auto}.card-help-dialog h3{margin-block:12px 6px}.card-help-dialog p{line-height:1.8}.card-help-art{width:100px;height:110px;object-fit:contain;display:block;margin:auto}
+.challenge-stage-card__visual .sadooh-card--back{box-shadow:4px 5px 0 var(--ui-ink);border:2px solid var(--ui-ink);transform:rotate(-4deg)}
+[lang=en] .sadooh-card__title{font-size:14px;overflow-wrap:anywhere}[lang=en] .human-hand-scroll .sadooh-card__title{font-size:12px}[lang=en] .sadooh-card__desc{font-size:11px;line-height:1.35}
+[lang=en] .feedback-round-words{direction:ltr}[lang=en] .feedback-round-words span:first-child{align-self:flex-start}[lang=en] .feedback-round-words span:last-child{align-self:flex-end}
+.sadooh-app-root[style*="--pro-background"] .main-menu-screen{background:var(--pro-background)!important;background-image:none!important}
+@media(max-width:600px){[data-pro-position=right] .human-dock-layout,[data-pro-position=left] .human-dock-layout{flex-direction:column!important}[data-pro-position=right] .move-controls-panel,[data-pro-position=left] .move-controls-panel{flex-basis:auto;width:100%}.table-topbar{gap:8px}.opponents-ring{gap:8px}.language-toggle{font-size:12px}.card-help-button{width:26px;height:26px}.card-help-dialog{width:calc(100vw - 24px)}}
+@media(max-width:600px){.table-topbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}.table-topbar__brand{display:contents}.table-topbar__brand>.brand-home,.table-topbar__brand>.pro-brand{grid-column:1;grid-row:1}.table-topbar__timer{grid-column:2;grid-row:1;min-width:0}.table-more{grid-column:3;grid-row:1}.table-topbar__meta{grid-column:1/-1;grid-row:2;display:flex;justify-content:center;gap:5px;font-size:11px}.table-topbar__meta .deck-pill,.table-topbar__meta .turn-badge{display:inline-flex;font-size:11px;padding:3px 7px;white-space:nowrap}.timer-pill{max-width:100%;flex-wrap:wrap;justify-content:center;font-size:12px}}

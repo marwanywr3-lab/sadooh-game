@@ -1,3 +1,4 @@
+import {t,fmt,tr} from '../i18n/translate';
 import React, { useState } from 'react';
 import { ChatMessage, PublicPlayerView } from '../types/game';
 import { QUICK_CHAT_REACTIONS } from '../game/bots/botPhrases';
@@ -45,7 +46,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
     e.preventDefault();
     const check = sanitizeChatText(inputText);
     if (!check.ok) {
-      setErrorText(check.errorAr ?? 'رسالة غير صالحة.');
+      setErrorText(check.errorAr ?? t("رسالة غير صالحة."));
       return;
     }
     setErrorText(null);
@@ -59,14 +60,13 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
         className="chat-drawer"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="شات الاستراحة العام"
+        aria-label={t("شات الاستراحة العام")}
       >
         <div className="chat-drawer__header">
           <div>
-            <h3> شات الاستراحة العام</h3>
+            <h3> {" "+t("شات الاستراحة العام")+""}</h3>
             <span className="chat-drawer__subtitle">
-              رسائل عامة لكل الجلسة (تظهر فقاعة 8 ثوانٍ فوق مقعد اللاعب)
-            </span>
+              {" "+t("رسائل عامة لكل الجلسة (تظهر فقاعة 8 ثوانٍ فوق مقعد اللاعب)")+" "}</span>
           </div>
           <button type="button" className="btn-icon-close" onClick={onClose}>
             ✕
@@ -75,9 +75,9 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
         {/* شريط إدارة اللاعبين (كتم / إبلاغ عن إساءة) */}
         <div className="chat-drawer__moderation-bar">
-          <span className="moderation-label">إدارة اللاعبين:</span>
+          <span className="moderation-label">{""+t("إدارة اللاعبين:")+""}</span>
           <div className="moderation-chips">
-            {players
+            {tr(players
               .filter((p) => p.id !== viewerPlayerId)
               .map((p) => (
                 <div key={p.id} className="moderation-chip">
@@ -89,39 +89,37 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                       onToggleMutePlayer(p.id);
                       setModerationNotice(
                         p.isMuted
-                          ? `طُلب إلغاء كتم «${p.name}».`
-                          : `طُلب كتم رسائل «${p.name}».`
+                          ? fmt("طُلب إلغاء كتم «{0}».",[p.name])
+                          : fmt("طُلب كتم رسائل «{0}».",[p.name])
                       );
                     }}
-                    title="كتم / إلغاء كتم اللاعب"
+                    title={t("كتم / إلغاء كتم اللاعب")}
                   >
-                    {p.isMuted ? ' مكتوم' : ' كتم'}
+                    {tr(p.isMuted ? t(" مكتوم") : t(" كتم"))}
                   </button>
                   <button
                     type="button"
                     className="btn-mini btn-mini--report"
                     onClick={() => setReportTargetId(p.id)}
-                    title="الإبلاغ عن إساءة"
+                    title={t("الإبلاغ عن إساءة")}
                   >
-                     إبلاغ
-                  </button>
+                     {" "+t("إبلاغ")+" "}</button>
                 </div>
-              ))}
+              )))}
           </div>
         </div>
 
-        {moderationNotice && (
-          <div className="chat-drawer__banner">{moderationNotice}</div>
-        )}
+        {tr(moderationNotice && (
+          <div className="chat-drawer__banner">{tr(moderationNotice)}</div>
+        ))}
 
-        {reportTargetId && (
+        {tr(reportTargetId && (
           <div className="chat-drawer__report-box">
             <p>
-              الإبلاغ عن إساءة من «
-              {players.find((p) => p.id === reportTargetId)?.name}»:
+              {" "+t("الإبلاغ عن إساءة من «")+" "}{tr(players.find((p) => p.id === reportTargetId)?.name)}»:
             </p>
             <div className="report-actions">
-              {['ألفاظ غير لائقة', 'إزعاج متكرر (سبام)', 'اسم غير مناسب'].map(
+              {tr([t("ألفاظ غير لائقة"), t("إزعاج متكرر (سبام)"), t("اسم غير مناسب")].map(
                 (reason) => (
                   <button
                     key={reason}
@@ -131,31 +129,29 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                       onReportPlayer(reportTargetId, reason);
                       setReportTargetId(null);
                       setModerationNotice(
-                        `أُرسل طلب البلاغ (${reason}). انتظر تأكيد الحفظ من الخادم.`
+                        fmt("أُرسل طلب البلاغ ({0}). انتظر تأكيد الحفظ من الخادم.",[reason])
                       );
                     }}
                   >
-                    {reason}
+                    {tr(reason)}
                   </button>
                 )
-              )}
+              ))}
               <button
                 type="button"
                 className="btn-ghost btn-sm"
                 onClick={() => setReportTargetId(null)}
               >
-                إلغاء
-              </button>
+                {" "+t("إلغاء")+" "}</button>
             </div>
           </div>
-        )}
+        ))}
 
         {/* سجل الرسائل */}
         <div className="chat-drawer__messages">
-          {visibleMessages.length === 0 ? (
+          {tr(visibleMessages.length === 0 ? (
             <p className="chat-drawer__empty">
-              لا توجد رسائل بعد.. ابدأ السوالف أو أرسل رد فعل سريع!
-            </p>
+              {" "+t("لا توجد رسائل بعد.. ابدأ السوالف أو أرسل رد فعل سريع!")+" "}</p>
           ) : (
             visibleMessages.map((msg) => {
               const isMe = msg.senderId === viewerPlayerId;
@@ -167,22 +163,22 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                   <div className="chat-msg__meta">
                     <strong>{msg.senderName}</strong>
                     <span>
-                      {new Date(msg.timestamp).toLocaleTimeString('ar-SA', {
+                      {tr(new Date(msg.timestamp).toLocaleTimeString('ar-SA', {
                         hour: '2-digit',
                         minute: '2-digit',
-                      })}
+                      }))}
                     </span>
                   </div>
                   <div className="chat-msg__text">{msg.text}</div>
                 </div>
               );
             })
-          )}
+          ))}
         </div>
 
         {/* ردود الفعل السريعة */}
         <div className="chat-drawer__quick">
-          {QUICK_CHAT_REACTIONS.map((reaction) => (
+          {tr(QUICK_CHAT_REACTIONS.map((reaction) => (
             <button
               key={reaction}
               type="button"
@@ -192,12 +188,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
                 onSendMessage(reaction, true);
               }}
             >
-              {reaction}
+              {tr(reaction)}
             </button>
-          ))}
+          )))}
         </div>
 
-        {errorText && <div className="chat-drawer__error">{errorText}</div>}
+        {tr(errorText && <div className="chat-drawer__error">{tr(errorText)}</div>)}
 
         {/* إرسال رسالة نصية (بدون صور أو روابط) */}
         <form className="chat-drawer__form" onSubmit={handleSend}>
@@ -205,12 +201,11 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="اكتب رسالة للجلسة (بدون روابط أو صور)..."
+            placeholder={t("اكتب رسالة للجلسة (بدون روابط أو صور)...")}
             maxLength={140}
           />
           <button type="submit" className="btn-primary">
-            إرسال
-          </button>
+            {" "+t("إرسال")+" "}</button>
         </form>
       </div>
     </div>

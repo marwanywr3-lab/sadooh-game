@@ -25,6 +25,7 @@ export interface RoomMember {
 }
 
 export interface RoomState {
+  turnDurationSeconds?:number;
   partyMode?: boolean;
   roomCode: string;
   inviteUrl: string;
@@ -47,7 +48,7 @@ export type ClientToServerEvent =
   | { type: 'ADD_BOT'; payload: { difficulty: BotDifficulty } }
   | { type: 'REMOVE_BOT'; payload: { botId: string } }
   | { type: 'UPDATE_MAX_PLAYERS'; payload: { maxPlayers: number } }
-  | { type: 'START_MATCH'; payload: { roomCode: string } }
+  | { type: 'START_MATCH'; payload: { roomCode: string; turnDurationSeconds?:number } }
   | {
       type: 'SUBMIT_MOVE';
       payload: {

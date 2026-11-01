@@ -1,4 +1,4 @@
-import {ProBadge} from './ProBadge';
+import {t,fmt,tr} from '../i18n/translate';
 import React from 'react';
 import { PublicPlayerView } from '../types/game';
 
@@ -42,7 +42,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
       {/* فقاعة الشات العائمة فوق مقعد اللاعب لمدة 4 ثوانٍ */}
       {bubbleText && (
         <div className="player-seat__chat-bubble" role="status">
-          <span>{bubbleText}</span>
+          <span>{player.isBot?t(bubbleText):bubbleText}</span>
         </div>
       )}
 
@@ -57,24 +57,23 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           className={`player-seat__conn-dot ${
             player.isConnected ? 'is-online' : 'is-offline'
           }`}
-          title={player.isConnected ? 'متصل' : 'منقطع'}
+          title={tr(player.isConnected ? t("متصل") : t("منقطع"))}
         />
-        {player.hasSanadShield && (
-          <span className="player-seat__shield-badge" title="محمي بدرع السند">
-             السند
-          </span>
-        )}
+        {tr(player.hasSanadShield && (
+          <span className="player-seat__shield-badge" title={t("محمي بدرع السند")}>
+             {" "+t("السند")+" "}</span>
+        ))}
       </div>
 
       <div className="player-seat__info">
         <div className="player-seat__name-row">
-          <span className="player-seat__name">{player.name}</span>{player.isPro&&<ProBadge color={player.proBadgeColor}/>}
-          {isCurrentTurn && <span className="player-seat__turn-pill">دوره</span>}
+          <span className="player-seat__name">{player.name}</span>
+          {tr(isCurrentTurn && <span className="player-seat__turn-pill">{""+t("دوره")+""}</span>)}
         </div>
 
-        <div className="player-seat__cards-row" title={`عدد البطاقات: ${player.cardCount}`}>
+        <div className="player-seat__cards-row" title={tr(fmt("عدد البطاقات: {0}",[player.cardCount]))}>
           <div className="player-seat__mini-fan">
-            {Array.from({ length: miniBacksCount }).map((_, idx) => (
+            {tr(Array.from({ length: miniBacksCount }).map((_, idx) => (
               <img
                 key={idx}
                 src="./assets/card-back.svg"
@@ -82,17 +81,17 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 className="player-seat__mini-card"
                 draggable={false}
               />
-            ))}
+            )))}
           </div>
-          <span className="player-seat__card-count">{player.cardCount} بطاقات</span>
+          <span className="player-seat__card-count">{tr(player.cardCount)} {" "+t("بطاقات")+""}</span>
         </div>
       </div>
 
-      {isTargetable && (
+      {tr(isTargetable && (
         <div className="player-seat__target-cta">
-          {isSelectedTarget ? '✓ تم تحديد الهدف' : 'اضغط للاستهداف '}
+          {tr(isSelectedTarget ? t("✓ تم تحديد الهدف") : t("اضغط للاستهداف "))}
         </div>
-      )}
+      ))}
     </div>
   );
 };

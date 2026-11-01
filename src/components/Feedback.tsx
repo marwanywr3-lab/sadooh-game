@@ -1,3 +1,4 @@
+import {getLanguage,t,fmt,tr} from '../i18n/translate';
 import React,{createContext,useContext,useEffect,useRef,useState} from 'react';
 import {BrandLogo,ThemeContext} from './Theme';
 import {CardView} from './CardView';
@@ -22,12 +23,12 @@ export function FeedbackProvider({children}:{children:React.ReactNode}){
  },[]);
  useEffect(()=>sound.configure(settings.soundEnabled,settings.soundVolume),[settings.soundEnabled,settings.soundVolume]);
  const reduced=settings.reduceMotion||osReduced;
- return <Context.Provider value={{reduced,play:(n,k)=>sound.play(n,k)}}><div className={reduced?'feedback-root feedback-reduced':'feedback-root'}>{children}<ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>{}}}><OpeningFeedback/></ThemeContext.Provider></div></Context.Provider>;
+ return <Context.Provider value={{reduced,play:(n,k)=>sound.play(n,k)}}><div className={reduced?'feedback-root feedback-reduced':'feedback-root'}>{tr(children)}<ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>{}}}><OpeningFeedback/></ThemeContext.Provider></div></Context.Provider>;
 }
 export function SoundControls(){
  const [settings,setSettings]=useState(loadUserSettings);
  useEffect(()=>{const refresh=()=>setSettings(loadUserSettings());window.addEventListener('sadooh-settings',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('sadooh-settings',refresh);window.removeEventListener('storage',refresh);};},[]);
- return <div className="feedback-sound-controls"><label className="toggle-row"><span>المؤثرات الصوتية</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>مستوى الصوت {Math.round(settings.soundVolume*100)}٪</span><input aria-label="مستوى المؤثرات الصوتية" type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label></div>;
+ return <div className="feedback-sound-controls"><label className="toggle-row"><span>{""+t("المؤثرات الصوتية")+""}</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>{""+t("مستوى الصوت")+" "}{tr(Math.round(settings.soundVolume*100))}{""+t("٪")+""}</span><input aria-label={t("مستوى المؤثرات الصوتية")} type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label></div>;
 }
 function OpeningFeedback(){
  const [open,setOpen]=useState(false);const {reduced,play}=useContext(Context);
@@ -37,12 +38,14 @@ function OpeningFeedback(){
  return open&&!reduced?<LogoScene opening onSkip={()=>setOpen(false)}/>:null;
 }
 function LogoScene({opening=false,onSkip}:{opening?:boolean;onSkip:()=>void}){
- return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt="صادوه!"/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>تجاوز الحركة</button></div>;
+ return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt={t("صادوه!")}/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{""+t("تجاوز الحركة")+""}</button></div>;
 }
 export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:FeedbackState|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);
  const [scene,setScene]=useState<{kind:string;key:string;turn:number}|null>(null);
  const popTimer=useRef<ReturnType<typeof setTimeout>>();
+ const actionPhase=useRef<string|null>(null);
+ useEffect(()=>{const previous=actionPhase.current;actionPhase.current=state?.phase||null;if(previous==='CHOOSING_MOVE'&&state?.phase==='CHALLENGE_WINDOW'&&!silent&&!document.hidden)play('flip',`${state.matchId}:${state.turnNumber}:play-card`);},[state?.matchId,state?.turnNumber,state?.phase,silent]);
  useEffect(()=>{
   const event=events.current.observe(state,remote,freshRemoteStart)[0];if(!event||!state)return;
   clearTimeout(popTimer.current);
@@ -57,14 +60,14 @@ export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=f
  useEffect(()=>{const hide=()=>{if(document.hidden){clearTimeout(popTimer.current);setScene(null);}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);clearTimeout(popTimer.current);sound.stop();};},[]);
  if(!scene||reduced)return null;
  if(scene.kind==='start')return <LogoScene onSkip={()=>{setScene(null);clearTimeout(popTimer.current);}}/>;
- if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={`جولة جديدة، الجولة ${scene.turn}`} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`,'--round-total-duration':`${FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>جولة</span><span>جديدة</span></div><div className="feedback-round-number" aria-hidden="true"><small>الجولة</small><strong>{new Intl.NumberFormat('ar-SA',{numberingSystem:'arab'}).format(scene.turn)}</strong></div></div>;
- return <div key={scene.key} className="feedback-confetti" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>)}</div>;
+ if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={tr(fmt("جولة جديدة، الجولة {0}",[scene.turn]))} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`,'--round-total-duration':`${FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>{""+t("جولة")+""}</span><span>{""+t("جديدة")+""}</span></div><div className="feedback-round-number" aria-hidden="true"><small>{""+t("الجولة")+""}</small><strong>{tr(new Intl.NumberFormat(getLanguage()==='ar'?'ar-SA':'en',{numberingSystem:getLanguage()==='ar'?'arab':'latn'}).format(scene.turn))}</strong></div></div>;
+ return <div key={scene.key} className="feedback-confetti" aria-hidden="true">{tr(Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>))}</div>;
 }
 /** Receives only an already-authorized public character. Never accepts a hidden hand. */
 export function RevealCard({characterId,eventKey,badgeText,silent=false}:{characterId:CharacterId;eventKey:string;badgeText?:string;silent?:boolean}){
  const {reduced,play}=useContext(Context);
  useEffect(()=>{if(!silent)play('flip',eventKey);},[eventKey,silent]);
- return <div key={eventKey} className={reduced?'feedback-card-static':'feedback-card-flip'}><div className="feedback-card-back" aria-hidden="true"><img src="./assets/card-back.svg" alt=""/></div><div className="feedback-card-front"><CardView characterId={characterId} size="sm" badgeText={badgeText}/></div></div>;
+ return <div key={eventKey} className={reduced?'feedback-card-static':'feedback-card-flip'}><div className="feedback-card-back" aria-hidden="true"><img src="./assets/card-back.svg" alt=""/></div><div className="feedback-card-front"><CardView characterId={characterId} size="sm" badgeText={tr(badgeText)}/></div></div>;
 }
 export function useJoinFeedback(ids:string[],scope:string,silent=false){
  const previous=useRef<{scope:string;ids:Set<string>}|null>(null);const [joined,setJoined]=useState<Set<string>>(()=>new Set());const {play}=useContext(Context);
@@ -77,4 +80,10 @@ export function useJoinFeedback(ids:string[],scope:string,silent=false){
   const timer=setTimeout(()=>setJoined(new Set()),400);return()=>{clearTimeout(timer);setJoined(new Set());};
  },[signature,scope,silent]);
  return joined;
+}
+
+/** Public pile counts are sufficient for drawing feedback; no card identity is inspected. */
+export function useDrawFeedback(count:number|undefined,matchId:string|undefined,silent=false){
+ const previous=useRef<{count:number;matchId:string}|null>(null);const {play}=useContext(Context);
+ useEffect(()=>{if(count===undefined||!matchId){previous.current=null;return;}const before=previous.current;previous.current={count,matchId};if(before?.matchId===matchId&&count<before.count&&!silent&&!document.hidden)play('turn',`${matchId}:draw:${Date.now()}`);},[count,matchId,silent]);
 }

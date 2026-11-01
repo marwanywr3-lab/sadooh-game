@@ -1,3 +1,4 @@
+import {normalizeTurnDuration} from '../src/game/rules/deck';
 import {pickBotNames} from '../src/game/bots/names';
 import type { GameState, BotDifficulty } from '../src/types/game';
 import type { RoomState, ClientToServerEvent } from '../src/types/multiplayer';
@@ -26,7 +27,7 @@ export function isDisplay(s:SavedRoom,userId:string){return s.party?.displayUser
 function phaseChanged(s:SavedRoom,g:GameState,now:number){
  s.partyPasses=[];
  s.game={...g,logs:g.logs.slice(0,100),chatMessages:[]};
- s.deadline=now+1000*(g.phase==='CHOOSING_MOVE'?MOVE_TIMER_SECONDS:g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
+ s.deadline=now+1000*(g.phase==='CHOOSING_MOVE'?normalizeTurnDuration(g.moveDurationSeconds):g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
  s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+BOT_CHALLENGE_DELAY_MS:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+BOT_MOVE_DELAY_MS:0;
  if(g.phase==='GAME_OVER')s.room.status='finished';
 }
@@ -91,7 +92,8 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
   let ni=0;s.room.members=s.room.members.map(m=>m.isBot?{...m,name:names[ni++]}:m);
   const deck=createBalancedDeck(8,secureRandom).map(c=>({...c,id:crypto.randomUUID()}));
   const players=s.room.members.map(m=>({...m,hand:deck.splice(0,4),hasSanadShield:false}));
-  const g=createMatch({matchId:crypto.randomUUID(),mode:'multiplayer',humanPlayerName:me.name,botCount:2,botDifficulty:'medium',customPlayers:players,customDrawPile:deck,rng:secureRandom});
+  s.room.turnDurationSeconds=normalizeTurnDuration(e.payload.turnDurationSeconds);
+  const g=createMatch({moveDurationSeconds:s.room.turnDurationSeconds,matchId:crypto.randomUUID(),mode:'multiplayer',humanPlayerName:me.name,botCount:2,botDifficulty:'medium',customPlayers:players,customDrawPile:deck,rng:secureRandom});
   s.room.status='in_progress';phaseChanged(s,g,now);break;
  }
  case 'SUBMIT_MOVE':{

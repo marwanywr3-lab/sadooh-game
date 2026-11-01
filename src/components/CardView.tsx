@@ -1,3 +1,5 @@
+import {CardHelp} from './CardHelp';
+import {t,fmt,tr} from '../i18n/translate';
 import React from 'react';
 import { CharacterId } from '../types/game';
 import { CHARACTERS } from '../game/rules/characters';
@@ -28,28 +30,28 @@ export const CardView: React.FC<CardViewProps> = ({
 }) => {
   if (faceDown || !characterId) {
     return (
-      <button
+      <div className="card-with-help"><button
         type="button"
         className={`sadooh-card sadooh-card--back sadooh-card--${size} ${selected ? 'is-selected' : ''}`}
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
-        aria-label="بطاقة مقلوبة"
+        aria-label={t("بطاقة مقلوبة")}
       >
         <img
           src="./assets/card-back.svg"
-          alt="ظهر البطاقة"
+          alt={t("ظهر البطاقة")}
           className="sadooh-card__back-img"
           draggable={false}
         />
-        {badgeText && <span className="sadooh-card__floating-badge">{badgeText}</span>}
-      </button>
+        {tr(badgeText && <span className="sadooh-card__floating-badge">{tr(badgeText)}</span>)}
+      </button><CardHelp/></div>
     );
   }
 
   const charDef = CHARACTERS[characterId];
 
   return (
-    <button
+    <div className="card-with-help"><button
       type="button"
       className={`sadooh-card sadooh-card--front sadooh-card--${size} ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''}`}
       onClick={disabled ? undefined : onClick}
@@ -63,18 +65,18 @@ export const CardView: React.FC<CardViewProps> = ({
         draggable={false}
       />
 
-      {badgeText && <span className="sadooh-card__floating-badge">{badgeText}</span>}
+      {tr(badgeText && <span className="sadooh-card__floating-badge">{tr(badgeText)}</span>)}
 
       {/* شريط اسم الشخصية في الخانة العلوية للإطار */}
       <div className="sadooh-card__header">
-        <span className="sadooh-card__title">{charDef.nameAr}</span>
+        <span className="sadooh-card__title">{tr(charDef.nameAr)}</span>
       </div>
 
       {/* رسم الشخصية داخل المنطقة الوسطى للإطار */}
       <div className="sadooh-card__art-wrap">
         <img
           src={charDef.assetPath}
-          alt={charDef.nameAr}
+          alt={tr(charDef.nameAr)}
           className="sadooh-card__art"
           draggable={false}
         />
@@ -82,14 +84,14 @@ export const CardView: React.FC<CardViewProps> = ({
           className="sadooh-card__tag"
           style={{ backgroundColor: charDef.accentColor }}
         >
-          {charDef.badgeTextAr}
+          {tr(charDef.badgeTextAr)}
         </span>
       </div>
 
       {/* وصف القدرة في سطر عربي واضح داخل الخانة السفلية للإطار */}
       <div className="sadooh-card__footer">
-        <p className="sadooh-card__desc">{charDef.descriptionAr}</p>
+        <p className="sadooh-card__desc">{tr(charDef.descriptionAr)}</p>
       </div>
-    </button>
+    </button><CardHelp characterId={characterId}/></div>
   );
 };

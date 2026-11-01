@@ -1,3 +1,4 @@
+import {loadUserSettings} from '../storage/localSettings';
 import {accountClient} from '../account';
 import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js';
 import type { ClientProjectedGameState } from '../../types/game';
@@ -88,7 +89,7 @@ export class SupabaseRoomService {
   }
   if(event.type==='RECONNECT_MATCH'){this.status('reconnecting');const p=await this.call('SYNC');await this.connect(p);return;}
   if(this.stopped||!this.code)throw Error('انضم إلى غرفة أولًا.');
-  const p=await this.call(event.type,event.payload,{matchId:this.view?.matchId,turnNumber:this.view?.turnNumber});if(event.type!=='LEAVE_ROOM')this.accept(p);
+  const p=await this.call(event.type,event.type==='START_MATCH'?{...event.payload,turnDurationSeconds:loadUserSettings().turnDurationSeconds}:event.payload,{matchId:this.view?.matchId,turnNumber:this.view?.turnNumber});if(event.type!=='LEAVE_ROOM')this.accept(p);
  }
  disconnect(){this.stopped=true;clearTimeout(this.timeout);clearInterval(this.heartbeat);clearInterval(this.uiTimer);if(this.channel){void this.client.removeChannel(this.channel);this.channel=null;}}
  leave(){this.queue=this.queue.then(async()=>{if(this.code&&this.userId)await this.call('LEAVE_ROOM',{roomCode:this.code});}).catch(()=>{}).finally(()=>{this.disconnect();this.code='';this.view=null;try{sessionStorage.removeItem(this.storageKey);}catch{/* storage disabled */}});}

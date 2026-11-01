@@ -1,5 +1,5 @@
+import {t,fmt,tr} from '../i18n/translate';
 import {useJoinFeedback} from '../components/Feedback';
-import {ProBadge} from '../components/ProBadge';
 import {BrandLogo} from '../components/Theme';
 import React, { useEffect, useRef, useState } from 'react';
 import { BotDifficulty, PublicPlayerView } from '../types/game';
@@ -30,7 +30,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
   const [service] = useState(() => new SupabaseRoomService(initialPlayerName));
   const [roomState, setRoomState] = useState<RoomState>(() => service.getState());
   const [statusBanner, setStatusBanner] = useState<string | null>(
-    'أنشئ غرفة جديدة أو انضم عبر رابط دعوة.'
+    t("أنشئ غرفة جديدة أو انضم عبر رابط دعوة.")
   );
 
   const seenWaiting=useRef(false);
@@ -82,10 +82,10 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
         document.execCommand('copy');
         document.body.removeChild(temp);
       }
-      setCopiedNotice('تم نسخ رابط الدعوة إلى الحافظة!');
+      setCopiedNotice(t("تم نسخ رابط الدعوة إلى الحافظة!"));
       setTimeout(() => setCopiedNotice(null), 3000);
     } catch {
-      setCopiedNotice('رابط الدعوة جاهز للنسخ.');
+      setCopiedNotice(t("رابط الدعوة جاهز للنسخ."));
     }
   };
 
@@ -103,14 +103,14 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
   }));
 
   const connectionBadgeLabel: Record<ConnectionStatus, string> = {
-    awaiting_backend: ' انتظر الاتصال بالخادم',
-    connecting: ' جاري الاتصال بالخادم...',
-    connected: ' متصل بالغرفة',
-    reconnecting: ' انقطع الاتصال — جاري محاولة العودة للمباراة...',
-    disconnected: ' غير متصل بالخادم',
+    awaiting_backend: t(" انتظر الاتصال بالخادم"),
+    connecting: t(" جاري الاتصال بالخادم..."),
+    connected: t(" متصل بالغرفة"),
+    reconnecting: t(" انقطع الاتصال — جاري محاولة العودة للمباراة..."),
+    disconnected: t(" غير متصل بالخادم"),
   };
 
-  if(matchView) return <><GameTableScreen freshRemoteStart={seenWaiting.current} feedbackSilent={!!roomState.partyMode} remote={{service,view:matchView}} humanPlayerName={playerName} botCount={2} botDifficulty="medium" onExitToMenu={leave} onRecordMatchEnd={()=>{}} />{roomState.connectionStatus!=='connected' && <div role="alert" style={{position:'fixed',top:10,right:10,zIndex:1000,background:'#622',padding:16}}>انقطع الاتصال — نحاول استعادة الجلسة.</div>}{statusBanner && statusBanner!=='متصل بالغرفة.' && <div role="status" style={{position:'fixed',bottom:10,right:10,zIndex:1000,background:'#342711',padding:12}}>{statusBanner}</div>}</>;
+  if(matchView) return <><GameTableScreen freshRemoteStart={seenWaiting.current} feedbackSilent={!!roomState.partyMode} remote={{service,view:matchView}} humanPlayerName={playerName} botCount={2} botDifficulty="medium" onExitToMenu={leave} onRecordMatchEnd={()=>{}} />{tr(roomState.connectionStatus!=='connected' && <div role="alert" style={{position:'fixed',top:10,right:10,zIndex:1000,background:'#622',padding:16}}>{""+t("انقطع الاتصال — نحاول استعادة الجلسة.")+""}</div>)}{tr(statusBanner && statusBanner!==t("متصل بالغرفة.") && <div role="status" style={{position:'fixed',bottom:10,right:10,zIndex:1000,background:'#342711',padding:12}}>{tr(statusBanner)}</div>)}</>;
   return (
     <div
       className="multiplayer-lobby-screen"
@@ -119,11 +119,11 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
       <div className={`multiplayer-lobby-overlay ${joinOnly?'party-phone':''}`}>
         <header className="lobby-header">
           <div className="lobby-header__right">
-            <BrandLogo onHome={leave} alt="صادوه!" className="lobby-logo" />
+            <BrandLogo onHome={leave} alt={t("صادوه!")} className="lobby-logo" />
             <div>
-              <h2> الغرف الجماعية عبر الإنترنت</h2>
+              <h2> {" "+t("الغرف الجماعية عبر الإنترنت")+""}</h2>
               <span className={`conn-status-pill conn-status--${roomState.connectionStatus}`}>
-                {connectionBadgeLabel[roomState.connectionStatus]}
+                {tr(connectionBadgeLabel[roomState.connectionStatus])}
               </span>
             </div>
           </div>
@@ -134,31 +134,28 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
               className="btn-secondary"
               onClick={() => setIsChatOpen(true)}
             >
-               الشات ({roomState.chatHistory.length})
+               {" "+t("الشات (")+""}{tr(roomState.chatHistory.length)})
             </button>
             <button type="button" className="btn-ghost" onClick={leave}>
-               القائمة الرئيسية
-            </button>
+               {" "+t("القائمة الرئيسية")+" "}</button>
           </div>
         </header>
 
         {/* تنبيه واضح وصادق بأن الخادم بانتظار التفعيل */}
-        {statusBanner && (
+        {tr(statusBanner && (
           <div className="backend-honest-banner" role="status">
-            <span> {statusBanner}</span>
+            <span> {tr(statusBanner)}</span>
           </div>
-        )}
+        ))}
 
         {/* واجهة العودة إلى المباراة بعد انقطاع الاتصال (Reconnect UI) */}
-        {roomState.roomCode && (roomState.connectionStatus === 'disconnected' ||
+        {tr(roomState.roomCode && (roomState.connectionStatus === 'disconnected' ||
           roomState.connectionStatus === 'reconnecting') && (
           <div className="reconnect-card" role="alert">
             <div className="reconnect-card__content">
-              <h3> انقطع الاتصال بالغرفة!</h3>
+              <h3> {" "+t("انقطع الاتصال بالغرفة!")+""}</h3>
               <p>
-                لا تشيل هم! مقعدك وبطاقاتك السرية محفوظة في الغرفة ({roomState.roomCode}). يمكنك
-                استعادة الجلسة فور استقرار الاتصال.
-              </p>
+                {" "+t("لا تشيل هم! مقعدك وبطاقاتك السرية محفوظة في الغرفة (")+""}{tr(roomState.roomCode)}{""+t("). يمكنك استعادة الجلسة فور استقرار الاتصال.")+" "}</p>
             </div>
             <div className="reconnect-card__actions">
               <button
@@ -175,51 +172,48 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                 العودة إلى المباراة الآن
-              </button>
+                 {" "+t("العودة إلى المباراة الآن")+" "}</button>
               <button
                 type="button"
                 className="btn-secondary"
                 onClick={() => service.simulateConnectionToggle('awaiting_backend')}
               >
-                إعادة الاتصال
-              </button>
+                {" "+t("إعادة الاتصال")+" "}</button>
             </div>
           </div>
-        )}
+        ))}
 
         <div className={`lobby-grid ${roomState.roomCode ? 'has-room' : 'no-room'}`}>
           {/* العمود الأيمن: إعدادات اللاعب، إنشاء غرفة، أو الانضمام برمز/رابط */}
           <section className="lobby-panel">
-            <h3>{joinOnly?'العب مع بعض — جوالك':'جهّز جلستك'}</h3>
+            <h3>{tr(joinOnly?t("العب مع بعض — جوالك"):t("جهّز جلستك"))}</h3>
 
             <div className="form-field">
-              <span>اسم اللاعب في الغرفة:</span>
+              <span>{""+t("اسم اللاعب في الغرفة:")+""}</span>
               <div className="inline-input-row">
                 <input
                   type="text"
                   value={playerName}
                   maxLength={20}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="اكتب اسمك..."
+                  placeholder={t("اكتب اسمك...")}
                 />
                 <button
                   type="button"
                   className="btn-secondary"
                   onClick={() => service.setPlayerName(playerName)}
                 >
-                  تحديث الاسم
-                </button>
+                  {" "+t("تحديث الاسم")+" "}</button>
               </div>
             </div>
 
             <div className="lobby-subbox">
-              {!joinOnly&&<>
-              <h4> إنشاء غرفة جديدة</h4>
+              {tr(!joinOnly&&<>
+              <h4> {" "+t("إنشاء غرفة جديدة")+""}</h4>
               <div className="form-field">
-                <span>عدد اللاعبين المستهدف ({roomState.maxPlayers} لاعبين):</span>
+                <span>{""+t("عدد اللاعبين المستهدف (")+""}{tr(roomState.maxPlayers)} {" "+t("لاعبين):")+""}</span>
                 <div className="player-count-chips">
-                  {[3, 4, 5, 6, 7, 8].map((cnt) => (
+                  {tr([3, 4, 5, 6, 7, 8].map((cnt) => (
                     <button
                       key={cnt}
                       type="button"
@@ -233,9 +227,8 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                         })
                       }
                     >
-                      {cnt} لاعبين
-                    </button>
-                  ))}
+                      {tr(cnt)} {" "+t("لاعبين")+" "}</button>
+                  )))}
                 </div>
               </div>
 
@@ -252,11 +245,10 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                 إنشاء غرفة جديدة
-              </button></>}
+                 {" "+t("إنشاء غرفة جديدة")+" "}</button></>)}
             </div>
 
-            <div className="lobby-subbox"><h4>عندك دعوة؟</h4><div className="inline-input-row"><input aria-label="رابط الدعوة أو رمز الغرفة" value={joinCodeInput} onChange={e=>setJoinCodeInput(e.target.value)} placeholder="الصق الرابط أو رمز الغرفة" maxLength={2048}/><button className="btn-secondary" onClick={()=>{let code=joinCodeInput.trim();try{code=new URL(code).searchParams.get('room')||code;}catch{}service.sendEvent({type:'JOIN_ROOM',payload:{roomCode:code.toUpperCase(),playerName}});}}>انضم</button></div></div>
+            <div className="lobby-subbox"><h4>{""+t("عندك دعوة؟")+""}</h4><div className="inline-input-row"><input aria-label={t("رابط الدعوة أو رمز الغرفة")} value={joinCodeInput} onChange={e=>setJoinCodeInput(e.target.value)} placeholder={t("الصق الرابط أو رمز الغرفة")} maxLength={2048}/><button className="btn-secondary" onClick={()=>{let code=joinCodeInput.trim();try{code=new URL(code).searchParams.get('room')||code;}catch{}service.sendEvent({type:'JOIN_ROOM',payload:{roomCode:code.toUpperCase(),playerName}});}}>{""+t("انضم")+""}</button></div></div>
 
           </section>
 
@@ -264,32 +256,31 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
           <section className="lobby-panel">
             <div className="room-code-banner">
               <div>
-                <span className="room-code-label">رمز الغرفة الحالي:</span>
-                <strong className="room-code-value">{roomState.roomCode}</strong>
+                <span className="room-code-label">{""+t("رمز الغرفة الحالي:")+""}</span>
+                <strong className="room-code-value">{tr(roomState.roomCode)}</strong>
               </div>
               <button
                 type="button"
                 className="btn-secondary btn-sm"
                 onClick={handleCopyInvite}
               >
-                 نسخ رابط الدعوة
-              </button>
+                 {" "+t("نسخ رابط الدعوة")+" "}</button>
             </div>
 
-            {copiedNotice && <div className="copied-toast">{copiedNotice}</div>}
+            {tr(copiedNotice && <div className="copied-toast">{tr(copiedNotice)}</div>)}
 
             <h3>
-               الربع ({roomState.members.length} / {roomState.maxPlayers})
+               {" "+t("الربع (")+""}{tr(roomState.members.length)} / {tr(roomState.maxPlayers)})
             </h3>
 
             <div className="room-members-list">
-              {roomState.members.map((member) => (
+              {tr(roomState.members.map((member) => (
                 <div key={member.id} className={`room-member-card ${joined.has(member.id)?'feedback-join':''}`}>
-                  {activeBubbleByPlayer[member.id] && (
+                  {tr(activeBubbleByPlayer[member.id] && (
                     <div className="member-chat-bubble">
-                      {activeBubbleByPlayer[member.id]}
+                      {tr(activeBubbleByPlayer[member.id])}
                     </div>
-                  )}
+                  ))}
                   <img
                     src={member.avatarAsset.replace(/\.png$/, '.svg')}
                     alt={member.name}
@@ -297,19 +288,19 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   />
                   <div className="room-member-info">
                     <div className="room-member-title">
-                      <strong>{member.name}</strong>{member.isPro&&<ProBadge color={member.proBadgeColor}/>}
-                      {member.isHost && <span className="host-badge"> المضيف</span>}
-                      {member.isBot && (
+                      <strong>{member.name}</strong>
+                      {tr(member.isHost && <span className="host-badge"> {" "+t("المضيف")+""}</span>)}
+                      {tr(member.isBot && (
                         <span className="bot-badge">
-                           آلي ({member.botDifficulty === 'easy' ? 'سهل' : member.botDifficulty === 'hard' ? 'صعب' : 'متوسط'})
+                           {" "+t("آلي (")+""}{tr(member.botDifficulty === 'easy' ? t("سهل") : member.botDifficulty === 'hard' ? t("صعب") : t("متوسط"))})
                         </span>
-                      )}
+                      ))}
                     </div>
                     <span className="room-member-status">
-                      {member.isConnected ? ' متصل وجاهز' : ' منقطع'}
+                      {tr(member.isConnected ? t(" متصل وجاهز") : t(" منقطع"))}
                     </span>
                   </div>
-                  {member.isBot && (
+                  {tr(member.isBot && (
                     <button
                       type="button"
                       className="btn-ghost btn-sm"
@@ -320,36 +311,35 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                         })
                       }
                     >
-                      إزالة ✕
-                    </button>
-                  )}
+                      {" "+t("إزالة ✕")+" "}</button>
+                  ))}
                 </div>
-              ))}
+              )))}
 
               {/* مقاعد انتظار اللاعبين الفارغة */}
-              {Array.from({
+              {tr(Array.from({
                 length: Math.max(0, roomState.maxPlayers - roomState.members.length),
               }).map((_, idx) => (
                 <div key={`empty_${idx}`} className="room-member-card is-empty-seat">
                   <div className="empty-seat-circle"></div>
                   <div className="room-member-info">
-                    <strong>مقعد بانتظار لاعب...</strong>
-                    <span>شارك رمز الغرفة أو أضف خصمًا آليًا</span>
+                    <strong>{""+t("مقعد بانتظار لاعب...")+""}</strong>
+                    <span>{""+t("شارك رمز الغرفة أو أضف خصمًا آليًا")+""}</span>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
 
             {/* إضافة خصوم آليين للغرفة */}
             <div className="add-bot-bar">
-              <span>إضافة خصم آلي للغرفة:</span>
+              <span>{""+t("إضافة خصم آلي للغرفة:")+""}</span>
               <select
                 value={botDiffToAdd}
                 onChange={(e) => setBotDiffToAdd(e.target.value as BotDifficulty)}
               >
-                <option value="easy">سهل</option>
-                <option value="medium">متوسط</option>
-                <option value="hard">صعب</option>
+                <option value="easy">{""+t("سهل")+""}</option>
+                <option value="medium">{""+t("متوسط")+""}</option>
+                <option value="hard">{""+t("صعب")+""}</option>
               </select>
               <button
                 type="button"
@@ -361,8 +351,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                 + إضافة خصم آلي
-              </button>
+                 {" "+t("+ إضافة خصم آلي")+" "}</button>
             </div>
 
             {/* أزرار بدء المباراة */}
@@ -377,8 +366,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   })
                 }
               >
-                 بدء المباراة الجماعية للمضيف
-              </button>
+                 {" "+t("بدء المباراة الجماعية للمضيف")+" "}</button>
 
               <button
                 type="button"
@@ -391,8 +379,7 @@ export const MultiplayerLobbyScreen: React.FC<MultiplayerLobbyScreenProps> = ({
                   )
                 }
               >
-                 العب الآن بنفس الإعدادات محليًا ضد الكمبيوتر
-              </button>
+                 {" "+t("العب الآن بنفس الإعدادات محليًا ضد الكمبيوتر")+" "}</button>
             </div>
           </section>
         </div>

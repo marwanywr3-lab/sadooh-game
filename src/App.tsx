@@ -1,7 +1,8 @@
-import {badgeInk} from './components/ProBadge';
-import {BrandLogo,ProBrandContext,BrandNavigationContext} from './components/Theme';
+import {t,fmt,tr} from './i18n/translate';
+import {LanguageToggle,useLanguage} from './i18n/Language';
+import {BrandNavigationContext} from './components/Theme';
 import {AccountPanel} from './components/AccountPanel';
-import {accountClient,accountRequest,proSettings,type Account} from './services/account';
+import {accountClient,accountRequest,type Account} from './services/account';
 import {PassPhoneScreen} from './screens/PassPhoneScreen';
 import {PartyScreen} from './screens/PartyScreen';
 import {ThemeContext} from './components/Theme';
@@ -26,11 +27,10 @@ export default function App() {
 
   useEffect(()=>{const refresh=()=>setSettings(loadUserSettings());window.addEventListener('sadooh-settings',refresh);return()=>window.removeEventListener('sadooh-settings',refresh);},[]);
 
-  // عند أول تشغيل، اعرض الجولة التعليمية التفاعلية مع «أبو فهد» تلقائيًا (مع إمكانية تخطيها فورًا)
+  // Open the menu immediately; local play never waits for account or network checks.
   const [screen, setScreen] = useState<ActiveScreen>(() => {
     if(/^[a-f0-9]{32}$/i.test(new URLSearchParams(location.search).get('room')||''))return 'multiplayer';
-    const initial = loadUserSettings();
-    return initial.tutorialCompleted ? 'menu' : 'tutorial';
+    return 'menu';
   });
 
 
@@ -47,16 +47,13 @@ export default function App() {
   });
 
   const [account,setAccount]=useState<Account|null>(null);
-  const [previewPrefs,setPreviewPrefs]=useState<{background:string;position:string;badgeColor:string}|null>(null);
-  const appearance=account?.isPro?(previewPrefs||account.prefs):{};
-  const [enforced,setEnforced]=useState(true);
-  const [checkingAccount,setCheckingAccount]=useState(true);
-  const [accountOpen,setAccountOpen]=useState(false),[proOpen,setProOpen]=useState(false),[passwordRecovery,setPasswordRecovery]=useState(false);
-  const refreshAccount=async()=>{try{const session=(await accountClient.auth.getSession()).data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{/* A brief network interruption must not unmount a running local game. Server actions still validate the session. */}}else setAccount(null);}finally{setCheckingAccount(false);}};
-  useEffect(()=>{void proSettings().then(s=>setEnforced(!!s.subscriptionsEnabled)).catch(()=>{});void refreshAccount();const sub=accountClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){setPasswordRecovery(true);setAccountOpen(true);}setTimeout(()=>{void refreshAccount();},0);});const timer=setInterval(()=>{void refreshAccount();},60000);return()=>{sub.data.subscription.unsubscribe();clearInterval(timer);};},[]);
+  const {language}=useLanguage();
+  const appearance={background:settings.background,position:settings.buttonPosition};
+  const [accountOpen,setAccountOpen]=useState(false),[passwordRecovery,setPasswordRecovery]=useState(false);
+  const refreshAccount=async()=>{try{const session=(await accountClient.auth.getSession()).data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{/* A brief network interruption must not unmount a running local game. Server actions still validate the session. */}}else setAccount(null);}catch{/* Account checks must not block local play. */}};
+  useEffect(()=>{void refreshAccount();const sub=accountClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){setPasswordRecovery(true);setAccountOpen(true);}setTimeout(()=>{void refreshAccount();},0);});const timer=setInterval(()=>{void refreshAccount();},60000);return()=>{sub.data.subscription.unsubscribe();clearInterval(timer);};},[]);
   useEffect(()=>{if(account?.username&&!loadUserSettings().tutorialCompleted){setSettings(saveUserSettings({tutorialCompleted:true}));}},[account?.username]);
-  const onlineAllowed=(!enforced||!!account?.username);
-  const openPro=()=>{setProOpen(true);setAccountOpen(true);};
+  const onlineAllowed=!!account?.username;
   const [partyJoin,setPartyJoin]=useState(new URLSearchParams(location.search).get('party')==='1');
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -67,7 +64,7 @@ export default function App() {
   }, [settings.darkMode]);
 
   const goHome=()=>{
-    setScreen('menu');setAccountOpen(false);setIsSettingsOpen(false);setIsHowToPlayOpen(false);setPreviewPrefs(null);
+    setScreen('menu');setAccountOpen(false);setIsSettingsOpen(false);setIsHowToPlayOpen(false);
     const url=new URL(window.location.href);url.searchParams.delete('room');url.searchParams.delete('party');window.history.replaceState(null,'',url);
   };
 
@@ -101,45 +98,44 @@ export default function App() {
     setScreen('game');
   };
 
-  if(!account?.username)return <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}><main className="entry-screen" dir="rtl" lang="ar"><BrandLogo alt="صادوه!"/><p>حيّاك في صادوه. سجّل مرة، وبعدها تدخل على طول.</p>{checkingAccount?<p role="status">جاري فتح حسابك…</p>:<AccountPanel entryMode account={account} onPreview={setPreviewPrefs} enforced={enforced} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{}}/>}</main></ThemeContext.Provider>;
   return (
     <ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>handleUpdateSettings({darkMode:!settings.darkMode})}}>
-    <ProBrandContext.Provider value={!!account?.isPro}><BrandNavigationContext.Provider value={{onHome:goHome,onPro:screen==='menu'&&account?.isPro?openPro:undefined}}><div
+    <BrandNavigationContext.Provider value={{onHome:goHome}}><div
       className={`sadooh-app-root ${settings.reduceMotion ? 'reduce-motion' : ''}`}
-      data-pro-position={account?.isPro?appearance.position:undefined}
-      style={account?.isPro&&appearance.background?{['--pro-background' as string]:appearance.background,['--ui-page' as string]:appearance.background,['--pro-badge-color' as string]:appearance.badgeColor||'#f2d96f',['--pro-badge-ink' as string]:badgeInk(appearance.badgeColor)}:undefined}
-      dir="rtl"
-      lang="ar"
+      data-pro-position={appearance.position}
+      style={appearance.background?{['--pro-background' as string]:appearance.background}:undefined}
+      dir={language==='ar'?'rtl':'ltr'}
+      lang={language}
     >
-      {screen === 'menu' && (
+      <LanguageToggle/>
+      {tr(screen === 'menu' && (
         <MainMenuScreen
           settings={settings}
           onStartSinglePlayer={handleStartSinglePlayer}
           onOpenMultiplayer={() => {setPartyJoin(false);setScreen('multiplayer');}}
           onOpenParty={()=>setScreen('party')}
           onOpenPassPhone={()=>setScreen('passphone')}
-          onOpenAccount={()=>{setProOpen(false);setAccountOpen(true);}}
-          onOpenPro={openPro}
+          onOpenAccount={()=>{setAccountOpen(true);}}
+          onOpenCustomize={()=>setIsSettingsOpen(true)}
           accountName={account?.username}
-          isPro={!!account?.isPro}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onStartTutorial={() => setScreen('tutorial')}
         />
-      )}
+      ))}
 
-      {screen === 'tutorial' && (
+      {tr(screen === 'tutorial' && (
         <TutorialScreen
           onCompleteTutorial={handleFinishOrSkipTutorial}
           onSkipTutorial={handleFinishOrSkipTutorial}
           onStartPractice={handleStartGuidedPractice}
         />
-      )}
+      ))}
 
-      {screen === 'passphone'&&<PassPhoneScreen onBack={goHome}/>}
-      {screen === 'party'&&onlineAllowed&&<PartyScreen onBack={goHome} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>}
+      {tr(screen === 'passphone'&&<PassPhoneScreen onBack={goHome}/>)}
+      {tr(screen === 'party'&&onlineAllowed&&<PartyScreen onBack={goHome} onJoin={()=>{setPartyJoin(true);setScreen('multiplayer');}}/>)}
 
-      {screen === 'multiplayer' && onlineAllowed && (
+      {tr(screen === 'multiplayer' && onlineAllowed && (
         <MultiplayerLobbyScreen
           joinOnly={partyJoin}
           initialPlayerName={account?.username||settings.playerName}
@@ -148,9 +144,9 @@ export default function App() {
             handleStartSinglePlayer(botCount, difficulty, playerName)
           }
         />
-      )}
+      ))}
 
-      {screen === 'game' && (
+      {tr(screen === 'game' && (
         <GameTableScreen
           humanPlayerName={matchConfig.playerName}
           botCount={matchConfig.botCount}
@@ -165,9 +161,9 @@ export default function App() {
             });
           }}
         />
-      )}
+      ))}
 
-      {((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} onPreview={setPreviewPrefs} enforced={enforced} recoveryMode={passwordRecovery} initialPro={proOpen} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);setPreviewPrefs(null);if(!onlineAllowed)setScreen('menu');}}/></div>}
+      {tr(((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);if(!onlineAllowed)setScreen('menu');}}/></div>)}
       <HowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}
@@ -183,7 +179,7 @@ export default function App() {
         onUpdateSettings={handleUpdateSettings}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </div></BrandNavigationContext.Provider></ProBrandContext.Provider>
+    </div></BrandNavigationContext.Provider>
     </ThemeContext.Provider>
   );
 }

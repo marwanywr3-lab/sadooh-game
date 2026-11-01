@@ -10,6 +10,7 @@ export const INITIAL_HAND_SIZE = 4;
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 8;
 export const MOVE_TIMER_SECONDS = 30;
+export function normalizeTurnDuration(value:unknown):number {return typeof value==='number'&&Number.isFinite(value)?Math.max(30,Math.min(180,Math.round(value))):MOVE_TIMER_SECONDS;}
 export const CHALLENGE_TIMER_SECONDS = 12;
 export const OUTCOME_READING_SECONDS = 18;
 export const BOT_MOVE_DELAY_MS = 4000;

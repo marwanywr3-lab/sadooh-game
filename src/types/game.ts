@@ -125,6 +125,7 @@ export interface BotLegalMemory {
  * الحالة الكاملة للمحرك (تعمل على الخادم في Cloudflare Durable Object أو محليًا في طور الفردي)
  */
 export interface GameState {
+  moveDurationSeconds?:number;
   matchId: string;
   mode: 'singleplayer' | 'tutorial' | 'multiplayer_preview' | 'multiplayer';
   players: PlayerState[];

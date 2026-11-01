@@ -1,6 +1,7 @@
+import {t,fmt,tr} from '../i18n/translate';
+import {loadUserSettings} from '../services/storage/localSettings';
 import {getRoundNumber} from '../services/feedbackEvents';
-import {GameFeedback,RevealCard} from '../components/Feedback';
-import {ProBadge} from '../components/ProBadge';
+import {GameFeedback,RevealCard,useDrawFeedback} from '../components/Feedback';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -58,6 +59,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   const HUMAN_ID = remote?.view.viewerPlayerId || 'player_human';
   const [gameState, setGameState] = useState<GameState>(() =>
     createMatch({
+      moveDurationSeconds:loadUserSettings().turnDurationSeconds,
       humanPlayerName,
       botCount,
       botDifficulty,
@@ -87,6 +89,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     [gameState, remote?.view]
   );
 
+  useDrawFeedback(view.drawPileCount,view.matchId,feedbackSilent);
   const activePlayer = view.players[view.currentPlayerIndex];
   const isMyTurn = activePlayer?.id === HUMAN_ID;
   const opponents = view.players.filter((p) => p.id !== HUMAN_ID);
@@ -269,12 +272,12 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   const handleConfirmMove = () => {
     if (remote) { if(selectedCardId) remote.service.sendEvent({type:'SUBMIT_MOVE',payload:{cardId:selectedCardId,claimedCharacter:selectedClaimChar,targetPlayerId:CHARACTERS[selectedClaimChar].requiresTarget?selectedTargetId:null,secondaryCardId:selectedSecondaryCardId}}); return; }
     if (!selectedCardId) {
-      setUiError('اختر بطاقة حقيقية من يدك أولًا!');
+      setUiError(t("اختر بطاقة حقيقية من يدك أولًا!"));
       return;
     }
     const charDef = CHARACTERS[selectedClaimChar];
     if (charDef.requiresTarget && !selectedTargetId) {
-      setUiError('اختر خصمًا مستهدفًا من حول الطاولة لهذه القدرة!');
+      setUiError(t("اختر خصمًا مستهدفًا من حول الطاولة لهذه القدرة!"));
       return;
     }
 
@@ -306,7 +309,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
       return;
     }
 
-    showBubbleForPlayer(HUMAN_ID, 'صادوه! اكشف البطاقة! ');
+    showBubbleForPlayer(HUMAN_ID, t("صادوه! اكشف البطاقة! "));
     setGameState((prev) => resolveChallengeWindow(prev, HUMAN_ID));
   };
 
@@ -324,7 +327,8 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     matchRecordedRef.current = false;
     setGameState(
       createMatch({
-        humanPlayerName,
+        moveDurationSeconds:loadUserSettings().turnDurationSeconds,
+      humanPlayerName,
         botCount,
         botDifficulty,
       })
@@ -382,56 +386,55 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
         {/* الشريط العلوي للمباراة */}
         <header className="table-topbar">
           <div className="table-topbar__brand">
-            <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo onHome={onExitToMenu} alt="صادوه!" className="table-topbar__logo" />
+            <GameFeedback state={view} remote={!!remote} silent={feedbackSilent} freshRemoteStart={freshRemoteStart}/><BrandLogo onHome={onExitToMenu} alt={t("صادوه!")} className="table-topbar__logo" />
             <div className="table-topbar__meta">
-              <span className="turn-badge">الجولة #{getRoundNumber(view.turnNumber,view.players.length)}</span>
-              <span className="deck-pill"> السحب: {view.drawPileCount}</span>
-              <span className="deck-pill"> المستخدمة: {view.discardPileCount}</span>
+              <span className="turn-badge">{""+t("الجولة #")+""}{tr(getRoundNumber(view.turnNumber,view.players.length))}</span>
+              <span className="deck-pill"> {" "+t("السحب:")+" "}{tr(view.drawPileCount)}</span>
+              <span className="deck-pill"> {" "+t("المستخدمة:")+" "}{tr(view.discardPileCount)}</span>
             </div>
           </div>
 
           {/* المؤقت الزمني للدور أو نافذة التحدي */}
           <div className="table-topbar__timer">
-            {view.phase === 'CHOOSING_MOVE' && (
+            {tr(view.phase === 'CHOOSING_MOVE' && (
               <div className="timer-pill timer-pill--move">
-                <span> دور «{activePlayer?.name}»:</span>
-                <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
+                <span> {" "+t("دور «")+""}{activePlayer?.name}»:</span>
+                <strong>{tr(practicePaused ? t("خذ وقتك") : fmt("{0} ث",[view.turnTimerSeconds]))}</strong>
               </div>
-            )}
-            {view.phase === 'CHALLENGE_WINDOW' && (
+            ))}
+            {tr(view.phase === 'CHALLENGE_WINDOW' && (
               <div className="timer-pill timer-pill--challenge">
-                <span> مهلة تحدي «صادوه!»:</span>
-                <strong>{practicePaused ? 'خذ وقتك' : `${view.turnTimerSeconds} ث`}</strong>
+                <span> {" "+t("مهلة تحدي «صادوه!»:")+""}</span>
+                <strong>{tr(practicePaused ? t("خذ وقتك") : fmt("{0} ث",[view.turnTimerSeconds]))}</strong>
               </div>
-            )}
+            ))}
           </div>
 
-          <details className="table-more"><summary>المزيد</summary><div className="table-topbar__actions"><ThemeToggle/>
+          <details className="table-more"><summary>{""+t("المزيد")+""}</summary><div className="table-topbar__actions"><ThemeToggle/>
             <button
               type="button"
               className="btn-secondary btn-sm"
               onClick={() => setIsChatOpen(true)}
             >
-               الشات ({view.chatMessages.length})
+               {" "+t("الشات (")+""}{tr(view.chatMessages.length)})
             </button>
             <button
               type="button"
               className="btn-secondary btn-sm"
               onClick={() => setIsLogOpen(true)}
             >
-               السجل ({view.logs.length})
+               {" "+t("السجل (")+""}{tr(view.logs.length)})
             </button>
             <button type="button" className="btn-ghost btn-sm" onClick={onExitToMenu}>
-               خروج
-            </button>
+               {" "+t("خروج")+" "}</button>
           </div></details>
         </header>
 
-        {guided && !remote && <PracticeCoach view={view} selectedCardId={selectedCardId} claimedCharacter={selectedClaimChar} />}
+        {tr(guided && !remote && <PracticeCoach view={view} selectedCardId={selectedCardId} claimedCharacter={selectedClaimChar} />)}
 
         {/* مقاعد الخصوم حول الطاولة */}
-        <section className="opponents-ring" aria-label="الخصوم حول الطاولة">
-          {opponents.map((opp) => (
+        <section className="opponents-ring" aria-label={t("الخصوم حول الطاولة")}>
+          {tr(opponents.map((opp) => (
             <PlayerSeat
               key={opp.id}
               player={opp}
@@ -441,120 +444,113 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
               onSelectTarget={(id) => setSelectedTargetId(id)}
               bubbleText={seatBubbles[opp.id] ?? null}
             />
-          ))}
+          )))}
         </section>
 
         {/* وسط طاولة الاستراحة (البطاقة المقلوبة، الادعاء، زر صادوه، ونتيجة الجولة) */}
         <main className="table-center-stage">
-          {view.phase === 'CHOOSING_MOVE' && (
+          {tr(view.phase === 'CHOOSING_MOVE' && (
             <div className="center-status-box">
-              {isMyTurn ? (
+              {tr(isMyTurn ? (
                 <>
-                    <h3> دورك الآن! {practicePaused ? 'خذ وقتك' : `(${view.turnTimerSeconds} ثانية)`}</h3>
+                    <h3> {" "+t("دورك الآن!")+" "}{tr(practicePaused ? t("خذ وقتك") : fmt("({0} ثانية)",[view.turnTimerSeconds]))}</h3>
                   <p>
-                    اختر بطاقة، وقل اسمها أو غيّره للخداع.
-                  </p>
+                    {" "+t("اختر بطاقة، وقل اسمها أو غيّره للخداع.")+" "}</p>
                 </>
               ) : (
                 <>
-                  <h3> «{activePlayer?.name}» يفكر في حركته...</h3>
-                  <p>{guided ? 'استعد! أول ما يحط بطاقته مقلوبة، بتقرر: تصدقه أو تضغط «صادوه!». بنشرح لك وقتها.' : `استعد! أول ما يحط بطاقته مقلوبة، قدامك ${CHALLENGE_TIMER_SECONDS} ثانية تقرر تصدقه ولا تصيده!`}</p>
+                  <h3> «{activePlayer?.name}{""+t("» يفكر في حركته...")+""}</h3>
+                  <p>{tr(guided ? t("استعد! أول ما يحط بطاقته مقلوبة، بتقرر: تصدقه أو تضغط «صادوه!». بنشرح لك وقتها.") : fmt("استعد! أول ما يحط بطاقته مقلوبة، قدامك {0} ثانية تقرر تصدقه ولا تصيده!",[CHALLENGE_TIMER_SECONDS]))}</p>
                 </>
-              )}
+              ))}
             </div>
-          )}
+          ))}
 
-          {view.phase === 'CHALLENGE_WINDOW' && view.pendingClaimPublic && claimedCharDef && (
+          {tr(view.phase === 'CHALLENGE_WINDOW' && view.pendingClaimPublic && claimedCharDef && (
             <div className="challenge-stage-card">
               <div className="challenge-stage-card__visual">
                 {/* البطاقة المقلوبة في وسط الطاولة (تظل سرية!) */}
-                <CardView faceDown size="md" badgeText="بطاقة مقلوبة" />
+                <CardView faceDown size="md" badgeText={t("بطاقة مقلوبة")} />
               </div>
 
               <div className="challenge-stage-card__details">
                 <div className="claim-announcement-badge">
-                  <span> إعلان على الطاولة:</span>
+                  <span> {" "+t("إعلان على الطاولة:")+""}</span>
                   <h3>
-                    «{claimSpeaker?.name}» يدّعي أنه يلعب{' '}
+                    «{claimSpeaker?.name}{""+t("» يدّعي أنه يلعب")+""}{tr(' ')}
                     <strong style={{ color: claimedCharDef.accentColor }}>
-                      {claimedCharDef.nameAr}
+                      {tr(claimedCharDef.nameAr)}
                     </strong>
-                    {claimTarget ? ` ضد «${claimTarget.name}»` : ''}!
+                    {tr(claimTarget ? fmt(" ضد «{0}»",[claimTarget.name]) : '')}!
                   </h3>
-                  <p className="claim-ability-line">{claimedCharDef.descriptionAr}</p>
+                  <p className="claim-ability-line">{tr(claimedCharDef.descriptionAr)}</p>
                 </div>
 
-                {view.hasPassedChallenge ? <p className="party-passed">عدّيتها. ننتظر قرار الباقين.</p> : view.pendingClaimPublic.playerId !== HUMAN_ID ? (
+                {tr(view.hasPassedChallenge ? <p className="party-passed">{""+t("عدّيتها. ننتظر قرار الباقين.")+""}</p> : view.pendingClaimPublic.playerId !== HUMAN_ID ? (
                   <div className="challenge-cta-group">
                     <button
                       type="button"
                       className="btn-sadooh-mega"
                       onClick={handleHumanPressSadooh}
                     >
-                       صادوه! {practicePaused ? '(اكشف بطاقته)' : `(${view.turnTimerSeconds} ث)`}
+                       {" "+t("صادوه!")+" "}{tr(practicePaused ? t("(اكشف بطاقته)") : fmt("({0} ث)",[view.turnTimerSeconds]))}
                     </button>
                     <button
                       type="button"
                       className="btn-secondary"
                       onClick={handleHumanPassChallenge}
                     >
-                       عدّها له (لا أتحدى)
-                    </button>
+                       {" "+t("عدّها له (لا أتحدى)")+" "}</button>
                   </div>
                 ) : (
                   <div className="waiting-opponents-challenge">
-                    <span> الخصوم ينظرون في عيونك... هل يضغط أحدهم «صادوه!»؟ ({view.turnTimerSeconds} ث)</span>
+                    <span> {" "+t("الخصوم ينظرون في عيونك... هل يضغط أحدهم «صادوه!»؟ (")+""}{tr(view.turnTimerSeconds)} {" "+t("ث)")+""}</span>
                   </div>
-                )}
+                ))}
               </div>
             </div>
-          )}
+          ))}
 
-          {view.phase === 'RESOLVING_CHALLENGE' && view.lastOutcomePublic && (
+          {tr(view.phase === 'RESOLVING_CHALLENGE' && view.lastOutcomePublic && (
             <div className="outcome-stage-card" role="status">
               <div className="outcome-stage-card__card-slot">
-                {view.lastOutcomePublic.revealedCard ? (
+                {tr(view.lastOutcomePublic.revealedCard ? (
                   <RevealCard
                     silent={feedbackSilent}
                     eventKey={`${view.matchId}:${view.turnNumber}:public-flip`}
                     characterId={view.lastOutcomePublic.revealedCard.characterId}
-                    badgeText={
-                      view.lastOutcomePublic.wasTruthful
-                        ? ' طلع صادق!'
-                        : ' طلع كذاب!'
-                    }
+                    badgeText={tr(view.lastOutcomePublic.wasTruthful
+                        ? t(" طلع صادق!")
+                        : t(" طلع كذاب!"))}
                   />
                 ) : (
                   <CardView
                     faceDown
                     size="sm"
-                    badgeText=" بقيت البطاقة سرية"
+                    badgeText={t(" بقيت البطاقة سرية")}
                   />
-                )}
+                ))}
               </div>
 
               <div className="outcome-stage-card__info">
                 <span className="outcome-funny-quote">
-                  «{view.lastOutcomePublic.funnyQuoteAr}»
+                  «{tr(view.lastOutcomePublic.funnyQuoteAr)}»
                 </span>
                 <p className="outcome-summary-text">
-                  {view.lastOutcomePublic.summaryAr}
+                  {tr(view.lastOutcomePublic.summaryAr)}
                 </p>
 
                 {/* نافذة الكشف السري الخاصة بقدرة «الملقوف» (تظهر فقط للاعب الذي استخدم القدرة!) */}
-                {view.lastOutcomePublic.myPrivateReveal && (
+                {tr(view.lastOutcomePublic.myPrivateReveal && (
                   <div className="private-malqoof-reveal">
                     <div>
-                      <strong> كشف «الملقوف» السري (تراه أنت فقط):</strong>
+                      <strong> {" "+t("كشف «الملقوف» السري (تراه أنت فقط):")+""}</strong>
                       <p>
-                        كشفت سرًا هذه البطاقة في يد «
-                        {
-                          view.players.find(
+                        {" "+t("كشفت سرًا هذه البطاقة في يد «")+" "}{tr(view.players.find(
                             (p) =>
                               p.id ===
                               view.lastOutcomePublic?.myPrivateReveal?.targetPlayerId
-                          )?.name
-                        }
+                          )?.name)}
                         »:
                       </p>
                     </div>
@@ -563,54 +559,52 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                         view.lastOutcomePublic.myPrivateReveal.revealedCard.characterId
                       }
                       size="sm"
-                      badgeText="سري لك فقط"
+                      badgeText={t("سري لك فقط")}
                     />
                   </div>
-                )}
+                ))}
 
                 <div className="outcome-next-row">
-                  {remote ? (
-                    <span> اقرأ النتيجة بهدوء — الدور التالي بعد {view.turnTimerSeconds} ثانية</span>
+                  {tr(remote ? (
+                    <span> {" "+t("اقرأ النتيجة بهدوء — الدور التالي بعد")+" "}{tr(view.turnTimerSeconds)} {" "+t("ثانية")+""}</span>
                   ) : <button
                     type="button"
                     className="btn-primary btn-sm"
                     onClick={() => setGameState((prev) => advanceToNextTurn(prev))}
                   >
-                    قرأت النتيجة — الدور التالي 
-                  </button>}
+                    {" "+t("قرأت النتيجة — الدور التالي")+" "}</button>)}
                 </div>
               </div>
             </div>
-          )}
+          ))}
         </main>
 
         {/* منطقة اللاعب البشري أسفل الشاشة (بطاقات اليد + لوحة إعلان الشخصية والهدف) */}
-        <section className="human-player-dock" aria-label="منطقة بطاقاتك وحركتك">
+        <section className="human-player-dock" aria-label={t("منطقة بطاقاتك وحركتك")}>
           {seatBubbles[HUMAN_ID] && (
             <div className="human-chat-bubble">{seatBubbles[HUMAN_ID]}</div>
           )}
 
           <div className="human-dock-header">
             <div className="human-status-info">
-              <strong> {myPublicProfile?.name} (أنت)</strong>{myPublicProfile?.isPro&&<ProBadge color={myPublicProfile.proBadgeColor}/>}
+              <strong> {myPublicProfile?.name} {" "+t("(أنت)")+""}</strong>
               <span className="my-card-count-badge">
-                بطاقات يدك: {view.myHand.length}
+                {" "+t("بطاقات يدك:")+" "}{tr(view.myHand.length)}
               </span>
-              {myPublicProfile?.hasSanadShield && (
-                <span className="sanad-active-pill"> محمي بدرع السند</span>
-              )}
+              {tr(myPublicProfile?.hasSanadShield && (
+                <span className="sanad-active-pill"> {" "+t("محمي بدرع السند")+""}</span>
+              ))}
             </div>
 
-            {uiError && <div className="dock-error-pill"> {uiError}</div>}
+            {tr(uiError && <div className="dock-error-pill"> {tr(uiError)}</div>)}
           </div>
 
           <div className="human-dock-layout">
             {/* بطاقات يد اللاعب الخاصة */}
             <div className="human-hand-scroll">
-              {view.myHand.length === 0 ? (
+              {tr(view.myHand.length === 0 ? (
                 <div className="empty-hand-notice">
-                  لا توجد بطاقات في يدك حاليًا!
-                </div>
+                  {" "+t("لا توجد بطاقات في يدك حاليًا!")+" "}</div>
               ) : (
                 view.myHand.map((card) => {
                   const isMainSelected = selectedCardId === card.id;
@@ -623,13 +617,11 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                       size="md"
                       selected={isMainSelected}
                       disabled={!isMyTurn || view.phase !== 'CHOOSING_MOVE'}
-                      badgeText={
-                        isMainSelected
-                          ? 'البطاقة الملعوبة'
+                      badgeText={tr(isMainSelected
+                          ? t("البطاقة الملعوبة")
                           : isSecondarySelected
-                          ? 'بطاقة القدرة الإضافية'
-                          : undefined
-                      }
+                          ? t("بطاقة القدرة الإضافية")
+                          : undefined)}
                       onClick={() => {
                         setSelectedCardId(card.id);
                         setSelectedClaimChar(card.characterId);setShowBluff(false);
@@ -641,29 +633,29 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                     />
                   );
                 })
-              )}
+              ))}
             </div>
 
             {/* لوحة اختيار الشخصية المعلنة والهدف عندما يكون الدور على اللاعب */}
-            {isMyTurn && view.phase === 'CHOOSING_MOVE' && (
+            {tr(isMyTurn && view.phase === 'CHOOSING_MOVE' && (
               <div className="move-controls-panel">
                 <div className="control-group simple-move-choice">
-                  <span className="control-label">بتقول: <strong>{CHARACTERS[selectedClaimChar].nameAr}</strong></span>
-                  <p className="selected-ability">{CHARACTERS[selectedClaimChar].descriptionAr}</p>
-                  <button type="button" className="btn-secondary btn-sm" aria-expanded={showBluff} onClick={()=>setShowBluff(!showBluff)}>{showBluff?'إخفاء الأسماء':'تبي تخدعهم؟ غيّر الاسم'}</button>
-                  {showBluff&&<label className="bluff-select">وش بتقول لهم؟<select value={selectedClaimChar} onChange={e=>setSelectedClaimChar(e.target.value as CharacterId)}>{CHARACTER_LIST.map(c=><option value={c.id} key={c.id}>{c.nameAr}{view.myHand.find(c=>c.id===selectedCardId)?.characterId===c.id?' — صدق':' — خداع'}</option>)}</select></label>}
+                  <span className="control-label">{""+t("بتقول:")+" "}<strong>{tr(CHARACTERS[selectedClaimChar].nameAr)}</strong></span>
+                  <p className="selected-ability">{tr(CHARACTERS[selectedClaimChar].descriptionAr)}</p>
+                  <button type="button" className="btn-secondary btn-sm" aria-expanded={showBluff} onClick={()=>setShowBluff(!showBluff)}>{tr(showBluff?t("إخفاء الأسماء"):t("تبي تخدعهم؟ غيّر الاسم"))}</button>
+                  {tr(showBluff&&<label className="bluff-select">{""+t("وش بتقول لهم؟")+""}<select value={selectedClaimChar} onChange={e=>setSelectedClaimChar(e.target.value as CharacterId)}>{tr(CHARACTER_LIST.map(c=><option value={c.id} key={c.id}>{tr(c.nameAr)}{tr(view.myHand.find(c=>c.id===selectedCardId)?.characterId===c.id?t(" — صدق"):t(" — خداع"))}</option>))}</select></label>)}
                 </div>
-                {needsTargetForSelection&&<label className="bluff-select">على مين؟<select value={selectedTargetId||''} onChange={e=>setSelectedTargetId(e.target.value)}>{opponents.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
+                {needsTargetForSelection&&<label className="bluff-select">{""+t("على مين؟")+""}<select value={selectedTargetId||''} onChange={e=>setSelectedTargetId(e.target.value)}>{opponents.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
 
-                {needsSecondaryCardPicker && (
+                {tr(needsSecondaryCardPicker && (
                   <div className="control-group">
                     <span className="control-label">
-                      {selectedClaimChar === 'mosarref'
-                        ? 'بطاقة يدك الإضافية لتصريفها (إن لم تكن الأخيرة):'
-                        : 'بطاقة يدك لتبديلها بالمخبّص:'}
+                      {tr(selectedClaimChar === 'mosarref'
+                        ? t("بطاقة يدك الإضافية لتصريفها (إن لم تكن الأخيرة):")
+                        : t("بطاقة يدك لتبديلها بالمخبّص:"))}
                     </span>
                     <div className="target-chips-row">
-                      {view.myHand
+                      {tr(view.myHand
                         .filter((c) => c.id !== selectedCardId)
                         .map((c) => (
                           <button
@@ -674,65 +666,63 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                             }`}
                             onClick={() => setSelectedSecondaryCardId(c.id)}
                           >
-                             {CHARACTERS[c.characterId].nameAr}
+                             {tr(CHARACTERS[c.characterId].nameAr)}
                           </button>
-                        ))}
+                        )))}
                     </div>
                   </div>
-                )}
+                ))}
 
                 <button
                   type="button"
                   className="btn-primary btn-play-confirm"
                   onClick={handleConfirmMove}
                 >
-                   العب وقل: «{CHARACTERS[selectedClaimChar].nameAr}»
+                   {" "+t("العب وقل: «")+""}{tr(CHARACTERS[selectedClaimChar].nameAr)}»
                 </button>
               </div>
-            )}
+            ))}
           </div>
         </section>
 
         {/* شاشة الفوز والاحتفال عند انتهاء المباراة */}
-        {view.phase === 'GAME_OVER' && view.winnerPlayerId && (
+        {tr(view.phase === 'GAME_OVER' && view.winnerPlayerId && (
           <div className="modal-backdrop">
-            <div className="victory-modal" role="dialog" aria-label="نتيجة المباراة">
+            <div className="victory-modal" role="dialog" aria-label={t("نتيجة المباراة")}>
               <div className="victory-confetti">    </div>
               <img
                 src={
                   view.players.find((p) => p.id === view.winnerPlayerId)?.avatarAsset.replace(/\.png$/, '.svg') ||
                   './assets/abu-fahad.svg'
                 }
-                alt="الفائز"
+                alt={t("الفائز")}
                 className="victory-avatar"
               />
               <h2>
-                {view.winnerPlayerId === HUMAN_ID
-                  ? ' كفو يا وحش! فزت بالجلسة!'
-                  : ` فاز «${
-                      view.players.find((p) => p.id === view.winnerPlayerId)?.name
-                    }» بالمباراة!`}
+                {tr(view.winnerPlayerId === HUMAN_ID
+                  ? t(" كفو يا وحش! فزت بالجلسة!")
+                  : fmt(" فاز «{0}» بالمباراة!",[view.players.find((p) => p.id === view.winnerPlayerId)?.name]))}
               </h2>
               <p className="victory-subtitle">
-                {view.winnerPlayerId === HUMAN_ID
-                  ? 'أبو فهد: «يا ساتر، شكلك صرت محترف رسمي! صفيت أوراقك كلها بنظام وذكاء!»'
-                  : 'أبو فهد: «خيرها بغيرها يا بطل! الجلسة الجاية رد اعتبارك واصفطهم!»'}
+                {tr(view.winnerPlayerId === HUMAN_ID
+                  ? t("أبو فهد: «يا ساتر، شكلك صرت محترف رسمي! صفيت أوراقك كلها بنظام وذكاء!»")
+                  : t("أبو فهد: «خيرها بغيرها يا بطل! الجلسة الجاية رد اعتبارك واصفطهم!»"))}
               </p>
 
-              <div className="victory-standings">
-                {view.players.map((p,i) => (
+              <div className="victory-standings"><h3>{t("الترتيب النهائي")}</h3>
+                {tr(view.players.slice().sort((a,b)=>a.id===view.winnerPlayerId?-1:b.id===view.winnerPlayerId?1:a.cardCount-b.cardCount).map((p,i) => (
                   <div key={p.id} className="standing-row feedback-result-row" style={{'--row-delay': `${i*70}ms`} as React.CSSProperties}>
                     <span>
-                      {p.id === view.winnerPlayerId ? ' ' : '• '}
+                      {tr(p.id === view.winnerPlayerId ? ' ' : '• ')}
                       {p.name}
                     </span>
                     <strong>
-                      {p.cardCount === 0 && p.id === view.winnerPlayerId
-                        ? 'فائز (0 بطاقات)'
-                        : `${p.cardCount} بطاقات متبقية`}
+                      {tr(p.cardCount === 0 && p.id === view.winnerPlayerId
+                        ? t("فائز (0 بطاقات)")
+                        : fmt("{0} بطاقات متبقية",[p.cardCount]))}
                     </strong>
                   </div>
-                ))}
+                )))}
               </div>
 
               <div className="victory-actions">
@@ -741,19 +731,17 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                   className="btn-primary btn-lg"
                   onClick={handleRestartMatch}
                 >
-                   العب مباراة جديدة
-                </button>
+                   {" "+t("العب مباراة جديدة")+" "}</button>
                 <button
                   type="button"
                   className="btn-secondary btn-lg"
                   onClick={onExitToMenu}
                 >
-                   القائمة الرئيسية
-                </button>
+                   {" "+t("القائمة الرئيسية")+" "}</button>
               </div>
             </div>
           </div>
-        )}
+        ))}
 
         <ChatDrawer
           isOpen={isChatOpen}

@@ -14,7 +14,7 @@ Deno.serve(async(req:Request)=>{
  const cors={'Access-Control-Allow-Origin':origins.includes(origin)?origin:origins[0],'Vary':'Origin','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Cache-Control':'no-store'};
  const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json','X-Content-Type-Options':'nosniff'}});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
- if(req.method==='GET')return reply({ok:true,service:'sadooh-api',backend:'supabase',subscriptionsEnabled:await rpc('sadooh_pro_enabled',{})});
+ if(req.method==='GET')return reply({ok:true,service:'sadooh-api',backend:'supabase',subscriptionsEnabled:false,unlimited:true});
  if(req.method!=='POST')return reply({error:'طريقة غير مسموحة.'},405);
  if(origin&&!origins.includes(origin))return reply({error:'Origin غير مسموح.'},403);
  try{
@@ -40,25 +40,24 @@ Deno.serve(async(req:Request)=>{
   if(!await rpc('sadooh_allow',{p_key:`request:${uid}`,p_window:10,p_max:30}))return reply({error:'طلبات كثيرة؛ انتظر قليلًا.'},429);
   const requestId=cleanText(body.requestId,64);
   if(!/^[a-f0-9-]{36}$/i.test(requestId))return reply({error:'معرف الطلب غير صالح.'},400);
-  const enforced=await rpc('sadooh_pro_enabled',{});
   const verified=!!user.email&&!user.is_anonymous;
   if(body.type==='ACCOUNT'){
    if(!verified)return reply({error:'سجّل دخولك أولًا.'},403);
-   if(!['GET','SAVE_NAME','SAVE_PREFS','REDEEM'].includes(body.action))return reply({error:'طلب حساب غير صالح.'},400);
-   if(body.action==='REDEEM'&&!await rpc('sadooh_allow',{p_key:'pro:'+uid,p_window:600,p_max:10}))return reply({error:'محاولات كثيرة. حاول بعد عشر دقائق.'},429);
+   if(!['GET','SAVE_NAME','SAVE_PREFS'].includes(body.action))return reply({error:'طلب حساب غير صالح.'},400);
    if(body.action==='SAVE_NAME')body.value={username:cleanText(body.value?.username,24)};
    const result=await rpc('sadooh_account',{p_uid:uid,p_action:body.action,p_value:body.value||{}});
    return reply(result);
   }
   let profile:any=null;
   if(verified)profile=await rpc('sadooh_account',{p_uid:uid});
-  if(body.type==='CREATE_PARTY_ROOM'&&enforced){
+  // Billing is retired. Only online identity and room authorization remain required.
+  if(body.type==='CREATE_PARTY_ROOM'){
    const token=body.payload?.accountToken;
    if(typeof token!=='string')return reply({error:'سجّل دخولك لبدء شاشة العرض.'},403);
    const owner=await admin.auth.getUser(token);
    if(owner.error||!owner.data.user?.email||owner.data.user.is_anonymous)return reply({error:'سجّل دخولك أولًا.'},403);
    await rpc('sadooh_account',{p_uid:owner.data.user.id});
-  }else if(enforced&&['CREATE_ROOM','JOIN_ROOM'].includes(body.type)&&(!profile||!profile.username))return reply({error:'سجّل دخولك واختر اسم المستخدم أولًا.'},403);
+  }else if(['CREATE_ROOM','JOIN_ROOM'].includes(body.type)&&(!profile||!profile.username))return reply({error:'سجّل دخولك واختر اسم المستخدم أولًا.'},403);
   if(profile?.username&&['CREATE_ROOM','JOIN_ROOM'].includes(body.type))body.payload={...body.payload,playerName:profile.username};
   if(body.type==='CREATE_ROOM'||body.type==='CREATE_PARTY_ROOM'){
    // Room creation has no hourly quota. The general request throttle above still applies.
@@ -76,7 +75,7 @@ Deno.serve(async(req:Request)=>{
    const s=loaded.state as SavedRoom,now=Number(loaded.now),revision=Number(loaded.revision);
    const isMember=s.room.members.some(m=>m.id===uid&&!m.isBot);
    if(!isMember&&!isDisplay(s,uid)&&event?.type!=='JOIN_ROOM')return reply({error:'لست عضوًا في الغرفة.'},403);
-   if(enforced&&!isDisplay(s,uid)&&!verified)return reply({error:'سجّل دخولك أولًا.'},403);
+   if(!isDisplay(s,uid)&&!verified)return reply({error:'سجّل دخولك أولًا.'},403);
    if(s.receipts.includes(`${uid}:${requestId}`))return reply({...projection(s,uid,now),revision});
    let changed=tick(s,now),report=null,errorAr:string|null=null;
    if(event){try{report=reduceEvent(s,uid,event,now,body.context);changed=true;}catch(e){errorAr=e instanceof Error?e.message:'طلب غير صالح.';}}
