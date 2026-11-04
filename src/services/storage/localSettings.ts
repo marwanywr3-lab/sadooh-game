@@ -5,6 +5,8 @@ export interface UserSettings {
   turnDurationSeconds:number;
   background:string;
   buttonPosition:'bottom'|'top'|'left'|'right';
+  musicEnabled:boolean;
+  musicVolume:number;
   soundEnabled: boolean;
   soundVolume: number;
   playerName: string;
@@ -21,6 +23,7 @@ const STORAGE_KEY = 'sadooh_estiraha_settings_v1';
 
 export const DEFAULT_SETTINGS: UserSettings = {
   language:'ar',turnDurationSeconds:30,background:'',buttonPosition:'bottom',
+  musicEnabled:true,musicVolume:0.3,
   soundEnabled: true,
   soundVolume: 0.35,
   playerName: 'سلطان',
@@ -42,6 +45,8 @@ export function loadUserSettings(): UserSettings {
     parsed.turnDurationSeconds=typeof parsed.turnDurationSeconds==='number'&&Number.isFinite(parsed.turnDurationSeconds)?Math.max(30,Math.min(180,Math.round(parsed.turnDurationSeconds))):30;
     parsed.background=/^#[0-9a-fA-F]{6}$/.test(parsed.background)?parsed.background:'';
     parsed.buttonPosition=['bottom','top','left','right'].includes(parsed.buttonPosition)?parsed.buttonPosition:'bottom';
+    parsed.musicEnabled=typeof parsed.musicEnabled==='boolean'?parsed.musicEnabled:true;
+    parsed.musicVolume=typeof parsed.musicVolume==='number'&&Number.isFinite(parsed.musicVolume)?Math.max(0,Math.min(1,parsed.musicVolume)):0.3;
     parsed.soundEnabled = typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true;
     parsed.soundVolume = typeof parsed.soundVolume === 'number' && Number.isFinite(parsed.soundVolume) ? Math.max(0,Math.min(1,parsed.soundVolume)) : 0.35;
     return {

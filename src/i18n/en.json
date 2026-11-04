@@ -553,5 +553,9 @@
   "تغيّرت حالة الغرفة؛ أعد المحاولة.": "The room changed. Please try again.",
   "اختر اسم المستخدم أولًا من حسابك.": "Choose your player name in your account first.",
   "اكتب اسمًا من 1 إلى 24 حرفًا بدون رموز HTML.": "Enter a name of 1 to 24 characters without HTML.",
-  "تخصيص غير صالح.": "Invalid appearance settings."
+  "تخصيص غير صالح.": "Invalid appearance settings.",
+  "موسيقى البداية والجولات والنهاية": "Match, round and victory music",
+  "مستوى الموسيقى": "Music volume",
+  "تبدأ الجولة بعد لحظات…": "The round starts in a moment…",
+  "انتظر انتهاء الانتقال لبدء الدور.": "Wait for the transition to finish before playing."
 }

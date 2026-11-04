@@ -163,6 +163,7 @@ export interface PublicPlayerView {
 }
 
 export interface ClientProjectedGameState {
+    transitionRemainingMs?:number;
   hasPassedChallenge?: boolean;
   matchId: string;
   viewerPlayerId: string;

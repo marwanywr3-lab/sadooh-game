@@ -5,9 +5,12 @@ import {CardView} from './CardView';
 import type {CharacterId} from '../types/game';
 import {loadUserSettings,saveUserSettings} from '../services/storage/localSettings';
 import {SoundManager,type SoundName} from '../services/soundManager';
+import {useTransitionPause} from '../services/useTransitionPause';
 import {FeedbackEvents,getRoundNumber,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
 
 const sound=new SoundManager();
+type MusicName='startMusic'|'roundMusic'|'endMusic';
+const music=new SoundManager<MusicName>({startMusic:'music-start.wav',roundMusic:'music-round.wav',endMusic:'music-end.wav'},true);
 let openingDismissed=false;
 const Context=createContext({reduced:false,play:(_name:SoundName,_key:string)=>{}});
 export function FeedbackProvider({children}:{children:React.ReactNode}){
@@ -16,19 +19,20 @@ export function FeedbackProvider({children}:{children:React.ReactNode}){
  useEffect(()=>{
   const refresh=()=>setSettings(loadUserSettings());
   const media=matchMedia('(prefers-reduced-motion: reduce)');const change=()=>setOsReduced(media.matches);
-  const unlock=()=>sound.unlock();const hide=()=>{if(document.hidden)sound.stop();};
+  const unlock=()=>{sound.unlock();if(loadUserSettings().musicEnabled)music.unlock();};const hide=()=>{if(document.hidden){sound.stop();music.stop();}};
   window.addEventListener('sadooh-settings',refresh);window.addEventListener('storage',refresh);
   media.addEventListener('change',change);window.addEventListener('pointerdown',unlock);window.addEventListener('keydown',unlock);document.addEventListener('visibilitychange',hide);
-  return()=>{window.removeEventListener('sadooh-settings',refresh);window.removeEventListener('storage',refresh);media.removeEventListener('change',change);window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);document.removeEventListener('visibilitychange',hide);sound.stop();};
+  return()=>{window.removeEventListener('sadooh-settings',refresh);window.removeEventListener('storage',refresh);media.removeEventListener('change',change);window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);document.removeEventListener('visibilitychange',hide);sound.stop();music.stop();};
  },[]);
  useEffect(()=>sound.configure(settings.soundEnabled,settings.soundVolume),[settings.soundEnabled,settings.soundVolume]);
+ useEffect(()=>music.configure(settings.musicEnabled,settings.musicVolume),[settings.musicEnabled,settings.musicVolume]);
  const reduced=settings.reduceMotion||osReduced;
  return <Context.Provider value={{reduced,play:(n,k)=>sound.play(n,k)}}><div className={reduced?'feedback-root feedback-reduced':'feedback-root'}>{tr(children)}<ThemeContext.Provider value={{dark:settings.darkMode,toggle:()=>{}}}><OpeningFeedback/></ThemeContext.Provider></div></Context.Provider>;
 }
 export function SoundControls(){
  const [settings,setSettings]=useState(loadUserSettings);
  useEffect(()=>{const refresh=()=>setSettings(loadUserSettings());window.addEventListener('sadooh-settings',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('sadooh-settings',refresh);window.removeEventListener('storage',refresh);};},[]);
- return <div className="feedback-sound-controls"><label className="toggle-row"><span>{""+t("المؤثرات الصوتية")+""}</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>{""+t("مستوى الصوت")+" "}{tr(Math.round(settings.soundVolume*100))}{""+t("٪")+""}</span><input aria-label={t("مستوى المؤثرات الصوتية")} type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label></div>;
+ return <div className="feedback-sound-controls"><label className="toggle-row"><span>{""+t("المؤثرات الصوتية")+""}</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>{""+t("مستوى الصوت")+" "}{tr(Math.round(settings.soundVolume*100))}{""+t("٪")+""}</span><input aria-label={t("مستوى المؤثرات الصوتية")} type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label><label className="toggle-row"><span>{t('موسيقى البداية والجولات والنهاية')}</span><input type="checkbox" checked={settings.musicEnabled} onChange={e=>setSettings(saveUserSettings({musicEnabled:e.target.checked}))}/></label><label className="form-field"><span>{t('مستوى الموسيقى')} {Math.round(settings.musicVolume*100)}%</span><input aria-label={t('مستوى الموسيقى')} type="range" min="0" max="100" value={Math.round(settings.musicVolume*100)} onChange={e=>setSettings(saveUserSettings({musicVolume:Number(e.target.value)/100}))}/></label></div>;
 }
 function OpeningFeedback(){
  const [open,setOpen]=useState(false);const {reduced,play}=useContext(Context);
@@ -37,31 +41,36 @@ function OpeningFeedback(){
  useEffect(()=>{if(reduced){setOpen(false);return;}if(!open)return;play('whoosh','app:open');const pop=setTimeout(()=>play('pop','app:pop'),850);const end=setTimeout(()=>setOpen(false),FEEDBACK_TIMINGS.opening);return()=>{clearTimeout(pop);clearTimeout(end);};},[reduced,open]);
  return open&&!reduced?<LogoScene opening onSkip={()=>setOpen(false)}/>:null;
 }
-function LogoScene({opening=false,onSkip}:{opening?:boolean;onSkip:()=>void}){
- return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt={t("صادوه!")}/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{""+t("تجاوز الحركة")+""}</button></div>;
+function LogoScene({opening=false,onSkip,elapsed=0}:{opening?:boolean;onSkip:()=>void;elapsed?:number}){
+ return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-elapsed':`${-elapsed}ms`,'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt={t("صادوه!")}/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{""+t("تجاوز الحركة")+""}</button></div>;
 }
-export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:FeedbackState|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
+export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:(FeedbackState&{transitionRemainingMs?:number})|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);
- const [scene,setScene]=useState<{kind:string;key:string;turn:number}|null>(null);
- const popTimer=useRef<ReturnType<typeof setTimeout>>();
+ const paused=useTransitionPause(state,remote);
+ const [scene,setScene]=useState<{kind:string;key:string;turn:number;duration:number}|null>(null);
  const actionPhase=useRef<string|null>(null);
  useEffect(()=>{const previous=actionPhase.current;actionPhase.current=state?.phase||null;if(previous==='CHOOSING_MOVE'&&state?.phase==='CHALLENGE_WINDOW'&&!silent&&!document.hidden)play('flip',`${state.matchId}:${state.turnNumber}:play-card`);},[state?.matchId,state?.turnNumber,state?.phase,silent]);
  useEffect(()=>{
   const event=events.current.observe(state,remote,freshRemoteStart)[0];if(!event||!state)return;
-  clearTimeout(popTimer.current);
+  music.stop();
   const key=`${state.matchId}:${state.turnNumber}:${event}`;
   if(event==='start'){openingDismissed=true;window.dispatchEvent(new Event('sadooh-feedback-start'));}
   if(document.hidden)return;
-  setScene({kind:event,key,turn:getRoundNumber(state.turnNumber,state.players.length)});
-  if(!silent){if(event==='start'){play('whoosh',key);popTimer.current=setTimeout(()=>play('pop',key+':pop'),800);}else if(event==='turn'){play('whoosh',key+':words');popTimer.current=setTimeout(()=>play('turn',key+':number'),FEEDBACK_TIMINGS.roundWords);}else{play('reveal',key+':reveal');popTimer.current=setTimeout(()=>play('victory',key+':winner'),520);}}
+  const duration=event==='results'?FEEDBACK_TIMINGS.results:remote?(state.transitionRemainingMs||0):event==='start'?FEEDBACK_TIMINGS.start:FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber;
+  if(!duration)return;
+  setScene({kind:event,key,turn:getRoundNumber(state.turnNumber,state.players.length),duration});
+  // Reconnects may show the remaining animation, but never start a late musical cue.
+  if(!silent&&(!remote||duration>=(event==='start'?FEEDBACK_TIMINGS.start:3000)-500||event==='results'))music.play(event==='start'?'startMusic':event==='turn'?'roundMusic':'endMusic',key);
  },[state?.matchId,state?.turnNumber,state?.phase,remote,silent,freshRemoteStart]);
- useEffect(()=>{if(!scene)return;const duration=scene.kind==='start'?FEEDBACK_TIMINGS.start:scene.kind==='turn'?FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:FEEDBACK_TIMINGS.results;const timer=setTimeout(()=>setScene(null),duration);return()=>clearTimeout(timer);},[scene]);
- useEffect(()=>{if(state?.phase==='GAME_OVER')return;if((scene?.kind==='start'||scene?.kind==='turn')&&state?.phase!=='CHOOSING_MOVE'){setScene(null);clearTimeout(popTimer.current);}},[state?.phase,scene?.kind]);
- useEffect(()=>{const hide=()=>{if(document.hidden){clearTimeout(popTimer.current);setScene(null);}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);clearTimeout(popTimer.current);sound.stop();};},[]);
- if(!scene||reduced)return null;
- if(scene.kind==='start')return <LogoScene onSkip={()=>{setScene(null);clearTimeout(popTimer.current);}}/>;
- if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene" role="status" aria-label={tr(fmt("جولة جديدة، الجولة {0}",[scene.turn]))} style={{'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`,'--round-total-duration':`${FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>{""+t("جولة")+""}</span><span>{""+t("جديدة")+""}</span></div><div className="feedback-round-number" aria-hidden="true"><small>{""+t("الجولة")+""}</small><strong>{tr(new Intl.NumberFormat(getLanguage()==='ar'?'ar-SA':'en',{numberingSystem:getLanguage()==='ar'?'arab':'latn'}).format(scene.turn))}</strong></div></div>;
- return <div key={scene.key} className="feedback-confetti" aria-hidden="true">{tr(Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>))}</div>;
+ useEffect(()=>{if(!scene)return;const timer=setTimeout(()=>{setScene(null);music.stop();},scene.duration);return()=>clearTimeout(timer);},[scene]);
+ useEffect(()=>{if(state?.phase==='GAME_OVER')return;if((scene?.kind==='start'||scene?.kind==='turn')&&state?.phase!=='CHOOSING_MOVE'){setScene(null);music.stop();}},[state?.phase,scene?.kind]);
+ useEffect(()=>{const hide=()=>{if(document.hidden){setScene(null);music.stop();}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);music.stop();sound.stop();};},[]);
+ const skip=()=>{music.stop();setScene(null);};
+ if(reduced&&scene?.kind==='results')return <div className="feedback-static-result"><button className="btn-secondary btn-sm" onClick={skip}>{t('تجاوز الحركة')}</button></div>;
+ if(!scene||reduced)return paused?<div className="feedback-wait" role="status"><span>{t('تبدأ الجولة بعد لحظات…')}</span>{scene&&<button className="btn-secondary btn-sm feedback-skip" onClick={skip}>{t('تجاوز الحركة')}</button>}</div>:null;
+ if(scene.kind==='start')return <div className="feedback-transition-block"><LogoScene onSkip={skip} elapsed={Math.max(0,FEEDBACK_TIMINGS.start-scene.duration)}/></div>;
+ if(scene.kind==='turn')return <div key={scene.key} className="feedback-round-scene feedback-transition-block" role="status" aria-label={fmt('جولة جديدة، الجولة {0}',[scene.turn])} style={{'--feedback-elapsed':`${-Math.max(0,3000-scene.duration)}ms`,'--round-words-duration':`${FEEDBACK_TIMINGS.roundWords}ms`,'--round-number-duration':`${FEEDBACK_TIMINGS.roundNumber}ms`,'--round-total-duration':`${FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber}ms`} as React.CSSProperties}><div className="feedback-round-words" aria-hidden="true"><span>{t('جولة')}</span><span>{t('جديدة')}</span></div><div className="feedback-round-number" aria-hidden="true"><small>{t('الجولة')}</small><strong>{new Intl.NumberFormat(getLanguage()==='ar'?'ar-SA':'en',{numberingSystem:getLanguage()==='ar'?'arab':'latn'}).format(scene.turn)}</strong></div><button className="btn-secondary btn-sm feedback-skip" onClick={skip}>{t('تجاوز الحركة')}</button></div>;
+ return <div key={scene.key} className="feedback-confetti"><div aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>)}</div><button className="btn-secondary btn-sm feedback-skip" onClick={skip}>{t('تجاوز الحركة')}</button></div>;
 }
 /** Receives only an already-authorized public character. Never accepts a hidden hand. */
 export function RevealCard({characterId,eventKey,badgeText,silent=false}:{characterId:CharacterId;eventKey:string;badgeText?:string;silent?:boolean}){

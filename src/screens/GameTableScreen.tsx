@@ -1,5 +1,6 @@
 import {t,fmt,tr} from '../i18n/translate';
 import {loadUserSettings} from '../services/storage/localSettings';
+import {useTransitionPause} from '../services/useTransitionPause';
 import {getRoundNumber} from '../services/feedbackEvents';
 import {GameFeedback,RevealCard,useDrawFeedback} from '../components/Feedback';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
@@ -89,6 +90,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     [gameState, remote?.view]
   );
 
+  const transitionPaused=useTransitionPause(view,!!remote);
   useDrawFeedback(view.drawPileCount,view.matchId,feedbackSilent);
   const activePlayer = view.players[view.currentPlayerIndex];
   const isMyTurn = activePlayer?.id === HUMAN_ID;
@@ -143,7 +145,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
   // عداد الوقت (15 ثانية لاختيار الحركة، و5 ثوانٍ لنافذة التحدي)
   useEffect(() => {
-    if (remote || practicePaused) return;
+    if (remote || practicePaused || transitionPaused) return;
     if (gameState.phase !== 'CHOOSING_MOVE' && gameState.phase !== 'CHALLENGE_WINDOW') {
       return;
     }
@@ -172,11 +174,11 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [gameState.phase, gameState.turnNumber, practicePaused]);
+  }, [gameState.phase, gameState.turnNumber, practicePaused,transitionPaused]);
 
   // ذكاء الخصوم الآليين في اختيار الحركة عندما يكون الدور على بوت
   useEffect(() => {
-    if (remote) return;
+    if (remote || transitionPaused) return;
     if (gameState.phase !== 'CHOOSING_MOVE') return;
     const current = gameState.players[gameState.currentPlayerIndex];
     if (!current || !current.isBot) return;
@@ -218,12 +220,13 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     gameState.currentPlayerIndex,
     gameState.turnNumber,
     botDifficulty,
+    transitionPaused,
     showBubbleForPlayer,
   ]);
 
   // ذكاء الخصوم الآليين في نافذة التحدي (5 ثوانٍ): هل يضغط أحد البوتات «صادوه!»؟
   useEffect(() => {
-    if (remote || practicePaused) return;
+    if (remote || practicePaused || transitionPaused) return;
     if (gameState.phase !== 'CHALLENGE_WINDOW' || !gameState.pendingClaim) return;
 
     const botChallengers = gameState.players.filter(
@@ -261,6 +264,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
     gameState.phase,
     gameState.turnNumber,
     botDifficulty,
+    transitionPaused,
     showBubbleForPlayer,
     practicePaused,
   ]);
@@ -270,6 +274,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
 
   // تأكيد حركة اللاعب البشري
   const handleConfirmMove = () => {
+    if(transitionPaused)return;
     if (remote) { if(selectedCardId) remote.service.sendEvent({type:'SUBMIT_MOVE',payload:{cardId:selectedCardId,claimedCharacter:selectedClaimChar,targetPlayerId:CHARACTERS[selectedClaimChar].requiresTarget?selectedTargetId:null,secondaryCardId:selectedSecondaryCardId}}); return; }
     if (!selectedCardId) {
       setUiError(t("اختر بطاقة حقيقية من يدك أولًا!"));
@@ -316,7 +321,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
   // تمرير التحدي من اللاعب البشري (تخطي انتظار الـ5 ثوانٍ إذا لم يرغب في التحدي)
   const handleHumanPassChallenge = () => {
     if(remote){remote.service.sendEvent({type:'PASS_CHALLENGE',payload:{matchId:view.matchId,turnNumber:view.turnNumber}});return;}
-    if (remote) return;
+    if (remote || transitionPaused) return;
     if (gameState.phase !== 'CHALLENGE_WINDOW') return;
     setGameState((prev) => resolveChallengeWindow(prev, null));
   };
@@ -676,6 +681,7 @@ export const GameTableScreen: React.FC<GameTableScreenProps> = ({
                 <button
                   type="button"
                   className="btn-primary btn-play-confirm"
+                  disabled={transitionPaused}
                   onClick={handleConfirmMove}
                 >
                    {t("العب وقل:")} <bdi>{t(CHARACTERS[selectedClaimChar].nameAr)}</bdi>

@@ -48,3 +48,16 @@
 
 .feedback-reduced .feedback-round-scene{display:none}
 @media(prefers-reduced-motion:reduce){.feedback-round-scene{display:none}}
+
+/* Skipping changes presentation only; the shared turn still begins at the same time. */
+.feedback-transition-block,.feedback-wait{position:fixed;inset:0;z-index:1100;pointer-events:auto}
+.feedback-wait{display:flex;align-items:flex-end;justify-content:center;padding:80px 16px;background:transparent}
+.feedback-wait>span{background:var(--ui-surface,#fff);color:var(--ui-text,#111);border:2px solid currentColor;border-radius:12px;padding:10px 18px;box-shadow:3px 3px 0 #0002}
+.feedback-transition-block .feedback-logo-scene{pointer-events:auto}
+.feedback-confetti i{animation-duration:4.8s}
+.feedback-winner,.victory-modal{animation-duration:1.6s}
+.feedback-confetti .feedback-skip{z-index:1}
+
+.feedback-logo,.feedback-logo-scene::before,.feedback-round-words,.feedback-round-scene::before{animation-delay:var(--feedback-elapsed,0ms)}
+.feedback-round-number{animation-delay:calc(var(--round-words-duration,2100ms) + var(--feedback-elapsed,0ms))}
+.feedback-static-result{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:1101}

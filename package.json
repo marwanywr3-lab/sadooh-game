@@ -16,7 +16,7 @@
     "test:live": "tsx scripts/test-live.ts",
     "build:edge": "node scripts/build-edge.mjs",
     "check": "npm test && npm run test:security && npm run test:rooms && npm run test:tutorial && npm run test:feedback && npm run build && npm run test:pwa && npm run build:edge",
-    "test:feedback": "tsx --test tests/feedback.test.ts tests/improvements.test.ts"
+    "test:feedback": "tsx --test tests/feedback.test.ts tests/improvements.test.ts tests/music.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

@@ -19,7 +19,7 @@ export class SupabaseRoomService {
  private client:SupabaseClient;private channel:RealtimeChannel|null=null;
  private userId='';private code='';private revision=-1;private stopped=false;
  private timeout:ReturnType<typeof setTimeout>|undefined;private heartbeat:ReturnType<typeof setInterval>|undefined;private uiTimer:ReturnType<typeof setInterval>|undefined;
- private deadline=0;private offset=0;private nextActionAt=0;private queue:Promise<void>=Promise.resolve();
+ private readyAt=0;private deadline=0;private offset=0;private nextActionAt=0;private queue:Promise<void>=Promise.resolve();
  view:ClientProjectedGameState|null=null;
  private storageKey:string;
  constructor(_name:string,display=false){
@@ -51,7 +51,7 @@ export class SupabaseRoomService {
   if(!p?.room||p.room.roomCode!==this.code||p.revision<this.revision)return;
   this.revision=p.revision;this.offset=p.serverNow-Date.now();this.deadline=p.deadline;this.nextActionAt=p.nextActionAt;
   this.state={...p.room,inviteUrl:`https://sadoh.marwanbarbood.com/?room=${p.room.roomCode}${p.room.partyMode?'&party=1':''}`,connectionStatus:this.state.connectionStatus==='reconnecting'?'reconnecting':'connected'};
-  this.view=p.view;this.emit(p.notice||null);if(this.view)for(const fn of this.matchListeners)fn(this.view);this.scheduleTick();
+  this.readyAt=p.serverNow+(p.view?.transitionRemainingMs||0);this.view=p.view;this.emit(p.notice||null);if(this.view)for(const fn of this.matchListeners)fn(this.view);this.scheduleTick();
  }
  private scheduleTick(){
   clearTimeout(this.timeout);
@@ -74,7 +74,7 @@ export class SupabaseRoomService {
     else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')this.status('reconnecting','انقطع التزامن؛ نحاول استعادة الاتصال.');
    });
   this.heartbeat=setInterval(()=>{void this.sync();},20000);
-  this.uiTimer=setInterval(()=>{if(this.view){this.view={...this.view,turnTimerSeconds:Math.max(0,Math.ceil((this.deadline-Date.now()-this.offset)/1000))};for(const fn of this.matchListeners)fn(this.view);}},250);
+  this.uiTimer=setInterval(()=>{if(this.view){this.view={...this.view,transitionRemainingMs:Math.max(0,this.readyAt-Date.now()-this.offset),turnTimerSeconds:Math.max(0,Math.ceil((this.deadline-Math.max(Date.now()+this.offset,this.readyAt))/1000))};for(const fn of this.matchListeners)fn(this.view);}},250);
  }
  sendEvent(event:ClientToServerEvent){this.queue=this.queue.then(()=>this.dispatch(event)).catch(e=>this.emit(e instanceof Error?e.message:'تعذر تنفيذ الطلب.'));}
  private async dispatch(event:ClientToServerEvent){

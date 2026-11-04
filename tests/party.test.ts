@@ -10,7 +10,7 @@ function setup(){
 function play(s:SavedRoom,truth=true){
  s.game!.players[0].hand[0]={id:'secret_actor_card',characterId:truth?'malqoof':'nashal'};
  s.game!.players[1].hand=s.game!.players[1].hand.map((v,i)=>({...v,id:`secret_target_${i}`}));
- reduceEvent(s,a,{type:'SUBMIT_MOVE',payload:{cardId:'secret_actor_card',claimedCharacter:'malqoof',targetPlayerId:b}},100003,{matchId:s.game!.matchId,turnNumber:s.game!.turnNumber});
+ reduceEvent(s,a,{type:'SUBMIT_MOVE',payload:{cardId:'secret_actor_card',claimedCharacter:'malqoof',targetPlayerId:b}},103503,{matchId:s.game!.matchId,turnNumber:s.game!.turnNumber});
 }
 test('screen does not take a player seat and first phone becomes host',()=>{
  const s=createPartyRoom('D'.repeat(32),display,8,100000);
@@ -21,31 +21,31 @@ test('screen does not take a player seat and first phone becomes host',()=>{
 });
 test('display cannot join as a player, start, act, challenge, pass or chat',()=>{
  const s=setup();const before=JSON.stringify(s);
- for(const event of [{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'اختراق'}},{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},{type:'SUBMIT_MOVE',payload:{cardId:'fake',claimedCharacter:'sanad',targetPlayerId:null}},{type:'PRESS_SADOOH',payload:{matchId:s.game!.matchId,turnNumber:1}},{type:'PASS_CHALLENGE',payload:{matchId:s.game!.matchId,turnNumber:1}},{type:'SEND_CHAT',payload:{text:'x'}}] as any[])assert.throws(()=>reduceEvent(s,display,event,100003));
- assert.equal(JSON.stringify(s),before);assert.throws(()=>projection(s,'outsider',100003));
+ for(const event of [{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'اختراق'}},{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},{type:'SUBMIT_MOVE',payload:{cardId:'fake',claimedCharacter:'sanad',targetPlayerId:null}},{type:'PRESS_SADOOH',payload:{matchId:s.game!.matchId,turnNumber:1}},{type:'PASS_CHALLENGE',payload:{matchId:s.game!.matchId,turnNumber:1}},{type:'SEND_CHAT',payload:{text:'x'}}] as any[])assert.throws(()=>reduceEvent(s,display,event,103503));
+ assert.equal(JSON.stringify(s),before);assert.throws(()=>projection(s,'outsider',103503));
 });
 test('public display never receives hands, played secret card or private peek',()=>{
- const s=setup();play(s);let pub=projection(s,display,100003).view!;
+ const s=setup();play(s);let pub=projection(s,display,103503).view!;
  assert.deepEqual(pub.myHand,[]);assert.equal(pub.pendingClaimPublic?.claimedCharacter,'malqoof');
  assert.ok(!JSON.stringify(pub).includes('secret_actor_card'));
  const payload={matchId:s.game!.matchId,turnNumber:1};
- reduceEvent(s,b,{type:'PASS_CHALLENGE',payload},100004);
- assert.equal(projection(s,b,100004).view!.hasPassedChallenge,true);
- assert.throws(()=>reduceEvent(s,b,{type:'PRESS_SADOOH',payload},100004));
- reduceEvent(s,c,{type:'PASS_CHALLENGE',payload},100005);
+ reduceEvent(s,b,{type:'PASS_CHALLENGE',payload},103504);
+ assert.equal(projection(s,b,103504).view!.hasPassedChallenge,true);
+ assert.throws(()=>reduceEvent(s,b,{type:'PRESS_SADOOH',payload},103504));
+ reduceEvent(s,c,{type:'PASS_CHALLENGE',payload},103505);
  assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
- assert.ok(projection(s,a,100005).view!.lastOutcomePublic?.myPrivateReveal);
- pub=projection(s,display,100005).view!;
+ assert.ok(projection(s,a,103505).view!.lastOutcomePublic?.myPrivateReveal);
+ pub=projection(s,display,103505).view!;
  assert.equal(pub.lastOutcomePublic?.myPrivateReveal,null);assert.equal(pub.lastOutcomePublic?.revealedCard,null);
  const serialized=JSON.stringify(pub);
  for(const p of s.game!.players)for(const card of p.hand)assert.ok(!serialized.includes(card.id));
  assert.ok(!serialized.includes('secret_actor_card'));assert.ok(!('drawPile' in pub));assert.ok(!('botMemories' in pub));
- assert.ok(pub.players.every(p=>!('hand' in p)));assert.equal(allProjections(s,100005).length,4);
+ assert.ok(pub.players.every(p=>!('hand' in p)));assert.equal(allProjections(s,103505).length,4);
 });
 test('display shows both challenge outcomes but never anyone’s remaining cards',()=>{
  for(const truth of [true,false]){
-  const s=setup();play(s,truth);reduceEvent(s,b,{type:'PRESS_SADOOH',payload:{matchId:s.game!.matchId,turnNumber:1}},100004);
-  const pub=projection(s,display,100004).view!;
+  const s=setup();play(s,truth);reduceEvent(s,b,{type:'PRESS_SADOOH',payload:{matchId:s.game!.matchId,turnNumber:1}},103504);
+  const pub=projection(s,display,103504).view!;
   assert.equal(pub.lastOutcomePublic?.wasTruthful,truth);assert.equal(pub.lastOutcomePublic?.challenged,true);
   assert.equal(pub.lastOutcomePublic?.penaltyPlayerId,truth?b:a);
   assert.ok(pub.lastOutcomePublic?.revealedCard);assert.deepEqual(pub.myHand,[]);

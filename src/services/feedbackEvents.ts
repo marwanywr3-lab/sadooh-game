@@ -4,7 +4,7 @@ export function getRoundNumber(turnNumber:number,playerCount:number):number {
  return Math.floor((Math.max(1,turnNumber)-1)/Math.max(1,playerCount))+1;
 }
 export type FeedbackEvent = 'start'|'turn'|'results';
-export const FEEDBACK_TIMINGS={opening:2200,start:2000,roundWords:1900,roundNumber:750,results:1200} as const;
+export const FEEDBACK_TIMINGS={opening:2200,start:3500,roundWords:2100,roundNumber:900,results:5500} as const;
 /** Only semantic transitions trigger feedback; timer snapshots are deliberately ignored. */
 export class FeedbackEvents {
   private previous: FeedbackState|null = null;
@@ -19,4 +19,11 @@ export class FeedbackEvents {
     if(getRoundNumber(next.turnNumber,next.players.length)>getRoundNumber(prev.turnNumber,prev.players.length) && next.phase==='CHOOSING_MOVE')return ['turn'];
     return [];
   }
+}
+
+/** Presentation pause is public timing only; never includes card data. */
+export function transitionDuration(previous:FeedbackState|null,next:FeedbackState):number {
+ if(next.phase!=='CHOOSING_MOVE')return 0;
+ if(!previous||previous.matchId!==next.matchId)return FEEDBACK_TIMINGS.start;
+ return getRoundNumber(next.turnNumber,next.players.length)>getRoundNumber(previous.turnNumber,previous.players.length)?FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:0;
 }

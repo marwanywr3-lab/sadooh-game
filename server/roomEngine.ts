@@ -1,3 +1,4 @@
+import {transitionDuration} from '../src/services/feedbackEvents';
 import {normalizeTurnDuration} from '../src/game/rules/deck';
 import {pickBotNames} from '../src/game/bots/names';
 import type { GameState, BotDifficulty } from '../src/types/game';
@@ -8,7 +9,7 @@ import { projectGameStateForPlayer } from '../src/game/engine/stateProjector';
 import { decideBotMove, decideBotChallenge } from '../src/game/bots/localBotEngine';
 import { secureRandom, cleanText, capacity } from '../server/security';
 
-export type SavedRoom={party?:{displayUserId:string};partyPasses?:string[];room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
+export type SavedRoom={readyAt?:number;party?:{displayUserId:string};partyPasses?:string[];room:RoomState;game:GameState|null;muted:Record<string,string[]>;lastSeen:Record<string,number>;chatAt:Record<string,number>;deadline:number;nextBot:number;expires:number;receipts:string[]};
 export type Report={id:string;reporter:string;target:string;reason:string;evidence:unknown};
 export type Projection={room:RoomState;view:ReturnType<typeof projectGameStateForPlayer>|null;deadline:number;nextActionAt:number;serverNow:number;revision?:number};
 const BOT_AVATARS=['abu-fahad','alkabeer','malqoof','nashal','sanad','mosarref','mokhabbes'];
@@ -25,10 +26,11 @@ export function createPartyRoom(code:string,displayUserId:string,max:number,now:
 }
 export function isDisplay(s:SavedRoom,userId:string){return s.party?.displayUserId===userId;}
 function phaseChanged(s:SavedRoom,g:GameState,now:number){
+ const pause=transitionDuration(s.game,g);s.readyAt=now+pause;
  s.partyPasses=[];
  s.game={...g,logs:g.logs.slice(0,100),chatMessages:[]};
- s.deadline=now+1000*(g.phase==='CHOOSING_MOVE'?normalizeTurnDuration(g.moveDurationSeconds):g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
- s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+BOT_CHALLENGE_DELAY_MS:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+BOT_MOVE_DELAY_MS:0;
+ s.deadline=now+pause+1000*(g.phase==='CHOOSING_MOVE'?normalizeTurnDuration(g.moveDurationSeconds):g.phase==='CHALLENGE_WINDOW'?CHALLENGE_TIMER_SECONDS:g.phase==='RESOLVING_CHALLENGE'?OUTCOME_READING_SECONDS:0);
+ s.nextBot=g.phase==='CHALLENGE_WINDOW'?now+BOT_CHALLENGE_DELAY_MS:g.phase==='CHOOSING_MOVE'&&g.players[g.currentPlayerIndex].isBot?now+pause+BOT_MOVE_DELAY_MS:0;
  if(g.phase==='GAME_OVER')s.room.status='finished';
 }
 export function tick(s:SavedRoom,now:number):boolean {
@@ -59,7 +61,7 @@ export function projection(s:SavedRoom,userId:string,now:number):Projection {
  const room={...s.room,members:s.room.members.map(m=>({...m,isConnected:m.isBot||now-(s.lastSeen[m.id]||0)<45000,isMuted:muted.includes(m.id)})),chatHistory:display?[]:s.room.chatHistory.filter(m=>!muted.includes(m.senderId))};
  const view=s.game?projectGameStateForPlayer(s.game,display?'public_display_no_player':userId):null;
  if(view){view.hasPassedChallenge=!display&&!!s.partyPasses?.includes(userId);if(display){view.myHand=[];view.chatMessages=[];if(view.lastOutcomePublic)view.lastOutcomePublic.myPrivateReveal=null;}}
- if(view){view.turnTimerSeconds=Math.max(0,Math.ceil((s.deadline-now)/1000));view.chatMessages=room.chatHistory;view.players=view.players.map(p=>({...p,isConnected:room.members.find(m=>m.id===p.id)?.isConnected||false,isMuted:muted.includes(p.id)}));}
+ if(view){view.transitionRemainingMs=s.game?.phase==='CHOOSING_MOVE'?Math.max(0,(s.readyAt||0)-now):0;view.turnTimerSeconds=Math.max(0,Math.ceil((s.deadline-Math.max(now,s.readyAt||0))/1000));view.chatMessages=room.chatHistory;view.players=view.players.map(p=>({...p,isConnected:room.members.find(m=>m.id===p.id)?.isConnected||false,isMuted:muted.includes(p.id)}));}
  return {room,view,deadline:s.deadline,nextActionAt:s.game&&s.game.phase!=='GAME_OVER'?Math.min(s.deadline,s.nextBot||Infinity):0,serverNow:now};
 }
 export function allProjections(s:SavedRoom,now:number){return [...s.room.members.filter(m=>!m.isBot).map(m=>m.id),...(s.party?[s.party.displayUserId]:[])].map(userId=>({userId,payload:projection(s,userId,now)}));}
@@ -97,6 +99,7 @@ export function reduceEvent(s:SavedRoom,userId:string,event:ClientToServerEvent,
   s.room.status='in_progress';phaseChanged(s,g,now);break;
  }
  case 'SUBMIT_MOVE':{
+  if(now<(s.readyAt||0))throw Error('انتظر انتهاء الانتقال لبدء الدور.');
   const g=s.game;if(!g)throw Error('المباراة لم تبدأ.');
   if(context?.matchId!==g.matchId||context?.turnNumber!==g.turnNumber)throw Error('الحركة من دور قديم.');
   const r=submitPlayerMove(g,{...e.payload,playerId:userId});if(r.errorAr)throw Error(r.errorAr);phaseChanged(s,r.nextState,now);break;

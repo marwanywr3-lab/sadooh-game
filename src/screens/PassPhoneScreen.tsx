@@ -1,3 +1,4 @@
+import {useTransitionPause} from '../services/useTransitionPause';
 import {loadUserSettings} from '../services/storage/localSettings';
 import {t,fmt,tr} from '../i18n/translate';
 import {GameFeedback,RevealCard} from '../components/Feedback';
@@ -16,6 +17,7 @@ export function createPassPhoneMatch(names:string[]):GameState {
 export function PassPhoneScreen({onBack}:{onBack:()=>void}){
  const [names,setNames]=useState(['','','']);
  const [game,setGame]=useState<GameState|null>(null);
+ const transitionPaused=useTransitionPause(game);
  const [privateOpen,setPrivateOpen]=useState(false);
  const [cardId,setCard]=useState('');
  const [claim,setClaim]=useState<CharacterId>('sanad');
@@ -29,10 +31,10 @@ export function PassPhoneScreen({onBack}:{onBack:()=>void}){
   document.addEventListener('visibilitychange',hide);
   return()=>document.removeEventListener('visibilitychange',hide);
  },[]);
- useEffect(()=>{if(!privateOpen||!game||game.phase!=='CHOOSING_MOVE')return;const timer=setTimeout(()=>{if(game.turnTimerSeconds<=1){setGame(executeAutoTimeoutMove(game));setPrivateOpen(false);}else setGame({...game,turnTimerSeconds:game.turnTimerSeconds-1});},1000);return()=>clearTimeout(timer);},[privateOpen,game]);
+ useEffect(()=>{if(transitionPaused||!privateOpen||!game||game.phase!=='CHOOSING_MOVE')return;const timer=setTimeout(()=>{if(game.turnTimerSeconds<=1){setGame(executeAutoTimeoutMove(game));setPrivateOpen(false);}else setGame({...game,turnTimerSeconds:game.turnTimerSeconds-1});},1000);return()=>clearTimeout(timer);},[privateOpen,game,transitionPaused]);
  const active=game?.players[game.currentPlayerIndex];
  const openHand=()=>{
-  if(!active||!game)return;
+  if(transitionPaused||!active||!game)return;
   const first=active.hand[0];setCard(first?.id||'');setClaim(first?.characterId||'sanad');
   setTarget(game.players.find(p=>p.id!==active.id)?.id||'');setSecondary(active.hand[1]?.id||'');setError('');setPrivateOpen(true);
  };
