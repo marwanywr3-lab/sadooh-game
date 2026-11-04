@@ -24,13 +24,6 @@ export class FeedbackEvents {
 /** Presentation pause is public timing only; never includes card data. */
 export function transitionDuration(previous:FeedbackState|null,next:FeedbackState):number {
  if(next.phase!=='CHOOSING_MOVE')return 0;
- if(!previous||previous.matchId!==next.matchId)return FEEDBACK_TIMINGS.start+FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber;
+ if(!previous||previous.matchId!==next.matchId)return FEEDBACK_TIMINGS.start;
  return getRoundNumber(next.turnNumber,next.players.length)>getRoundNumber(previous.turnNumber,previous.players.length)?FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:0;
-}
-
-/** Resume the first-match presentation at the correct stage after network latency. */
-export function firstMatchScene(remainingMs:number){
- const round=FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber;
- const remaining=Math.max(0,Math.min(FEEDBACK_TIMINGS.start+round,remainingMs));
- return remaining>round?{kind:'start',duration:remaining-round,hasFirstRound:true}:{kind:'turn',duration:remaining,hasFirstRound:false};
 }

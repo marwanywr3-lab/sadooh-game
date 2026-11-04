@@ -63,3 +63,10 @@
 .feedback-static-result{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:1101}
 
 .feedback-opening-ready{position:fixed;inset:0;z-index:1100;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:24px;color:#111}.feedback-opening-ready>img,.feedback-opening-ready .brand-logo{width:min(55vw,260px);height:auto}.feedback-opening-ready .btn-primary{min-width:160px}
+
+/* One 4.5s cue: logo exits while round-one words enter; number closes the same cue. */
+.feedback-first-match{display:grid;place-items:center;background:#fff;overflow:hidden}
+.feedback-first-match .feedback-round-words{animation-delay:calc(1700ms + var(--feedback-elapsed,0ms))}
+.feedback-first-match .feedback-round-number{animation-delay:calc(3300ms + var(--feedback-elapsed,0ms))}
+.feedback-reduced .feedback-first-match{display:none}
+@media(prefers-reduced-motion:reduce){.feedback-first-match{display:none}}
