@@ -70,3 +70,5 @@
 .feedback-first-match .feedback-round-number{animation-delay:calc(3300ms + var(--feedback-elapsed,0ms))}
 .feedback-reduced .feedback-first-match{display:none}
 @media(prefers-reduced-motion:reduce){.feedback-first-match{display:none}}
+
+.feedback-audio-hint{position:absolute;bottom:80px;left:16px;right:16px;text-align:center;color:#444;font-size:.85rem;pointer-events:none}

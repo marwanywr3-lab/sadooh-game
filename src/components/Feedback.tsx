@@ -35,9 +35,19 @@ export function SoundControls(){
  return <div className="feedback-sound-controls"><label className="toggle-row"><span>{""+t("المؤثرات الصوتية")+""}</span><input type="checkbox" checked={settings.soundEnabled} onChange={e=>setSettings(saveUserSettings({soundEnabled:e.target.checked}))}/></label><label className="form-field"><span>{""+t("مستوى الصوت")+" "}{tr(Math.round(settings.soundVolume*100))}{""+t("٪")+""}</span><input aria-label={t("مستوى المؤثرات الصوتية")} type="range" min="0" max="100" value={Math.round(settings.soundVolume*100)} onChange={e=>setSettings(saveUserSettings({soundVolume:Number(e.target.value)/100}))}/></label><label className="toggle-row"><span>{t('موسيقى الافتتاح والبداية والجولات والنهاية')}</span><input type="checkbox" checked={settings.musicEnabled} onChange={e=>setSettings(saveUserSettings({musicEnabled:e.target.checked}))}/></label><label className="form-field"><span>{t('مستوى الموسيقى')} {Math.round(settings.musicVolume*100)}%</span><input aria-label={t('مستوى الموسيقى')} type="range" min="0" max="100" value={Math.round(settings.musicVolume*100)} onChange={e=>setSettings(saveUserSettings({musicVolume:Number(e.target.value)/100}))}/></label></div>;
 }
 function OpeningFeedback(){
- const [open,setOpen]=useState(false);const active=useRef(false);const {reduced}=useContext(Context);
- useEffect(()=>{if(openingDismissed||reduced)return;active.current=true;setOpen(true);const openedAt=performance.now();void music.prepare().then(()=>{if(active.current&&!document.hidden&&performance.now()-openedAt<500)music.play('startMusic','app:opening');});const close=()=>{active.current=false;music.stop();setOpen(false);};const end=setTimeout(close,FEEDBACK_TIMINGS.opening);const hide=()=>{if(document.hidden)close();};window.addEventListener('sadooh-feedback-start',close);document.addEventListener('visibilitychange',hide);return()=>{active.current=false;clearTimeout(end);window.removeEventListener('sadooh-feedback-start',close);document.removeEventListener('visibilitychange',hide);};},[reduced]);
- return open&&!reduced?<LogoScene opening onSkip={()=>{active.current=false;music.stop();setOpen(false);}}/>:null;
+ const [open,setOpen]=useState(false),[blocked,setBlocked]=useState(false);const active=useRef(false);const {reduced}=useContext(Context);
+ useEffect(()=>{
+  if(openingDismissed||reduced)return;
+  active.current=true;setOpen(true);const openedAt=performance.now();
+  const attempt=()=>{if(!active.current||document.hidden||performance.now()-openedAt>=FEEDBACK_TIMINGS.opening)return;void music.prepare().then(()=>{if(active.current&&!document.hidden){setBlocked(music.needsGesture&&loadUserSettings().musicEnabled&&loadUserSettings().musicVolume>0);music.play('startMusic','app:opening',{startedAt:openedAt,durationMs:FEEDBACK_TIMINGS.opening});}});};
+  // Retry only during this opening, on a real gesture, and never on the skip button.
+  const gesture=(event:Event)=>{if(event.target instanceof Element&&event.target.closest('.feedback-skip'))return;attempt();};
+  const close=()=>{active.current=false;music.stop();setOpen(false);};
+  attempt();const end=setTimeout(close,FEEDBACK_TIMINGS.opening);const hide=()=>{if(document.hidden)close();};
+  window.addEventListener('sadooh-feedback-start',close);document.addEventListener('visibilitychange',hide);window.addEventListener('pointerdown',gesture);window.addEventListener('click',gesture);window.addEventListener('keydown',gesture);
+  return()=>{active.current=false;clearTimeout(end);window.removeEventListener('sadooh-feedback-start',close);document.removeEventListener('visibilitychange',hide);window.removeEventListener('pointerdown',gesture);window.removeEventListener('click',gesture);window.removeEventListener('keydown',gesture);};
+ },[reduced]);
+ return open&&!reduced?<LogoScene opening audioHint={blocked} onSkip={()=>{active.current=false;music.stop();setOpen(false);}}/>:null;
 }
 function FirstRoundScene({elapsed,onSkip}:{elapsed:number;onSkip:()=>void}){
  return <div className="feedback-first-match feedback-transition-block" role="status" aria-label={fmt('جولة جديدة، الجولة {0}',[1])} style={{'--feedback-elapsed':`${-elapsed}ms`,'--feedback-logo-duration':'2200ms','--round-words-duration':'1600ms','--round-number-duration':'1200ms'} as React.CSSProperties}>
@@ -46,8 +56,8 @@ function FirstRoundScene({elapsed,onSkip}:{elapsed:number;onSkip:()=>void}){
  <div className="feedback-round-number" aria-hidden="true"><small>{t('الجولة')}</small><strong>{new Intl.NumberFormat(getLanguage()==='ar'?'ar-SA':'en',{numberingSystem:getLanguage()==='ar'?'arab':'latn'}).format(1)}</strong></div>
  <button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{t('تجاوز الحركة')}</button></div>;
 }
-function LogoScene({opening=false,onSkip,elapsed=0}:{opening?:boolean;onSkip:()=>void;elapsed?:number}){
- return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-elapsed':`${-elapsed}ms`,'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt={t("صادوه!")}/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{""+t("تجاوز الحركة")+""}</button></div>;
+function LogoScene({opening=false,onSkip,elapsed=0,audioHint=false}:{opening?:boolean;onSkip:()=>void;elapsed?:number;audioHint?:boolean}){
+ return <div className={`feedback-logo-scene ${opening?'feedback-opening':''}`} style={{'--feedback-elapsed':`${-elapsed}ms`,'--feedback-logo-duration':`${opening?FEEDBACK_TIMINGS.opening:FEEDBACK_TIMINGS.start}ms`} as React.CSSProperties}><div className="feedback-logo"><ThemeContext.Provider value={{dark:false,toggle:()=>{}}}><BrandLogo interactive={false} hideProBadge alt={t("صادوه!")}/></ThemeContext.Provider></div><button className="btn-secondary btn-sm feedback-skip" onClick={onSkip}>{""+t("تجاوز الحركة")+""}</button>{audioHint&&<small className="feedback-audio-hint">{t("المس الشاشة لتشغيل الصوت")}</small>}</div>;
 }
 export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:(FeedbackState&{transitionRemainingMs?:number})|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);

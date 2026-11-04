@@ -7,6 +7,17 @@ import {createRoom,reduceEvent,projection,tick} from '../server/roomEngine';
 import {SoundManager} from '../src/services/soundManager';
 import {loadUserSettings,saveUserSettings} from '../src/services/storage/localSettings';
 
+test('blocked opening can retry after a gesture and stays synchronized without replaying late',async()=>{
+ let now=1000,allowed=false;const starts:number[]=[];
+ class Context {state='suspended';currentTime=0;destination={};resume(){if(allowed)this.state='running';return Promise.resolve();}createGain(){return {gain:{value:0,setValueAtTime(){},linearRampToValueAtTime(){}},connect(){},disconnect(){}};}decodeAudioData(){return Promise.resolve({duration:4.39});}createBufferSource(){return {buffer:null,onended:null,connect(){},disconnect(){},addEventListener(){},start:(_at:number,offset:number)=>starts.push(offset),stop(){}};}}
+ Object.defineProperty(globalThis,'AudioContext',{configurable:true,value:Context});Object.defineProperty(globalThis,'performance',{configurable:true,value:{now:()=>now}});Object.defineProperty(globalThis,'document',{configurable:true,value:{hidden:false,baseURI:'https://example.test/'}});Object.defineProperty(globalThis,'fetch',{configurable:true,value:async()=>({ok:true,arrayBuffer:async()=>new ArrayBuffer(1)})});
+ const flush=()=>new Promise(r=>setImmediate(r)),sound=new SoundManager({opening:'selected-start.mp3'},true),timeline={startedAt:1000,durationMs:4500};
+ sound.unlock();sound.play('opening','same-opening',timeline);await flush();assert.equal(starts.length,0);
+ allowed=true;now=1800;await sound.prepare();sound.play('opening','same-opening',timeline);await flush();assert.deepEqual(starts,[.8]);
+ sound.play('opening','same-opening',timeline);await flush();assert.equal(starts.length,1);
+ sound.stop();now=6000;sound.play('opening','expired-opening',timeline);await flush();assert.equal(starts.length,1);
+});
+
 test('presentation is start 4.5s, full-roster round 4.5s, victory 6.8s; no pause on ordinary turns',()=>{
  const state={matchId:'x',turnNumber:1,phase:'CHOOSING_MOVE',players:[{},{},{}]};
  assert.equal(transitionDuration(null,state),4500);
