@@ -4,7 +4,7 @@ export function getRoundNumber(turnNumber:number,playerCount:number):number {
  return Math.floor((Math.max(1,turnNumber)-1)/Math.max(1,playerCount))+1;
 }
 export type FeedbackEvent = 'start'|'turn'|'results';
-export const FEEDBACK_TIMINGS={opening:2200,start:3500,roundWords:2100,roundNumber:900,results:5500} as const;
+export const FEEDBACK_TIMINGS={opening:4500,start:4500,roundWords:3300,roundNumber:1200,results:6800} as const;
 /** Only semantic transitions trigger feedback; timer snapshots are deliberately ignored. */
 export class FeedbackEvents {
   private previous: FeedbackState|null = null;

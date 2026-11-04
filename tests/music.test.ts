@@ -7,27 +7,27 @@ import {createRoom,reduceEvent,projection,tick} from '../server/roomEngine';
 import {SoundManager} from '../src/services/soundManager';
 import {loadUserSettings,saveUserSettings} from '../src/services/storage/localSettings';
 
-test('presentation is start 3.5s, full-roster round 3s, victory 5.5s; no pause on ordinary turns',()=>{
+test('presentation is start 4.5s, full-roster round 4.5s, victory 6.8s; no pause on ordinary turns',()=>{
  const state={matchId:'x',turnNumber:1,phase:'CHOOSING_MOVE',players:[{},{},{}]};
- assert.equal(transitionDuration(null,state),3500);
+ assert.equal(transitionDuration(null,state),4500);
  assert.equal(transitionDuration(state,{...state,turnNumber:2}),0);
- assert.equal(transitionDuration({...state,turnNumber:3},{...state,turnNumber:4}),3000);
+ assert.equal(transitionDuration({...state,turnNumber:3},{...state,turnNumber:4}),4500);
  assert.equal(transitionDuration(state,{...state,phase:'GAME_OVER'}),0);
- assert.equal(FEEDBACK_TIMINGS.results,5500);
+ assert.equal(FEEDBACK_TIMINGS.results,6800);
 });
 
 test('server protects full turn time and rejects early moves even after a client skips',()=>{
  const room=createRoom('F'.repeat(32),'host','Host',3,100000);
  for(const name of ['a','b'])reduceEvent(room,name,{type:'JOIN_ROOM',payload:{roomCode:room.room.roomCode,playerName:name}},100000);
  reduceEvent(room,'host',{type:'START_MATCH',payload:{roomCode:room.room.roomCode,turnDurationSeconds:30}},100000);
- assert.equal(room.readyAt,103500);assert.equal(room.deadline,133500);
+ assert.equal(room.readyAt,104500);assert.equal(room.deadline,134500);
  const g=room.game!,move={type:'SUBMIT_MOVE' as const,payload:{cardId:g.players[0].hand[0].id,claimedCharacter:'sanad' as const,targetPlayerId:null}},ctx={matchId:g.matchId,turnNumber:1};
- assert.throws(()=>reduceEvent(room,'host',move,103499,ctx),/الانتقال/);
+ assert.throws(()=>reduceEvent(room,'host',move,104499,ctx),/الانتقال/);
  assert.equal(projection(room,'a',102000).view!.turnTimerSeconds,30);
- assert.equal(projection(room,'a',102000).view!.transitionRemainingMs,1500);
- assert.equal(tick(room,103499),false);
- reduceEvent(room,'host',move,103500,ctx);assert.equal(room.game!.phase,'CHALLENGE_WINDOW');
- assert.equal(room.deadline,115500); // Challenge remains 12 seconds, no music delay.
+ assert.equal(projection(room,'a',102000).view!.transitionRemainingMs,2500);
+ assert.equal(tick(room,104499),false);
+ reduceEvent(room,'host',move,104500,ctx);assert.equal(room.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(room.deadline,116500); // Challenge remains 12 seconds, no music delay.
 });
 
 test('new round server pause applies once to humans and bots, old rooms remain compatible',()=>{
@@ -36,8 +36,8 @@ test('new round server pause applies once to humans and bots, old rooms remain c
  reduceEvent(room,'host',{type:'ADD_BOT',payload:{difficulty:'easy'}},100000);
  reduceEvent(room,'host',{type:'START_MATCH',payload:{roomCode:room.room.roomCode}},100000);
  const g=room.game!;g.turnNumber=3;g.currentPlayerIndex=2;g.phase='RESOLVING_CHALLENGE';room.deadline=110000;
- tick(room,110000);assert.equal(room.game!.turnNumber,4);assert.equal(room.readyAt,113000);assert.equal(room.deadline,143000);
- assert.equal(tick(room,112999),false);assert.equal(projection(room,'host',111000).view!.turnTimerSeconds,30);
+ tick(room,110000);assert.equal(room.game!.turnNumber,4);assert.equal(room.readyAt,114500);assert.equal(room.deadline,144500);
+ assert.equal(tick(room,114499),false);assert.equal(projection(room,'host',111000).view!.turnTimerSeconds,30);
  delete room.readyAt;assert.equal(projection(room,'host',114000).view!.transitionRemainingMs,0);
 });
 
@@ -47,10 +47,10 @@ test('music preferences are independent, bounded and persistent',()=>{
  raw=JSON.stringify({musicVolume:7,musicEnabled:'false'});assert.equal(loadUserSettings().musicVolume,1);assert.equal(loadUserSettings().musicEnabled,true);
 });
 
-test('three distinct music excerpts retain CC0 provenance and exact hashes',()=>{
- const clips=JSON.parse(fs.readFileSync('public/assets/audio/music-sources.json','utf8'));
- assert.equal(clips.length,3);assert.equal(new Set(clips.map((c:any)=>c.originalFile)).size,3);
- for(const c of clips){assert.equal(c.license,'CC0-1.0');assert.equal(c.source,'https://opengameart.org/content/5-chiptunes-action');const bytes=fs.readFileSync('public/assets/audio/'+c.file);assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),c.sha256);}
+test('owner-selected originals are preserved exactly and share the opening/start/round identity',()=>{
+ const clips=JSON.parse(fs.readFileSync('public/assets/audio/music-sources.json','utf8'));assert.equal(clips.length,2);
+ const first=clips.find((c:any)=>c.file==='selected-start.mp3');assert.deepEqual(first.purposes,['app opening','match start','new round']);
+ for(const c of clips){const bytes=fs.readFileSync('public/assets/audio/'+c.file);assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),c.sha256);const local=fs.readFileSync('audio-selections/'+(c.file.includes('start')?'match-and-round.mp3':'victory.mp3'));assert.deepEqual(bytes,local);assert.ok(c.license.startsWith('Owner-provided'));}
 });
 
 test('music never loops or overlaps, skip cancels pending playback, mute and effects are independent',async()=>{

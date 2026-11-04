@@ -15,13 +15,13 @@ const host='11111111-1111-4111-8111-111111111111',guest='22222222-2222-4222-8222
 function setup(){const s=createRoom('A'.repeat(32),host,'المضيف',4,100000);reduceEvent(s,guest,{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'ضيف'}},100000);reduceEvent(s,third,{type:'JOIN_ROOM',payload:{roomCode:s.room.roomCode,playerName:'ضيف آخر'}},100000);return s;}
 test('online bot names use the same requested list when adding and restarting',()=>{
  const s=createRoom('B'.repeat(32),host,'المضيف',4,100000);
- reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},103501);
- reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},103502);
+ reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},104501);
+ reduceEvent(s,host,{type:'ADD_BOT',payload:{difficulty:'easy'}},104502);
  assert.ok(s.room.members.filter(m=>m.isBot).every(m=>BOT_NAMES.includes(m.name)));
- reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},103503);
+ reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},104503);
  assert.equal(new Set(s.game!.players.map(p=>p.name)).size,3);
  s.room.status='finished';
- reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},103504);
+ reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},104504);
  assert.deepEqual(s.game!.players.map(p=>p.name),s.room.members.map(m=>m.name));
  assert.ok(s.game!.players.filter(p=>p.isBot).every(p=>BOT_NAMES.includes(p.name)));
 });
@@ -40,25 +40,25 @@ test('server rejects wrong actor, stale turn, fake card and claimant challenge',
  const s=setup();reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100000);const g=s.game!;
  const e={type:'SUBMIT_MOVE' as const,payload:{cardId:g.players[0].hand[0].id,claimedCharacter:'sanad' as const,targetPlayerId:null}};
  const ctx={matchId:g.matchId,turnNumber:g.turnNumber};
- assert.throws(()=>reduceEvent(s,guest,e,103501,ctx));assert.throws(()=>reduceEvent(s,host,e,103501,{...ctx,turnNumber:0}));
- assert.throws(()=>reduceEvent(s,host,{...e,payload:{...e.payload,cardId:'fake'}},103501,ctx));
- reduceEvent(s,host,e,103501,ctx);
- assert.throws(()=>reduceEvent(s,host,{type:'PRESS_SADOOH',payload:ctx},103502));
- const deadline=s.deadline;reduceEvent(s,guest,{type:'PASS_CHALLENGE',payload:ctx},103502);assert.equal(s.deadline,deadline);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
+ assert.throws(()=>reduceEvent(s,guest,e,104501,ctx));assert.throws(()=>reduceEvent(s,host,e,104501,{...ctx,turnNumber:0}));
+ assert.throws(()=>reduceEvent(s,host,{...e,payload:{...e.payload,cardId:'fake'}},104501,ctx));
+ reduceEvent(s,host,e,104501,ctx);
+ assert.throws(()=>reduceEvent(s,host,{type:'PRESS_SADOOH',payload:ctx},104502));
+ const deadline=s.deadline;reduceEvent(s,guest,{type:'PASS_CHALLENGE',payload:ctx},104502);assert.equal(s.deadline,deadline);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
 });
 test('ticks cannot advance early; server deadlines resolve a disconnected human',()=>{
  const s=setup();reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100000);
- assert.equal(tick(s,133499),false);assert.equal(s.game!.phase,'CHOOSING_MOVE');
- assert.equal(tick(s,133500),true);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
- assert.equal(tick(s,145500),true);assert.notEqual(s.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(tick(s,134499),false);assert.equal(s.game!.phase,'CHOOSING_MOVE');
+ assert.equal(tick(s,134500),true);assert.equal(s.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(tick(s,146500),true);assert.notEqual(s.game!.phase,'CHALLENGE_WINDOW');
 });
 test('result remains readable for the whole multiplayer reading window',()=>{
  const s=setup();reduceEvent(s,host,{type:'START_MATCH',payload:{roomCode:s.room.roomCode}},100000);
  const g=s.game!,card=g.players[0].hand[0];
- reduceEvent(s,host,{type:'SUBMIT_MOVE',payload:{cardId:card.id,claimedCharacter:'sanad',targetPlayerId:null}},103501,{matchId:g.matchId,turnNumber:1});
- tick(s,115501);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
- assert.equal(tick(s,133500),false);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
- assert.equal(tick(s,133501),true);assert.equal(s.game!.turnNumber,2);
+ reduceEvent(s,host,{type:'SUBMIT_MOVE',payload:{cardId:card.id,claimedCharacter:'sanad',targetPlayerId:null}},104501,{matchId:g.matchId,turnNumber:1});
+ tick(s,116501);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
+ assert.equal(tick(s,134500),false);assert.equal(s.game!.phase,'RESOLVING_CHALLENGE');
+ assert.equal(tick(s,134501),true);assert.equal(s.game!.turnNumber,2);
 });
 test('mute is per viewer, reports capture evidence and outsiders cannot get a projection',()=>{
  const s=setup();reduceEvent(s,guest,{type:'SEND_CHAT',payload:{text:'حي الله الشباب'}},100000);

@@ -28,6 +28,7 @@ export class SoundManager<Name extends string=SoundName> {
       for(const name of Object.keys(this.sources) as Name[])void this.load(name);
     }catch{/* Audio is optional; unsupported/blocked playback never interrupts a move. */}
   }
+  async prepare(){this.unlock();await Promise.all((Object.keys(this.sources) as Name[]).map(name=>this.load(name)));}
   private load(name:Name):Promise<AudioBuffer|null>{
     const existing=this.loads.get(name);if(existing)return existing;
     const context=this.context;if(!context)return Promise.resolve(null);

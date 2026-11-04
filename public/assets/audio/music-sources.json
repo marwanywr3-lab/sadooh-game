@@ -1,32 +1,26 @@
 [
   {
-    "file": "music-start.wav",
-    "originalFile": "Juhani Junkala [Retro Game Music Pack] Title Screen.wav",
-    "durationSeconds": 3.35,
-    "source": "https://opengameart.org/content/5-chiptunes-action",
-    "author": "Juhani Junkala (SubspaceAudio)",
-    "license": "CC0-1.0",
-    "changes": "Opening excerpt, mono, volume normalization and boundary fades only. No synthesis.",
-    "sha256": "f37a7d1e78016aec9bc5ed5870eef0c970a867f49e6e39c956ac8d3745db4a9d"
+    "file": "selected-start.mp3",
+    "purposes": [
+      "app opening",
+      "match start",
+      "new round"
+    ],
+    "source": "Provided and selected by the project owner; owner reports Gemini generation",
+    "license": "Owner-provided audio; not represented as CC0",
+    "sha256": "afafd9360acda3ab72f51a5475810a8010e822b4ac3f092fdfdbd951ee697c33",
+    "durationSeconds": 4.39,
+    "changes": "Original owner-approved MP3 retained without trimming or re-encoding"
   },
   {
-    "file": "music-round.wav",
-    "originalFile": "Juhani Junkala [Retro Game Music Pack] Level 1.wav",
-    "durationSeconds": 2.85,
-    "source": "https://opengameart.org/content/5-chiptunes-action",
-    "author": "Juhani Junkala (SubspaceAudio)",
-    "license": "CC0-1.0",
-    "changes": "Opening excerpt, mono, volume normalization and boundary fades only. No synthesis.",
-    "sha256": "de7def5a46d16f326ac6001dbae5b41dff0c2f6d1564b6608db68f321e2aab3f"
-  },
-  {
-    "file": "music-end.wav",
-    "originalFile": "Juhani Junkala [Retro Game Music Pack] Ending.wav",
-    "durationSeconds": 5.1,
-    "source": "https://opengameart.org/content/5-chiptunes-action",
-    "author": "Juhani Junkala (SubspaceAudio)",
-    "license": "CC0-1.0",
-    "changes": "Opening excerpt, mono, volume normalization and boundary fades only. No synthesis.",
-    "sha256": "30007394de40fb2c3dfb3db3eaf37d5310a75ea2f2bc709b3faf9f596bc3e58b"
+    "file": "selected-end.mp3",
+    "purposes": [
+      "victory"
+    ],
+    "source": "Provided and selected by the project owner; owner reports Gemini generation",
+    "license": "Owner-provided audio; not represented as CC0",
+    "sha256": "538bbbe1cf1d78653d08c206e7dbf3c6d5fe6ccadd1842716ba83efda66ba32d",
+    "durationSeconds": 6.64,
+    "changes": "Original owner-approved MP3 retained without trimming or re-encoding"
   }
 ]

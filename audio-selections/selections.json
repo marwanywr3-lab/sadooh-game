@@ -1,0 +1,25 @@
+{
+  "opening": "match-and-round.mp3 (same latest approved selection)",
+  "tracks": [
+    {
+      "file": "match-and-round.mp3",
+      "originalName": "Dealer’s_Turn (mp3cut (mp3cut.net).mp3",
+      "purpose": "بداية القيم والجولة الجديدة",
+      "sha256": "afafd9360acda3ab72f51a5475810a8010e822b4ac3f092fdfdbd951ee697c33",
+      "bytes": 105996,
+      "source": "User-provided audio; user reports Gemini generation",
+      "status": "Integrated into selected-music18 release",
+      "previousFile": "match-and-round.previous.mp3"
+    },
+    {
+      "file": "victory.mp3",
+      "originalName": "Coffee_and_Cards (mp3cut (mp3cut.net).mp3",
+      "purpose": "نهاية القيم",
+      "sha256": "538bbbe1cf1d78653d08c206e7dbf3c6d5fe6ccadd1842716ba83efda66ba32d",
+      "bytes": 159913,
+      "source": "User-provided audio; user reports Gemini generation",
+      "status": "Integrated into selected-music18 release",
+      "previousFile": "victory.previous.mp3"
+    }
+  ]
+}
