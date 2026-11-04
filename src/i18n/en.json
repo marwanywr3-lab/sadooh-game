@@ -560,5 +560,8 @@
   "رابط اللاعبين": "Players’ link",
   "انسخ الرابط وأرسله للربع؛ كل لاعب يفتحه من جواله وينضم.": "Copy the link and share it with your friends. Each player opens it on their phone to join.",
   "المقدّم ينسخ الرابط ويرسله للاعبين. افتحوا الرابط من جوالاتكم وانضموا. أول لاعب ينضم هو المضيف ويبدأ المباراة من جواله.": "The presenter copies the link and shares it with the players. Open it on your phones to join. The first player to join is the host and starts the match from their phone.",
-  "تعذر النسخ التلقائي. الرابط محدد؛ انسخه وأرسله للاعبين.": "Automatic copying failed. The link is selected; copy it and share it with the players."
+  "تعذر النسخ التلقائي. الرابط محدد؛ انسخه وأرسله للاعبين.": "Automatic copying failed. The link is selected; copy it and share it with the players.",
+  "الدخول بقوقل": "Sign in with Google",
+  "تعذر بدء الدخول بقوقل. حاول مرة أخرى.": "Could not start Google sign-in. Please try again.",
+  "لم يكتمل الدخول بقوقل. حاول مرة أخرى.": "Google sign-in was not completed. Please try again."
 }

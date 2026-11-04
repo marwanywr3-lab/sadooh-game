@@ -2,7 +2,7 @@ import {t,fmt,tr} from './i18n/translate';
 import {LanguageToggle,useLanguage} from './i18n/Language';
 import {BrandNavigationContext} from './components/Theme';
 import {AccountPanel} from './components/AccountPanel';
-import {accountClient,accountRequest,type Account} from './services/account';
+import {accountClient,accountRequest,googleCallback,type Account} from './services/account';
 import {PassPhoneScreen} from './screens/PassPhoneScreen';
 import {PartyScreen} from './screens/PartyScreen';
 import {ThemeContext} from './components/Theme';
@@ -49,8 +49,9 @@ export default function App() {
   const [account,setAccount]=useState<Account|null>(null);
   const {language}=useLanguage();
   const appearance={background:settings.background,position:settings.buttonPosition};
-  const [accountOpen,setAccountOpen]=useState(false),[passwordRecovery,setPasswordRecovery]=useState(false);
-  const refreshAccount=async()=>{try{const session=(await accountClient.auth.getSession()).data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{/* A brief network interruption must not unmount a running local game. Server actions still validate the session. */}}else setAccount(null);}catch{/* Account checks must not block local play. */}};
+  const [accountOpen,setAccountOpen]=useState(googleCallback.active),[oauthError,setOAuthError]=useState(googleCallback.failed),[passwordRecovery,setPasswordRecovery]=useState(false);
+  useEffect(()=>{if(googleCallback.active){const url=new URL(location.href);url.searchParams.delete('auth');window.history.replaceState(null,'',url);}},[]);
+  const refreshAccount=async()=>{try{const result=await accountClient.auth.getSession();if(result.error&&googleCallback.active){setOAuthError(true);setAccountOpen(true);}const session=result.data.session;if(session&&!session.user.is_anonymous){try{setAccount(await accountRequest());}catch{/* A brief network interruption must not unmount a running local game. Server actions still validate the session. */}}else setAccount(null);}catch{/* Account checks must not block local play. */}};
   useEffect(()=>{void refreshAccount();const sub=accountClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){setPasswordRecovery(true);setAccountOpen(true);}setTimeout(()=>{void refreshAccount();},0);});const timer=setInterval(()=>{void refreshAccount();},60000);return()=>{sub.data.subscription.unsubscribe();clearInterval(timer);};},[]);
   useEffect(()=>{if(account?.username&&!loadUserSettings().tutorialCompleted){setSettings(saveUserSettings({tutorialCompleted:true}));}},[account?.username]);
   const onlineAllowed=!!account?.username;
@@ -163,7 +164,7 @@ export default function App() {
         />
       ))}
 
-      {tr(((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} recoveryMode={passwordRecovery} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);if(!onlineAllowed)setScreen('menu');}}/></div>)}
+      {tr(((!onlineAllowed&&(screen==='multiplayer'||screen==='party'))||accountOpen)&&<div className="account-backdrop"><AccountPanel key={account?.username?'signed':'guest'} account={account} recoveryMode={passwordRecovery} oauthError={oauthError} onRefresh={refreshAccount} onClose={()=>{setAccountOpen(false);if(!onlineAllowed)setScreen('menu');}}/></div>)}
       <HowToPlayModal
         isOpen={isHowToPlayOpen}
         onClose={() => setIsHowToPlayOpen(false)}

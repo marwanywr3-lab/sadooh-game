@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build && node scripts/build-pwa.mjs",
     "preview": "vite preview",
     "test": "tsx scripts/test-engine.ts",
-    "test:security": "tsx --test tests/security.test.ts tests/api.test.mjs",
+    "test:security": "tsx --test tests/security.test.ts tests/api.test.mjs tests/googleAuth.test.ts",
     "test:rooms": "tsx --test tests/room.test.ts tests/party.test.ts tests/passphone.test.ts",
     "test:tutorial": "tsx --test tests/tutorial.test.ts",
     "test:pwa": "node --test tests/pwa.test.mjs",
