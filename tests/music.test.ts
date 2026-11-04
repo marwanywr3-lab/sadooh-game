@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import {transitionDuration,FEEDBACK_TIMINGS} from '../src/services/feedbackEvents';
+import {transitionDuration,firstMatchScene,FEEDBACK_TIMINGS} from '../src/services/feedbackEvents';
 import {createRoom,reduceEvent,projection,tick} from '../server/roomEngine';
 import {SoundManager} from '../src/services/soundManager';
 import {loadUserSettings,saveUserSettings} from '../src/services/storage/localSettings';
 
-test('presentation is start 4.5s, full-roster round 4.5s, victory 6.8s; no pause on ordinary turns',()=>{
+test('presentation is start plus first round 9s, full-roster round 4.5s, victory 6.8s; no pause on ordinary turns',()=>{
  const state={matchId:'x',turnNumber:1,phase:'CHOOSING_MOVE',players:[{},{},{}]};
- assert.equal(transitionDuration(null,state),4500);
+ assert.equal(transitionDuration(null,state),9000);
  assert.equal(transitionDuration(state,{...state,turnNumber:2}),0);
  assert.equal(transitionDuration({...state,turnNumber:3},{...state,turnNumber:4}),4500);
  assert.equal(transitionDuration(state,{...state,phase:'GAME_OVER'}),0);
@@ -20,14 +20,14 @@ test('server protects full turn time and rejects early moves even after a client
  const room=createRoom('F'.repeat(32),'host','Host',3,100000);
  for(const name of ['a','b'])reduceEvent(room,name,{type:'JOIN_ROOM',payload:{roomCode:room.room.roomCode,playerName:name}},100000);
  reduceEvent(room,'host',{type:'START_MATCH',payload:{roomCode:room.room.roomCode,turnDurationSeconds:30}},100000);
- assert.equal(room.readyAt,104500);assert.equal(room.deadline,134500);
+ assert.equal(room.readyAt,109000);assert.equal(room.deadline,139000);
  const g=room.game!,move={type:'SUBMIT_MOVE' as const,payload:{cardId:g.players[0].hand[0].id,claimedCharacter:'sanad' as const,targetPlayerId:null}},ctx={matchId:g.matchId,turnNumber:1};
- assert.throws(()=>reduceEvent(room,'host',move,104499,ctx),/الانتقال/);
+ assert.throws(()=>reduceEvent(room,'host',move,108999,ctx),/الانتقال/);
  assert.equal(projection(room,'a',102000).view!.turnTimerSeconds,30);
- assert.equal(projection(room,'a',102000).view!.transitionRemainingMs,2500);
- assert.equal(tick(room,104499),false);
- reduceEvent(room,'host',move,104500,ctx);assert.equal(room.game!.phase,'CHALLENGE_WINDOW');
- assert.equal(room.deadline,116500); // Challenge remains 12 seconds, no music delay.
+ assert.equal(projection(room,'a',102000).view!.transitionRemainingMs,7000);
+ assert.equal(tick(room,108999),false);
+ reduceEvent(room,'host',move,109000,ctx);assert.equal(room.game!.phase,'CHALLENGE_WINDOW');
+ assert.equal(room.deadline,121000); // Challenge remains 12 seconds, no music delay.
 });
 
 test('new round server pause applies once to humans and bots, old rooms remain compatible',()=>{
@@ -63,4 +63,12 @@ test('music never loops or overlaps, skip cancels pending playback, mute and eff
  now+=1000;music.play('end','pending');music.stop();await flush();assert.equal(nodes.length,2);assert.ok(nodes[1].stopped);
  music.configure(false,.3);effects.play('flip','effect');await flush();assert.equal(nodes.length,3);music.play('end','muted');await flush();assert.equal(nodes.length,3);
  (document as any).hidden=true;effects.play('victory','hidden');await flush();assert.equal(nodes.length,3);effects.stop();music.stop();
+});
+
+test('first round follows logo and resumes correctly without duplicating authoritative turns',()=>{
+ assert.deepEqual(firstMatchScene(9000),{kind:'start',duration:4500,hasFirstRound:true});
+ assert.deepEqual(firstMatchScene(8200),{kind:'start',duration:3700,hasFirstRound:true});
+ assert.deepEqual(firstMatchScene(4500),{kind:'turn',duration:4500,hasFirstRound:false});
+ assert.deepEqual(firstMatchScene(2000),{kind:'turn',duration:2000,hasFirstRound:false});
+ assert.deepEqual(firstMatchScene(0),{kind:'turn',duration:0,hasFirstRound:false});
 });

@@ -6,7 +6,7 @@ import type {CharacterId} from '../types/game';
 import {loadUserSettings,saveUserSettings} from '../services/storage/localSettings';
 import {SoundManager,type SoundName} from '../services/soundManager';
 import {useTransitionPause} from '../services/useTransitionPause';
-import {FeedbackEvents,getRoundNumber,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
+import {FeedbackEvents,firstMatchScene,getRoundNumber,FEEDBACK_TIMINGS,type FeedbackState} from '../services/feedbackEvents';
 
 const sound=new SoundManager();
 type MusicName='startMusic'|'roundMusic'|'endMusic';
@@ -51,7 +51,7 @@ function LogoScene({opening=false,onSkip,elapsed=0}:{opening?:boolean;onSkip:()=
 export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=false}:{state:(FeedbackState&{transitionRemainingMs?:number})|null;remote?:boolean;silent?:boolean;freshRemoteStart?:boolean}){
  const events=useRef(new FeedbackEvents());const {reduced,play}=useContext(Context);
  const paused=useTransitionPause(state,remote);
- const [scene,setScene]=useState<{kind:string;key:string;turn:number;duration:number}|null>(null);
+ const [scene,setScene]=useState<{kind:string;key:string;turn:number;duration:number;firstRoundEndsAt?:number}|null>(null);
  const actionPhase=useRef<string|null>(null);
  useEffect(()=>{const previous=actionPhase.current;actionPhase.current=state?.phase||null;if(previous==='CHOOSING_MOVE'&&state?.phase==='CHALLENGE_WINDOW'&&!silent&&!document.hidden)play('flip',`${state.matchId}:${state.turnNumber}:play-card`);},[state?.matchId,state?.turnNumber,state?.phase,silent]);
  useEffect(()=>{
@@ -60,13 +60,15 @@ export function GameFeedback({state,remote=false,silent=false,freshRemoteStart=f
   const key=`${state.matchId}:${state.turnNumber}:${event}`;
   if(event==='start'){openingDismissed=true;window.dispatchEvent(new Event('sadooh-feedback-start'));}
   if(document.hidden)return;
-  const duration=event==='results'?FEEDBACK_TIMINGS.results:remote?(state.transitionRemainingMs||0):event==='start'?FEEDBACK_TIMINGS.start:FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber;
+  const duration=event==='results'?FEEDBACK_TIMINGS.results:remote?(state.transitionRemainingMs||0):event==='start'?FEEDBACK_TIMINGS.start+FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber:FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber;
   if(!duration)return;
-  setScene({kind:event,key,turn:getRoundNumber(state.turnNumber,state.players.length),duration});
+  const initial=event==='start'?firstMatchScene(duration):null;
+  const kind=initial?.kind||event,sceneDuration=initial?.duration||duration;
+  setScene({kind,key,turn:getRoundNumber(state.turnNumber,state.players.length),duration:sceneDuration,firstRoundEndsAt:initial?.hasFirstRound?Date.now()+duration:undefined});
   // Reconnects may show the remaining animation, but never start a late musical cue.
-  if(!silent&&(!remote||duration>=(event==='start'?FEEDBACK_TIMINGS.start:FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber)-500||event==='results'))music.play(event==='start'?'startMusic':event==='turn'?'roundMusic':'endMusic',key);
+  if(!silent&&(!remote||sceneDuration>=(kind==='start'?FEEDBACK_TIMINGS.start:FEEDBACK_TIMINGS.roundWords+FEEDBACK_TIMINGS.roundNumber)-500||event==='results'))music.play(kind==='start'?'startMusic':kind==='turn'?'roundMusic':'endMusic',key);
  },[state?.matchId,state?.turnNumber,state?.phase,remote,silent,freshRemoteStart]);
- useEffect(()=>{if(!scene)return;const timer=setTimeout(()=>{setScene(null);music.stop();},scene.duration);return()=>clearTimeout(timer);},[scene]);
+ useEffect(()=>{if(!scene)return;const timer=setTimeout(()=>{music.stop();const remaining=scene.firstRoundEndsAt?Math.max(0,scene.firstRoundEndsAt-Date.now()):0;if(remaining>0&&!document.hidden){const key=scene.key+':first-round';setScene({kind:'turn',key,turn:1,duration:remaining});if(!silent)music.play('roundMusic',key);}else setScene(null);},scene.duration);return()=>clearTimeout(timer);},[scene]);
  useEffect(()=>{if(state?.phase==='GAME_OVER')return;if((scene?.kind==='start'||scene?.kind==='turn')&&state?.phase!=='CHOOSING_MOVE'){setScene(null);music.stop();}},[state?.phase,scene?.kind]);
  useEffect(()=>{const hide=()=>{if(document.hidden){setScene(null);music.stop();}};document.addEventListener('visibilitychange',hide);return()=>{document.removeEventListener('visibilitychange',hide);music.stop();sound.stop();};},[]);
  const skip=()=>{music.stop();setScene(null);};
