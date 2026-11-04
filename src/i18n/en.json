@@ -276,7 +276,6 @@
   "بدء المباراة الجماعية للمضيف": "Host: start multiplayer match",
   "العب الآن بنفس الإعدادات محليًا ضد الكمبيوتر": "Play locally against bots with these settings",
   "شاشة العرض": "Shared display",
-  "استخدم رابط اللاعبين إذا لم يظهر رمز QR.": "Use the players’ link if the QR code does not appear.",
   "اللاعب": "Player",
   "اجمعوا الربع": "Gather your friends",
   "دور {0}": "{0}’s turn",
@@ -303,11 +302,8 @@
   "على {0}.": "Target: {0}.",
   "على جوالاتكم: «صادوه!» أو «عدّيها».": "On your phones: call Sadooh! or Pass.",
   "اختيار البطاقة والاسم من جوال صاحب الدور فقط.": "Only the active player chooses their card and claim on their phone.",
-  "امسح الرمز بجوالك، واكتب اسمك، ثم انضم. أول لاعب يدخل هو المضيف ويبدأ المباراة من جواله.": "Scan with your phone, enter your name, and join. The first player is the host and starts the match from their phone.",
   "ثانية لقراءة النتيجة": "seconds to read the result",
-  "امسح رمز QR للانضمام من جوالك": "Scan the QR code to join from your phone",
   "افتح رابط اللاعبين": "Open the players’ link",
-  "انسخ الرابط الظاهر أسفل الرمز.": "Copy the link shown below the code.",
   "تم نسخ الرابط": "Link copied",
   "نسخ رابط اللاعبين": "Copy players’ link",
   "رابط انضمام اللاعبين": "Player join link",
@@ -560,5 +556,9 @@
   "انتظر انتهاء الانتقال لبدء الدور.": "Wait for the transition to finish before playing.",
   "موسيقى الافتتاح والبداية والجولات والنهاية": "Opening, match, round and victory music",
   "اضغط للبدء": "Tap to start",
-  "المس الشاشة لتشغيل الصوت": "Tap anywhere for sound"
+  "المس الشاشة لتشغيل الصوت": "Tap anywhere for sound",
+  "رابط اللاعبين": "Players’ link",
+  "انسخ الرابط وأرسله للربع؛ كل لاعب يفتحه من جواله وينضم.": "Copy the link and share it with your friends. Each player opens it on their phone to join.",
+  "المقدّم ينسخ الرابط ويرسله للاعبين. افتحوا الرابط من جوالاتكم وانضموا. أول لاعب ينضم هو المضيف ويبدأ المباراة من جواله.": "The presenter copies the link and shares it with the players. Open it on your phones to join. The first player to join is the host and starts the match from their phone.",
+  "تعذر النسخ التلقائي. الرابط محدد؛ انسخه وأرسله للاعبين.": "Automatic copying failed. The link is selected; copy it and share it with the players."
 }

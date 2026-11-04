@@ -1,7 +1,6 @@
 import {t,fmt,tr} from '../i18n/translate';
 import {GameFeedback,RevealCard,useJoinFeedback,useDrawFeedback} from '../components/Feedback';
 import React,{useEffect,useRef,useState} from 'react';
-import QRCode from 'qrcode';
 import {SupabaseRoomService} from '../services/multiplayer/roomClient';
 import {BrandLogo,ThemeToggle} from '../components/Theme';
 import type {ClientProjectedGameState} from '../types/game';
@@ -16,18 +15,16 @@ export const PartyScreen:React.FC<{onBack:()=>void;onJoin:()=>void}>=({onBack,on
  const joined=useJoinFeedback(room.members.map(m=>m.id),room.roomCode||'');
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
- const [qr,setQr]=useState('');
  const [copied,setCopied]=useState(false);
  useEffect(()=>{
   const off=service.subscribe((next,banner)=>{setRoom({...next});if(banner)setMessage(banner);if(banner||next.roomCode)setBusy(false);});
   const offMatch=service.subscribeMatch(setView);service.reconnect();
   return()=>{off();offMatch();service.disconnect();};
  },[service]);
- useEffect(()=>{
-  let active=true;
-  if(room.inviteUrl)void QRCode.toDataURL(room.inviteUrl,{width:320,margin:2,color:{dark:'#252722',light:'#ffffff'},errorCorrectionLevel:'M'}).then(data=>{if(active)setQr(data);}).catch(()=>{if(active)setMessage(t("استخدم رابط اللاعبين إذا لم يظهر رمز QR."));});
-  return()=>{active=false;};
- },[room.inviteUrl]);
+ const inviteInput=useRef<HTMLInputElement>(null);
+ const [copyError,setCopyError]=useState('');
+ useEffect(()=>{setCopied(false);setCopyError('');},[room.inviteUrl]);
+ const copyInvite=async()=>{setCopyError('');try{await navigator.clipboard.writeText(room.inviteUrl);setCopied(true);}catch{setCopied(false);inviteInput.current?.focus();inviteInput.current?.select();setCopyError(t('تعذر النسخ التلقائي. الرابط محدد؛ انسخه وأرسله للاعبين.'));}};
  const leave=()=>{service.disconnect();onBack();};
  const name=(id:string|null|undefined)=>view?.players.find(p=>p.id===id)?.name||room.members.find(p=>p.id===id)?.name||t("اللاعب");
  useDrawFeedback(view?.drawPileCount,view?.matchId);
@@ -45,10 +42,10 @@ export const PartyScreen:React.FC<{onBack:()=>void;onJoin:()=>void}>=({onBack,on
      {tr(phase==='CHOOSING_MOVE'&&<p>{""+t("اختيار البطاقة والاسم من جوال صاحب الدور فقط.")+""}</p>)}
      {tr(result&&(phase==='RESOLVING_CHALLENGE'||phase==='GAME_OVER')&&<p className="party-result">{tr(result.summaryAr)}</p>)}
      {tr(result?.revealedCard&&(phase==='RESOLVING_CHALLENGE'||phase==='GAME_OVER')&&<RevealCard characterId={result.revealedCard.characterId} eventKey={`${view!.matchId}:${view!.turnNumber}:public-flip`}/>)}
-     {tr(!view&&<p>{""+t("امسح الرمز بجوالك، واكتب اسمك، ثم انضم. أول لاعب يدخل هو المضيف ويبدأ المباراة من جواله.")+""}</p>)}
+     {tr(!view&&<p>{""+t("المقدّم ينسخ الرابط ويرسله للاعبين. افتحوا الرابط من جوالاتكم وانضموا. أول لاعب ينضم هو المضيف ويبدأ المباراة من جواله.")+""}</p>)}
      {tr(view&&phase!=='GAME_OVER'&&<div className="party-clock"><strong>{tr(view.turnTimerSeconds)}</strong><span>{tr(phase==='RESOLVING_CHALLENGE'?t("ثانية لقراءة النتيجة"):t("ثانية"))}</span></div>)}
     </div>
-    {tr(!view&&<aside className="party-join"><img src={qr||undefined} alt={t("امسح رمز QR للانضمام من جوالك")}/><a href={room.inviteUrl} target="_blank" rel="noreferrer">{""+t("افتح رابط اللاعبين")+""}</a><button className="btn-secondary" onClick={async()=>{try{await navigator.clipboard.writeText(room.inviteUrl);setCopied(true);}catch{setMessage(t("انسخ الرابط الظاهر أسفل الرمز."));}}}>{tr(copied?t("تم نسخ الرابط"):t("نسخ رابط اللاعبين"))}</button><input readOnly aria-label={t("رابط انضمام اللاعبين")} value={room.inviteUrl} onFocus={e=>e.target.select()}/></aside>)}
+    {tr(!view&&<aside className="party-join"><h2>{t('رابط اللاعبين')}</h2><p>{t('انسخ الرابط وأرسله للربع؛ كل لاعب يفتحه من جواله وينضم.')}</p><input ref={inviteInput} readOnly aria-label={t('رابط انضمام اللاعبين')} value={room.inviteUrl} onFocus={e=>e.target.select()}/><button className="btn-primary" onClick={()=>void copyInvite()}>{copied?t('تم نسخ الرابط'):t('نسخ رابط اللاعبين')}</button><a href={room.inviteUrl} target="_blank" rel="noreferrer">{t('افتح رابط اللاعبين')}</a>{copyError&&<p role="status">{copyError}</p>}</aside>)}
    </section>
    <section className="party-roster" aria-label={t("اللاعبون")}>{tr(room.members.map(p=><article key={p.id} className={`${view?.players[view.currentPlayerIndex]?.id===p.id&&phase==='CHOOSING_MOVE'?'is-current':''} ${joined.has(p.id)?'feedback-join':''} ${phase==='GAME_OVER'?'feedback-result-row':''}`} style={{'--row-delay':`${room.members.indexOf(p)*70}ms`} as React.CSSProperties}><img src={p.avatarAsset.replace(/\.png$/,'.svg')} alt=""/><strong>{p.name}</strong>{tr(view&&<span>{tr(view.players.find(v=>v.id===p.id)?.cardCount||0)} {" "+t("بطاقات")+""}</span>)}{tr(p.isHost&&!view&&<span>{""+t("المضيف")+""}</span>)}</article>))}{tr(!room.members.length&&<p>{""+t("بانتظار أول لاعب…")+""}</p>)}</section>
    {tr(view&&<section className="party-events" aria-label={t("آخر أحداث المباراة")}>{tr(view.logs.slice(0,4).map(log=><p key={log.id}>{tr(log.messageAr)}</p>))}</section>)}
